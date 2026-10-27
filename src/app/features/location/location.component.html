@@ -1,0 +1,400 @@
+
+
+
+
+<div class="bg-paper rounded-2xl border border-inkText/8 shadow-soft overflow-hidden">
+  <div class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <p class="font-display text-lg text-inkText">All Locations</p>
+      <p class="text-xs text-fog mt-0.5">Organize your locations one level at a time.</p>
+    </div>
+
+    <div class="flex  gap-2 justify-center items-center" >
+    
+
+ <div class="field min-w-55 relative">
+          <input id="location-type-business-filter" type="text" class="has-value"
+                 autocomplete="off" role="combobox" maxlength="100"
+                 [attr.aria-expanded]="dropdownOpen()"
+                 [value]="dropdownOpen() ? businessSearch() : (selectedBusiness()?.name ?? '')"
+                 (focus)="openBusinessDropdown()"
+                 (input)="onBusinessSearch($any($event.target).value)"
+                 (keydown.escape)="closeBusinessDropdown()" />
+          <label for="location-type-business-filter">Business</label>
+          <span class="chevron">⌄</span>
+
+          @if (dropdownOpen()) {
+            <div class="fixed inset-0 z-10" (click)="closeBusinessDropdown()"></div>
+            <ul class="absolute left-0 right-0 top-full mt-1 z-20 max-h-60 overflow-auto rounded-lg border border-inkText/15 bg-paper shadow-soft py-1"
+                role="listbox">
+              @for (b of businesses(); track b.id) {
+                <li role="option" [attr.aria-selected]="b.id === businessId()"
+                    class="px-3 py-2 text-sm text-inkText cursor-pointer hover:bg-ivory"
+                    [class.font-semibold]="b.id === businessId()"
+                    (click)="selectBusiness(b)">{{ b.name }}</li>
+              }
+              @if (businessHasNext()) {
+                <li #businessSentinel class="h-px" aria-hidden="true"></li>
+              }
+              @if (businessLoading()) {
+                <li class="px-3 py-2 text-xs text-fog text-center">Loading…</li>
+              } @else if (businesses().length === 0) {
+                <li class="px-3 py-2 text-xs text-fog">No businesses found.</li>
+              }
+            </ul>
+          }
+        </div>
+        
+    <button *appHasPermission="'Permissions.Locations.Add'"
+      type="button"
+      class="flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2.5 rounded-lg bg-ink text-ivory hover:bg-ink2 shadow-soft"
+      (click)="openAdd()"
+    >
+      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      Add Location
+    </button>
+    </div>
+  </div>
+
+  <nav class="px-4 sm:px-5 py-3 border-b  border-inkText/8 bg-ivory/50" aria-label="Location path">
+    <button
+      type="button"
+      class="text-sm cursor-pointer"
+      [class.font-semibold]="!currentLocation()"
+      [class.text-inkText]="!currentLocation()"
+      [class.text-brassDk]="!!currentLocation()"
+       [disabled]="!currentLocation()"
+      [class.hover:underline]="!!currentLocation()"
+      [attr.aria-current]="!currentLocation() ? 'page' : null"
+      (click)="goToBreadcrumb(null)"
+    >
+      Locations (Top Level)
+    </button>
+    @for (crumb of breadcrumb(); track crumb.id; let last = $last) {
+      <span class="mx-2 text-fog" aria-hidden="true">/</span>
+      <button
+        type="button"
+        class="text-sm"
+        [class.font-semibold]="last"
+        [class.text-inkText]="last"
+        [class.text-brassDk]="!last"
+        [class.hover:underline]="!last"
+          [disabled]="last"
+        [class.cursor-pointer]="!last"
+        [attr.aria-current]="last ? 'page' : null"
+        (click)="goToBreadcrumb(crumb.id)"
+      >
+        {{ crumb.name }}
+      </button>
+    }
+  </nav>
+
+
+  <div class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div class="relative w-full lg:w-64">
+      <svg class="w-4 h-4 text-fog absolute left-3 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.35-4.35" />
+      </svg>
+      <input
+        type="text"
+        placeholder="Search locations…"
+        aria-label="Search locations"
+        class="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-inkText/15 focus:outline-none focus:ring-2 focus:ring-brass/30"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="setSearchTerm($event)"
+      />
+    </div>
+
+    <label class="flex items-center gap-2 text-xs text-fog">
+      Show
+      <select
+        class="border border-inkText/15 rounded-lg px-2 py-1.5 text-xs text-inkText focus:outline-none focus:ring-2 focus:ring-brass/30"
+        [ngModel]="pageSize()"
+        (ngModelChange)="setPageSize(+$event)"
+      >
+        <option [ngValue]="5">5</option>
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="25">25</option>
+        <option [ngValue]="50">50</option>
+      </select>
+      entries
+    </label>
+  </div>
+  <div class="p-3 sm:p-4">
+    @if (loading()) {
+      <p class="text-sm text-fog text-center py-8">Loading…</p>
+    } @else if (error()) {
+      <div class="text-sm text-danger text-center py-8">
+        {{ error() }}
+        <button type="button" class="underline ms-2" (click)="load()">Retry</button>
+      </div>
+    } @else {
+      @for (location of items(); track location.id) {
+        <article
+          class="loc-row flex items-center gap-3 p-3 sm:p-4 border border-inkText/8 rounded-xl mb-2 hover:border-brass/50 hover:bg-ivory/60"
+        >
+          <button
+            type="button"
+            class="flex items-center gap-3 min-w-0 flex-1 text-left"
+            [attr.aria-label]="'Open ' + location.name"
+            (click)="openChild(location)"
+          >
+            <span class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-ink/5 text-brassDk">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="4" y="4" width="16" height="16" rx="3" />
+                <path d="M4 10h16M10 4v16" />
+              </svg>
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="block text-sm font-semibold text-inkText truncate">{{ location.name }}</span>
+              <span class="block text-xs text-fog mt-0.5">
+                {{ location.code }}
+              </span>
+            </span>
+            <span class="text-fog" aria-hidden="true">›</span>
+          </button>
+
+          <button
+            type="button"
+            class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
+            title="View details"
+            [attr.aria-label]="'View ' + location.name"
+            (click)="openDetails(location)"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
+            title="Edit location"
+            *appHasPermission="'Permissions.Locations.Edit'"
+            [attr.aria-label]="'Edit ' + location.name"
+            (click)="openEdit(location)"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="p-1.5 rounded-lg hover:bg-dangerBg text-danger"
+            title="Delete location"
+            *appHasPermission="'Permissions.Locations.Delete'"
+            [attr.aria-label]="'Delete ' + location.name"
+            (click)="openDelete(location)"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 6h18" />
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+            </svg>
+          </button>
+        </article>
+      } @empty {
+        <p class="text-sm text-fog text-center py-8">
+          {{ searchTerm() ? 'No matching locations found.' : 'No sub-locations here yet.' }}
+        </p>
+      }
+    }
+  </div>
+
+  <div class="p-4 sm:p-5 border-t border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-fog">
+    <p>
+      @if (pageRange().total) {
+        Showing {{ pageRange().from }}–{{ pageRange().to }} of {{ pageRange().total }} locations
+      } @else {
+        No matching locations found
+      }
+    </p>
+    <div class="flex items-center gap-1">
+      <button
+        type="button"
+        class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="currentPage() <= 1 || loading()"
+        (click)="prevPage()"
+      >
+        Previous
+      </button>
+      <span class="px-3 py-1.5 rounded-lg bg-ink text-ivory font-semibold">{{ currentPage() }}</span>
+      <button
+        type="button"
+        class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="currentPage() >= totalPages() || loading()"
+        (click)="nextPage()"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ========== Add / Edit modal ========== -->
+@if (modalOpen()) {
+  <app-location-modal
+    [businessId]="selectedBusiness()?.id ?? ''"
+    [location]="modalLocation()"
+    [saving]="saving()"
+    [errorMessage]="saveError()"
+    (saved)="onSaved($event)"
+    (cancelled)="closeModal()"
+  />
+}
+
+<!-- ========== Details modal ========== -->
+@if (detailsOpen()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="closeDetails()"></div>
+
+    <div
+      class="relative bg-paper w-full max-w-md rounded-2xl shadow-soft"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="location-details-title"
+    >
+      <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
+        <p id="location-details-title" class="font-display text-xl text-inkText">Location Details</p>
+        <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog" aria-label="Close" (click)="closeDetails()">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="px-6 py-6">
+        @if (detailsLoading()) {
+          <p class="text-sm text-fog text-center py-6">Loading…</p>
+        } @else if (detailsError()) {
+          <div class="text-sm text-danger text-center py-6">
+            {{ detailsError() }}
+            <button type="button" class="underline ms-2" (click)="retryDetails()">Retry</button>
+          </div>
+        } @else if (detailsLocation(); as g) {
+          <dl class="space-y-4 text-sm">
+            <div class="flex items-start justify-between gap-4">
+              <dt class="text-fog">Name</dt>
+              <dd class="font-semibold text-inkText text-right wrap-break-word">{{ g.name }}</dd>
+            </div>
+            <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
+              <dt class="text-fog">Type</dt>
+              <dd class="text-inkText text-right">{{ g.locationTypeName || '—' }}</dd>
+            </div>
+            <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
+              <dt class="text-fog">Code</dt>
+              <dd class="font-semibold text-inkText text-right">{{ g.code }}</dd>
+            </div>
+            <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
+              <dt class="text-fog">Parent</dt>
+              <dd class="text-inkText text-right">{{ currentLocation()?.name ?? 'Top level' }}</dd>
+            </div>
+           
+            <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
+  <dt class="text-fog">Created by</dt>
+  <dd class="text-inkText text-right">{{ g.createdByName || '—' }}</dd>
+</div>
+<div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
+  <dt class="text-fog">Updated by</dt>
+  <dd class="text-inkText text-right">{{ g.updatedByName || '—' }}</dd>
+</div>
+          </dl>
+        }
+
+        <div class="flex justify-end pt-5 mt-5 border-t border-inkText/8">
+          <button
+            type="button"
+            class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft"
+            (click)="closeDetails()"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ========== Delete modal ========== -->
+@if (deleteTarget(); as target) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="cancelDelete()"></div>
+
+    <div
+      class="relative bg-paper w-full max-w-md rounded-2xl shadow-soft"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="delete-location-title"
+      aria-describedby="delete-location-desc"
+    >
+      <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
+        <p id="delete-location-title" class="font-display text-xl text-inkText">Delete Location</p>
+        <button
+          type="button"
+          class="p-2 rounded-lg hover:bg-ink/5 text-fog disabled:opacity-40"
+          aria-label="Close"
+          [disabled]="deleting()"
+          (click)="cancelDelete()"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="px-6 py-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-dangerBg text-danger">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 6h18" />
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+            </svg>
+          </span>
+          <p id="delete-location-desc" class="text-sm text-inkText">
+            Are you sure you want to delete
+            <span class="font-semibold">{{ target.name }}</span>
+            <span class="text-fog">({{ target.code }})</span>?
+            This action cannot be undone.
+          </p>
+        </div>
+
+        @if (deleteError()) {
+          <p class="text-xs text-danger bg-dangerBg rounded-lg px-3 py-2" role="alert">
+            {{ deleteError() }}
+          </p>
+        }
+
+        <div class="flex items-center gap-3 pt-3 border-t border-inkText/8 justify-end">
+          <button
+            type="button"
+            class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5 disabled:opacity-40"
+            [disabled]="deleting()"
+            (click)="cancelDelete()"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-danger text-white hover:opacity-90 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed"
+            [disabled]="deleting()"
+            (click)="confirmDelete()"
+          >
+            {{ deleting() ? 'Deleting…' : 'Delete location' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

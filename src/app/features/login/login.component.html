@@ -1,0 +1,154 @@
+@let email = loginForm.controls.email;
+@let password = loginForm.controls.password;
+
+<section class="h-screen w-full grid lg:grid-cols-2 overflow-hidden">
+
+  <div class="relative hidden lg:flex flex-col justify-between bg-ink text-ivory p-12 overflow-hidden h-full">
+    <svg class="absolute inset-0 w-full h-full opacity-[0.15]" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <path d="M400 120 C 250 120 180 250 180 400 L180 820 L620 820 L620 400 C620 250 550 120 400 120 Z" fill="none" stroke="#E3C38C" stroke-width="2" />
+      <path d="M400 220 C 300 220 250 310 250 400 L250 820" fill="none" stroke="#E3C38C" stroke-width="1" />
+      <path d="M400 220 C 500 220 550 310 550 400 L550 820" fill="none" stroke="#E3C38C" stroke-width="1" />
+      <circle cx="400" cy="480" r="3" fill="#E3C38C" />
+      <line x1="120" y1="820" x2="680" y2="820" stroke="#E3C38C" stroke-width="1" />
+    </svg>
+
+    <div class="relative z-10 flex items-center gap-3">
+      <div class="w-11 h-11 rounded-full border border-brassLt/60 flex items-center justify-center">
+        <span class="font-display text-lg">D</span>
+      </div>
+      <div class="leading-tight">
+        <p class="font-display text-xl tracking-wide">{{ branding.companyName() }}</p>
+        <p class="text-[11px] text-brassLt/80 tracking-[0.18em]">{{ branding.systemName() }}</p>
+      </div>
+    </div>
+
+    <div class="relative z-10 max-w-sm">
+      <p class="font-display text-4xl leading-[1.2]">Every stay, <br />managed with care.</p>
+      <p class="mt-4 text-sm text-ivory/65 leading-relaxed">
+        One workspace for your front desk, housekeeping and back office — built for teams who
+        treat hospitality as a craft.
+      </p>
+    </div>
+
+    <div class="relative z-10 flex items-center gap-6 text-[11px] text-ivory/45 tracking-wide">
+      <span>© 2026 {{ branding.companyName() }}</span>
+      <span>Privacy</span>
+      <span>Support</span>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-center p-6 sm:p-10 bg-ivory relative h-full overflow-y-auto">
+    <svg class="absolute top-8 start-8 w-9 h-9 lg:hidden" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+      <circle cx="22" cy="22" r="21" stroke="#B6894A" stroke-width="1.5" />
+        <text x="22" y="28" text-anchor="middle" font-family="Fraunces, serif" font-size="18" fill="#B6894A">{{ branding.companyName().charAt(0) }}</text>
+    </svg>
+
+    <div class="w-full max-w-sm my-auto">
+      <div class="glass-card rounded-2xl shadow-soft p-8 sm:p-10">
+        <h1 class="font-display text-[26px] text-inkText">Welcome back</h1>
+        <p class="text-sm text-fog mt-1.5">Sign in to the {{ branding.companyName() }} {{ branding.systemName() }} system.</p>
+
+        <form class="mt-8 space-y-5" [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+
+          <div>
+            <div class="field" [class.has-error]="email.invalid && email.touched">
+              <input
+                type="email"
+                id="login-email"
+                placeholder=" "
+                autocomplete="username"
+                formControlName="email"
+                [attr.aria-invalid]="email.invalid && email.touched"
+                [attr.aria-describedby]="email.invalid && email.touched ? 'login-email-error' : null"
+              />
+              <label for="login-email">Email address</label>
+            </div>
+            @if (email.invalid && email.touched) {
+              <p id="login-email-error" class="text-xs text-danger mt-1" role="alert">
+                @if (email.hasError('required')) {
+                  Email is required.
+                } @else if (email.hasError('email')) {
+                  Please enter a valid email address.
+                }
+              </p>
+            }
+          </div>
+
+          <div>
+            <div class="field relative" [class.has-error]="password.invalid && password.touched">
+              <input
+                [type]="showPassword() ? 'text' : 'password'"
+                id="login-password"
+                placeholder=" "
+                autocomplete="current-password"
+                formControlName="password"
+                [attr.aria-invalid]="password.invalid && password.touched"
+                [attr.aria-describedby]="password.invalid && password.touched ? 'login-password-error' : null"
+              />
+              <label for="login-password">Password</label>
+              <button
+                type="button"
+                class="absolute end-3 top-3.5 text-fog hover:text-inkText cursor-pointer transition-colors"
+                [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+                [attr.aria-pressed]="showPassword()"
+                (click)="togglePasswordVisibility()"
+              >
+                @if (showPassword()) {
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"
+                       stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                } @else {
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"
+                       stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                }
+              </button>
+            </div>
+            @if (password.invalid && password.touched) {
+              <p id="login-password-error" class="text-xs text-danger mt-1" role="alert">
+                @if (password.hasError('required')) {
+                  Password is required.
+                } @else if (password.hasError('pattern')) {
+                  Use at least 6 characters, including a lowercase letter and a number.
+                }
+              </p>
+            }
+          </div>
+
+          <div class="flex items-center justify-between text-sm">
+            <label class="flex items-center gap-2 text-fog cursor-pointer select-none">
+              <input type="checkbox" class="w-4 h-4 rounded border-fog/40 text-brass focus:ring-brass" checked />
+              Remember me
+            </label>
+            <a routerLink="/auth/forgot-password" class="text-brassDk font-semibold hover:underline">Forgot password?</a>
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="submitting()"
+            class="w-full bg-ink hover:bg-ink2 disabled:opacity-60 disabled:cursor-not-allowed text-ivory font-semibold text-sm py-3.5 rounded-xl transition-colors shadow-soft flex items-center justify-center gap-2"
+          >
+            @if (submitting()) {
+              <svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M12 3a9 9 0 1 0 9 9" />
+              </svg>
+              Signing in…
+            } @else {
+              Log in to {{ branding.companyName() }}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            }
+          </button>
+        </form>
+      </div>
+      <p class="text-center text-xs text-fog mt-6">Need access? Contact your property administrator.</p>
+    </div>
+  </div>
+</section>

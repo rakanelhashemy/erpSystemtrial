@@ -1,0 +1,143 @@
+<!-- location-types.component.html -->
+<section id="view-location-types">
+  <div class="bg-paper rounded-2xl border border-inkText/8 shadow-soft overflow-hidden">
+
+    <!-- Header -->
+    <div class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <p class="font-display text-lg text-inkText">Location Types</p>
+        <p class="text-xs text-fog mt-0.5">Manage location types for each business.</p>
+      </div>
+      <div class="flex items-center gap-2">
+
+        <!-- Searchable business dropdown -->
+        <div class="field min-w-55 relative">
+          <input id="location-type-business-filter" type="text" class="has-value"
+                 autocomplete="off" role="combobox" maxlength="100"
+                 [attr.aria-expanded]="dropdownOpen()"
+                 [value]="dropdownOpen() ? businessSearch() : (selectedBusiness()?.name ?? '')"
+                 (focus)="openBusinessDropdown()"
+                 (input)="onBusinessSearch($any($event.target).value)"
+                 (keydown.escape)="closeBusinessDropdown()" />
+          <label for="location-type-business-filter">Business</label>
+          <span class="chevron">⌄</span>
+
+          @if (dropdownOpen()) {
+            <div class="fixed inset-0 z-10" (click)="closeBusinessDropdown()"></div>
+            <ul class="absolute left-0 right-0 top-full mt-1 z-20 max-h-60 overflow-auto rounded-lg border border-inkText/15 bg-paper shadow-soft py-1"
+                role="listbox">
+              @for (b of businesses(); track b.id) {
+                <li role="option" [attr.aria-selected]="b.id === businessId()"
+                    class="px-3 py-2 text-sm text-inkText cursor-pointer hover:bg-ivory"
+                    [class.font-semibold]="b.id === businessId()"
+                    (click)="selectBusiness(b)">{{ b.name }}</li>
+              }
+              @if (businessHasNext()) {
+                <li #businessSentinel class="h-px" aria-hidden="true"></li>
+              }
+              @if (businessLoading()) {
+                <li class="px-3 py-2 text-xs text-fog text-center">Loading…</li>
+              } @else if (businesses().length === 0) {
+                <li class="px-3 py-2 text-xs text-fog">No businesses found.</li>
+              }
+            </ul>
+          }
+        </div>
+
+        <button *appHasPermission="'Permissions.LocationTypes.Add'" type="button" (click)="openAdd()" [disabled]="!businessId()"
+                class="flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2.5 rounded-lg bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-40">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M5 12h14"></path>
+          </svg>
+          Add Type
+        </button>
+      </div>
+    </div>
+
+   
+    <div class="p-4 sm:p-5 border-b border-inkText/8 flex justify-end">
+      <input type="search" placeholder="Search location types..." maxlength="100"
+             class="w-full sm:w-64 pl-3 pr-3 py-2.5 text-sm rounded-lg border border-inkText/15 focus:outline-none focus:ring-2 focus:ring-brass/30"
+             [value]="search()" (input)="onSearch($any($event.target).value)" />
+    </div>
+
+    @if (error()) {
+      <p class="px-5 py-3 text-xs text-danger" role="alert">{{ error() }}</p>
+    }
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-ivory text-left text-[11px] uppercase tracking-wide text-fog">
+            <th class="px-5 py-3 font-semibold">Location Type</th>
+            <th class="px-5 py-3 font-semibold">Business</th>
+            <th class="px-5 py-3 font-semibold text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-inkText/6">
+          @if (loading()) {
+            <tr><td colspan="3" class="px-5 py-8 text-center text-fog">Loading…</td></tr>
+          } @else {
+            @for (item of items(); track item.id) {
+              <tr class="hover:bg-ivory/60">
+                <td class="px-5 py-3.5 font-semibold text-inkText">{{ item.name }}</td>
+                <td class="px-5 py-3.5 text-fog">{{ selectedBusiness()?.name }}</td>
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center justify-end gap-1">
+                    <button *appHasPermission="'Permissions.LocationTypes.Edit'" type="button" class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
+                            title="Edit type" [attr.aria-label]="'Edit ' + item.name"
+                            (click)="openEdit(item)">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                      </svg>
+                    </button>
+                    <button *appHasPermission="'Permissions.LocationTypes.Delete'" type="button" class="p-1.5 rounded-lg hover:bg-dangerBg text-danger"
+                            title="Delete type" [attr.aria-label]="'Delete ' + item.name"
+                            (click)="remove(item)">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"></path>
+                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="3" class="px-5 py-8 text-center text-fog">No location types found.</td></tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="p-4 sm:p-5 border-t border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-fog">
+      <p>Showing {{ from() }} to {{ to() }} of {{ totalCount() }} location types</p>
+      <div class="flex items-center gap-1">
+        <button type="button" (click)="prev()" [disabled]="!hasPreviousPage()"
+                class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed">
+          Previous
+        </button>
+        <span class="px-3 py-1.5 rounded-lg bg-ink text-ivory font-semibold">
+          {{ pageNumber() }} / {{ totalPages() }}
+        </span>
+        <button type="button" (click)="next()" [disabled]="!hasNextPage()"
+                class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed">
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (modalOpen()) {
+    <app-location-type-modal
+      [businessId]="businessId()"
+      [businessName]="selectedBusiness()?.name ?? ''"
+      [locationType]="editing()"
+      (saved)="onSaved()"
+      (cancelled)="closeModal()" />
+  }
+</section>

@@ -1,0 +1,141 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="!saving() && cancelled.emit()"></div>
+
+  <div class="relative bg-paper w-full max-w-2xl rounded-2xl shadow-soft max-h-[90vh] overflow-y-auto"
+       role="dialog" aria-modal="true" aria-labelledby="supplier-modal-title">
+
+    <!-- Header -->
+    <div class="sticky top-0 z-10 bg-paper flex items-center justify-between px-6 py-5 border-b border-inkText/8">
+      <p id="supplier-modal-title" class="font-display text-xl text-inkText">
+        {{ isEdit() ? 'Edit Supplier' : 'Add Supplier' }}
+      </p>
+      <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog disabled:opacity-40"
+              aria-label="Close" [disabled]="saving()" (click)="cancelled.emit()">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    @if (isEdit() && detailsResource.error()) {
+      <div class="px-6 py-10 text-sm text-danger text-center">
+        Could not load the supplier.
+        <button type="button" class="underline ms-2" (click)="detailsResource.reload()">Retry</button>
+      </div>
+    } @else if (!ready()) {
+      <p class="px-6 py-10 text-sm text-fog text-center">Loading…</p>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="submit()" class="px-6 py-6 space-y-5" novalidate>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="field">
+            <input id="sup-name" formControlName="name" placeholder=" " />
+            <label for="sup-name">Supplier Name</label>
+            @if (form.controls.name.touched && form.controls.name.invalid) {
+              <p class="text-xs text-danger mt-1">Supplier name is required.</p>
+            }
+          </div>
+
+          <div class="field">
+            <select id="sup-category" formControlName="categoryId">
+              <option [ngValue]="null">Select category</option>
+              @for (cat of categories(); track cat.id) {
+                <option [ngValue]="cat.id">{{ cat.name }}</option>
+              }
+            </select>
+            <label for="sup-category">Category</label>
+            @if (form.controls.categoryId.touched && form.controls.categoryId.invalid) {
+              <p class="text-xs text-danger mt-1">Category is required.</p>
+            }
+          </div>
+
+          <div class="field sm:col-span-2">
+            <input id="sup-address" formControlName="address" placeholder=" " />
+            <label for="sup-address">Address</label>
+          </div>
+
+          <div class="field sm:col-span-2">
+            <input id="sup-notes" formControlName="notes" placeholder=" " />
+            <label for="sup-notes">Notes</label>
+          </div>
+        </div>
+
+        <!-- Contact people -->
+        <div class="pt-4 border-t border-inkText/8">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-sm font-semibold text-inkText">Contact People</p>
+            <button type="button"
+                    class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg border border-brass/60 text-brassDk hover:bg-brass/10"
+                    (click)="addContact()">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Add contact
+            </button>
+          </div>
+
+          <div formArrayName="contactPeople" class="space-y-3">
+            @for (c of contacts.controls; track c; let i = $index) {
+              <div [formGroupName]="i" class="border border-inkText/8 rounded-xl p-3 sm:p-4">
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div class="field">
+                    <input [id]="'c-name-' + i" formControlName="name" placeholder=" " />
+                    <label [for]="'c-name-' + i">Name</label>
+                    @if (c.controls.name.touched && c.controls.name.invalid) {
+                      <p class="text-xs text-danger mt-1">Name is required.</p>
+                    }
+                  </div>
+                  <div class="field">
+                    <input [id]="'c-pos-' + i" formControlName="position" placeholder=" " />
+                    <label [for]="'c-pos-' + i">Position</label>
+                  </div>
+                  <div class="field">
+                    <input [id]="'c-phone-' + i" formControlName="phone" placeholder=" " />
+                    <label [for]="'c-phone-' + i">Phone</label>
+                  </div>
+                  <div class="field">
+                    <input [id]="'c-email-' + i" type="email" formControlName="email" placeholder=" " />
+                    <label [for]="'c-email-' + i">Email</label>
+                    @if (c.controls.email.touched && c.controls.email.invalid) {
+                      <p class="text-xs text-danger mt-1">Invalid email.</p>
+                    }
+                  </div>
+                </div>
+
+                @if (contacts.length > 1) {
+                  <div class="flex justify-end mt-3">
+                    <button type="button"
+                            class="text-xs font-semibold text-danger hover:underline"
+                            (click)="removeContact(i)">
+                      Remove
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        @if (error()) {
+          <p class="text-xs text-danger bg-dangerBg rounded-lg px-3 py-2" role="alert">{{ error() }}</p>
+        }
+
+        <!-- Actions -->
+        <div class="flex items-center gap-3 pt-4 border-t border-inkText/8 justify-end">
+          <button type="button"
+                  class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5 disabled:opacity-40"
+                  [disabled]="saving()" (click)="cancelled.emit()">
+            Cancel
+          </button>
+          <button type="submit"
+                  class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed"
+                  [disabled]="saving()">
+            {{ saving() ? 'Saving…' : (isEdit() ? 'Save changes' : 'Create supplier') }}
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>

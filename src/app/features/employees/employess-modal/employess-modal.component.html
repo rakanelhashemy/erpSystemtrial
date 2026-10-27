@@ -1,0 +1,110 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="!saving() && cancelled.emit()"></div>
+
+  <div class="relative bg-paper w-full max-w-2xl rounded-2xl shadow-soft max-h-[90vh] overflow-y-auto"
+       role="dialog" aria-modal="true" aria-labelledby="employee-modal-title">
+
+    <!-- Header -->
+    <div class="sticky top-0 z-10 bg-paper flex items-center justify-between px-6 py-5 border-b border-inkText/8">
+      <p id="employee-modal-title" class="font-display text-xl text-inkText">
+        {{ isEdit() ? 'Edit Employee' : 'Add Employee' }}
+      </p>
+      <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog disabled:opacity-40"
+              aria-label="Close" [disabled]="saving()" (click)="cancelled.emit()">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    @if (isEdit() && detailsResource.error()) {
+      <div class="px-6 py-10 text-sm text-danger text-center">
+        Could not load the employee.
+        <button type="button" class="underline ms-2" (click)="detailsResource.reload()">Retry</button>
+      </div>
+    } @else if (!ready()) {
+      <p class="px-6 py-10 text-sm text-fog text-center">Loading…</p>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="submit()" class="px-6 py-6 space-y-5" novalidate>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="field sm:col-span-2">
+            <input id="emp-name" formControlName="name" placeholder=" " />
+            <label for="emp-name">Employee Name</label>
+            @if (form.controls.name.touched && form.controls.name.invalid) {
+              <p class="text-xs text-danger mt-1">Employee name is required.</p>
+            }
+          </div>
+
+          <div class="field">
+            <input id="emp-job" formControlName="jobTitle" placeholder=" " />
+            <label for="emp-job">Job Title</label>
+          </div>
+
+          <div class="field">
+            <select id="emp-department" formControlName="departmentId">
+              <option [ngValue]="null">Select department</option>
+              @for (d of departments(); track d.id) {
+                <option [ngValue]="d.id">{{ d.title }}</option>
+              }
+            </select>
+            <label for="emp-department">Department</label>
+            @if (form.controls.departmentId.touched && form.controls.departmentId.invalid) {
+              <p class="text-xs text-danger mt-1">Department is required.</p>
+            }
+          </div>
+
+          <div class="field">
+            <select id="emp-gender" formControlName="gender">
+              <option [ngValue]="null">Select gender</option>
+              @for (g of genders(); track g.id) {
+                <option [ngValue]="g.id">{{ g.name }}</option>
+              }
+            </select>
+            <label for="emp-gender">Gender</label>
+            @if (form.controls.gender.touched && form.controls.gender.invalid) {
+              <p class="text-xs text-danger mt-1">Gender is required.</p>
+            }
+          </div>
+
+          <div class="field">
+            <input id="emp-phone" formControlName="phone" placeholder=" " dir="ltr" />
+            <label for="emp-phone">Phone</label>
+          </div>
+
+          <div class="field">
+            <input id="emp-email" type="email" formControlName="email" placeholder=" " dir="ltr" />
+            <label for="emp-email">Email</label>
+            @if (form.controls.email.touched && form.controls.email.invalid) {
+              <p class="text-xs text-danger mt-1">Invalid email.</p>
+            }
+          </div>
+        </div>
+
+        <label class="flex items-center gap-2 text-sm text-inkText cursor-pointer select-none">
+          <input type="checkbox" formControlName="active" class="w-4 h-4 accent-brass" />
+          Active
+        </label>
+
+        @if (error()) {
+          <p class="text-xs text-danger bg-dangerBg rounded-lg px-3 py-2" role="alert">{{ error() }}</p>
+        }
+
+        <!-- Actions -->
+        <div class="flex items-center gap-3 pt-4 border-t border-inkText/8 justify-end">
+          <button type="button"
+                  class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5 disabled:opacity-40"
+                  [disabled]="saving()" (click)="cancelled.emit()">
+            Cancel
+          </button>
+          <button type="submit"
+                  class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed"
+                  [disabled]="saving()">
+            {{ saving() ? 'Saving…' : (isEdit() ? 'Save changes' : 'Create employee') }}
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>

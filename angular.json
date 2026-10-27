@@ -2,13 +2,32 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "npm"
+    "packageManager": "npm",
+    "analytics": false
   },
   "newProjectRoot": "projects",
   "projects": {
     "ErpSystem": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+  "@schematics/angular:component": {
+    "prefix": "app",
+    "skipTests": true,
+    "type": "Component"
+  },
+  "@schematics/angular:guard": {
+    "skipTests": true
+  },
+  "@schematics/angular:interceptor": {
+    "skipTests": true
+  },
+  "@schematics/angular:pipe": {
+    "skipTests": true
+  },
+  "@schematics/angular:service": {
+    "skipTests": true
+  }
+},
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",

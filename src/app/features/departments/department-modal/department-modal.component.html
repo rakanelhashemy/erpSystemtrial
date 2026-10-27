@@ -1,0 +1,49 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="cancel()"></div>
+
+  <div class="relative bg-paper w-full max-w-md rounded-2xl shadow-soft"
+       role="dialog" aria-modal="true" aria-labelledby="department-modal-title">
+    <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
+      <p id="department-modal-title" class="font-display text-xl text-inkText">
+        {{ isEdit() ? 'Edit Department' : 'Add Department' }}
+      </p>
+      <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog disabled:opacity-40"
+              aria-label="Close" [disabled]="saving()" (click)="cancel()">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <form class="px-6 py-6 space-y-5" novalidate (submit)="onSubmit($event)">
+      <div class="field" [class.has-error]="titleError()">
+        <input #titleInput type="text" id="department-title" name="title" placeholder=" " required
+               autocomplete="off"
+               [value]="title()" (input)="title.set(titleInput.value)"
+               [attr.aria-invalid]="titleError()"
+               [attr.aria-describedby]="titleError() ? 'department-title-error' : null" />
+        <label for="department-title">Department title</label>
+      </div>
+      @if (titleError()) {
+        <p id="department-title-error" class="text-xs text-danger -mt-3">Department title is required.</p>
+      }
+
+      @if (error(); as message) {
+        <p class="px-3 py-2 rounded-lg bg-dangerBg text-danger text-xs" role="alert">{{ message }}</p>
+      }
+
+      <div class="flex items-center justify-end gap-3 pt-3 border-t border-inkText/8">
+        <button type="button" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5 disabled:opacity-40"
+                [disabled]="saving()" (click)="cancel()">
+          Cancel
+        </button>
+        <button type="submit"
+                class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed"
+                [disabled]="saving()">
+          {{ saving() ? 'Saving…' : 'Save department' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

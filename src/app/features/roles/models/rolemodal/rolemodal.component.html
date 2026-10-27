@@ -1,0 +1,155 @@
+<div
+  id="role-modal"
+  class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="role-modal-title"
+>
+  <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="closeModal()"></div>
+
+  <div class="relative bg-paper w-full max-w-3xl max-h-[92vh] overflow-hidden rounded-2xl shadow-soft flex flex-col">
+    <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8 shrink-0">
+      <p id="role-modal-title" class="font-display text-xl text-inkText">
+        {{ isEdit() ? 'Edit Role' : 'Add Role' }}
+      </p>
+      <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog" aria-label="Close role modal" (click)="closeModal()">×</button>
+    </div>
+
+    <form (submit)="$event.preventDefault(); save()" class="flex-1 min-h-0 flex flex-col" novalidate>
+      <div class="px-6 py-6 flex-1 min-h-0 flex flex-col gap-5">
+
+        @if (loading()) {
+          <p class="text-sm text-fog text-center shrink-0">Loading role...</p>
+        }
+
+        <div class="field shrink-0">
+          <input id="role-name" type="text" placeholder=" " [formControl]="roleName" autocomplete="off" />
+          <label for="role-name">Role Name</label>
+          @if (roleName.invalid && roleName.touched) {
+            <p class="text-xs text-red-600 mt-1" role="alert">Role name is required</p>
+          }
+        </div>
+
+        <div class="flex-1 min-h-0 flex flex-col">
+          <div class="flex items-center justify-between mb-3 shrink-0">
+            <p class="text-xs font-bold uppercase tracking-wide text-brassDk">Module permissions</p>
+            <p class="text-xs text-fog">{{ selectedCount() }} selected</p>
+          </div>
+
+          <div
+            class="border border-inkText/10 rounded-xl overflow-auto min-h-0"
+            [class.opacity-50]="loading()"
+            [class.pointer-events-none]="loading()"
+          >
+            <table class="w-full min-w-150 text-sm">
+              <thead class="sticky top-0 z-10">
+                <tr class="text-left text-[11px] uppercase tracking-wide text-fog">
+                  <th class="bg-ivory px-4 py-2.5 font-semibold">Module</th>
+
+                  @for (a of crudActions; track a) {
+                    <th class="bg-ivory px-3 py-2.5 font-semibold text-center">
+                      <label class="inline-flex items-center justify-center gap-1.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          [checked]="isAllSelected(columnPermissions(a))"
+                          [indeterminate]="isPartiallySelected(columnPermissions(a))"
+                          (change)="onToggleMany(columnPermissions(a), $event)"
+                          [attr.aria-label]="'Select all ' + a"
+                        />
+                        {{ a }}
+                      </label>
+                    </th>
+                  }
+
+                  <th class="bg-ivory px-3 py-2.5 font-semibold text-center">
+                    <label class="inline-flex items-center justify-center gap-1.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        [checked]="isAllSelected(allPermissions)"
+                        [indeterminate]="isPartiallySelected(allPermissions)"
+                        (change)="onToggleMany(allPermissions, $event)"
+                        aria-label="Select all permissions"
+                      />
+                      All
+                    </label>
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody class="divide-y divide-inkText/6">
+                @for (m of modules; track m.key) {
+                  <tr>
+                    <td class="px-4 py-2.5 font-semibold text-inkText whitespace-nowrap">{{ m.label }}</td>
+
+                    @if (m.key === 'Security') {
+                      <td class="px-3 py-2.5" [attr.colspan]="crudActions.length">
+                        @for (a of m.actions; track a) {
+                          <label class="inline-flex items-center gap-2 text-xs text-fog me-4">
+                            <input
+                              type="checkbox"
+                              [checked]="isSelected(permissionName(m.key, a))"
+                              (change)="onPermissionChange(permissionName(m.key, a), $event)"
+                            />
+                            Revoke Sessions
+                          </label>
+                        }
+                      </td>
+                    } @else {
+                      @for (a of crudActions; track a) {
+                        <td class="px-3 py-2.5 text-center">
+                          @if (hasAction(m, a)) {
+                            <input
+                              type="checkbox"
+                              [checked]="isSelected(permissionName(m.key, a))"
+                              (change)="onPermissionChange(permissionName(m.key, a), $event)"
+                              [attr.aria-label]="m.label + ' ' + a"
+                            />
+                          } @else {
+                            <span class="text-fog/40" aria-hidden="true">—</span>
+                          }
+                        </td>
+                      }
+                    }
+
+                    <!-- Select all for the row -->
+                    <td class="px-3 py-2.5 text-center bg-ivory/30">
+                      <input
+                        type="checkbox"
+                        [checked]="isAllSelected(rowPermissions(m))"
+                        [indeterminate]="isPartiallySelected(rowPermissions(m))"
+                        (change)="onToggleMany(rowPermissions(m), $event)"
+                        [attr.aria-label]="'Select all ' + m.label"
+                      />
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        @if (errorMsg()) {
+          <p class="text-sm text-red-600 shrink-0" role="alert">{{ errorMsg() }}</p>
+        }
+      </div>
+
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-inkText/8 bg-ivory/45 shrink-0">
+        <button
+          type="button"
+          class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5"
+          [disabled]="saving()"
+          (click)="closeModal()"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="saving() || loading()"
+          class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60"
+        >
+          {{ saving() ? 'Saving...' : isEdit() ? 'Save Changes' : 'Save Role' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

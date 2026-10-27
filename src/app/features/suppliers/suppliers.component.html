@@ -1,0 +1,442 @@
+<div class="bg-paper rounded-2xl border border-inkText/8 shadow-soft overflow-hidden">
+
+  <!-- Header -->
+  <div class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <p class="font-display text-xl text-inkText">Suppliers</p>
+      <p class="text-xs text-fog mt-0.5">Manage supplier contacts and purchasing partners.</p>
+    </div>
+    <button *appHasPermission="'Permissions.Suppliers.Add'"
+      type="button"
+      class="flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2.5 rounded-lg bg-ink text-ivory hover:bg-ink2 shadow-soft"
+      (click)="openAdd()">
+      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      Add Supplier
+    </button>
+  </div>
+
+
+  <div class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="relative w-full sm:w-64">
+      <svg class="w-4 h-4 text-fog absolute left-3 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.35-4.35" />
+      </svg>
+      <input
+        #searchBox
+        type="search"
+        placeholder="Search suppliers…"
+        aria-label="Search suppliers"
+        class="w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-inkText/15 focus:outline-none focus:ring-2 focus:ring-brass/30"
+        [value]="searchTerm()"
+        (input)="searchTerm.set(searchBox.value)" />
+    </div>
+
+    <button
+      type="button"
+      class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-brass/60 text-sm font-semibold text-brassDk hover:bg-brass/10"
+      [attr.aria-expanded]="filtersOpen()"
+      aria-controls="supplier-advanced-filters"
+      (click)="filtersOpen.set(!filtersOpen())">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <path d="M4 6h16M7 12h10M10 18h4" />
+      </svg>
+      <span>Advanced Filters</span>
+      @if (activeFiltersCount() > 0) {
+        <span class="min-w-5 h-5 px-1.5 rounded-full bg-brass text-white text-[10px] leading-5 text-center">
+          {{ activeFiltersCount() }}
+        </span>
+      }
+    </button>
+  </div>
+
+
+  @if (filtersOpen()) {
+    <div id="supplier-advanced-filters" class="border-b border-inkText/8 bg-ivory/45">
+      <div class="p-4 sm:p-5">
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="field">
+            <input id="supplier-filter-address" placeholder=" "
+                   [value]="draftAddress()"
+                   (input)="draftAddress.set($any($event.target).value)" />
+            <label for="supplier-filter-address">Address</label>
+          </div>
+          <div class="field">
+            <select id="supplier-filter-category"
+                    (change)="draftCategoryId.set($any($event.target).value ? +$any($event.target).value : null)">
+              <option value="" [selected]="draftCategoryId() === null">All categories</option>
+              @for (cat of categories(); track cat.id) {
+                <option [value]="cat.id" [selected]="cat.id === draftCategoryId()">{{ cat.name }}</option>
+              }
+            </select>
+            <label for="supplier-filter-category">Category</label>
+          </div>
+        </div>
+        <div class="mt-5 flex justify-end gap-2">
+          <button type="button"
+                  class="px-4 py-2.5 rounded-lg text-sm font-semibold text-fog hover:bg-ink/5"
+                  (click)="resetFilters()">
+            Reset
+          </button>
+          <button type="button"
+                  class="px-4 py-2.5 rounded-lg text-sm font-semibold bg-ink text-ivory"
+                  (click)="applyFilters()">
+            Apply Filters
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Page size -->
+  <div class="px-4 sm:px-5 py-3 border-b border-inkText/8 flex justify-end">
+    <label class="flex items-center gap-2 text-xs text-fog">
+      Show
+      <select
+        #sizeSelect
+        class="border border-inkText/15 rounded-lg px-2 py-1.5 text-xs text-inkText focus:outline-none focus:ring-2 focus:ring-brass/30"
+        (change)="pageSize.set(+sizeSelect.value)">
+        @for (size of pageSizeOptions; track size) {
+          <option [value]="size" [selected]="size === pageSize()">{{ size }}</option>
+        }
+      </select>
+      entries
+    </label>
+  </div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto" [class.opacity-60]="loading()" [attr.aria-busy]="loading()">
+    @if (error()) {
+      <div class="text-sm text-danger text-center py-8">
+        {{ error() }}
+        <button type="button" class="underline ms-2" (click)="reload()">Retry</button>
+      </div>
+    } @else {
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-ivory text-left text-[11px] uppercase tracking-wide text-fog">
+            <th class="px-5 py-3 font-semibold">Code</th>
+            <th class="px-5 py-3 font-semibold">Supplier Name</th>
+            <th class="px-5 py-3 font-semibold">Category</th>
+            <th class="px-5 py-3 font-semibold">Address</th>
+            <th class="px-5 py-3 font-semibold text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-inkText/6">
+          @for (sup of items(); track sup.id) {
+            <tr class="hover:bg-ivory/60 cursor-pointer" (click)="openDetails(sup)">
+              <td class="px-5 py-3.5 text-fog">{{ sup.code }}</td>
+              <td class="px-5 py-3.5 font-semibold text-inkText">{{ sup.name }}</td>
+              <td class="px-5 py-3.5">
+                <span class="inline-block text-xs px-2 py-1 rounded-full bg-ink/5 text-brassDk">
+                  {{ sup.categoryName || '—' }}
+                </span>
+              </td>
+              <td class="px-5 py-3.5">{{ sup.address || '—' }}</td>
+              <td class="px-5 py-3.5 text-right whitespace-nowrap">
+                <button
+                  type="button"
+                  class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
+                  title="View details"
+                  [attr.aria-label]="'View ' + sup.name"
+                  (click)="$event.stopPropagation(); openDetails(sup)">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </button>
+                <button *appHasPermission="'Permissions.Suppliers.Edit'"
+                  type="button"
+                  class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
+                  title="Edit supplier"
+                  [attr.aria-label]="'Edit ' + sup.name"
+                  (click)="$event.stopPropagation(); openEdit(sup)">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                  </svg>
+                </button>
+                <button *appHasPermission="'Permissions.Suppliers.Delete'"
+                  type="button"
+                  class="p-1.5 rounded-lg hover:bg-dangerBg text-danger"
+                  title="Delete supplier"
+                  [attr.aria-label]="'Delete ' + sup.name"
+                  (click)="$event.stopPropagation(); openDelete(sup)">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 6h18" />
+                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="text-sm text-fog text-center py-8">
+                {{ loading() ? 'Loading suppliers…' : (searchTerm() || activeFiltersCount() ? 'No matching suppliers found.' : 'No suppliers yet.') }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <!-- Pagination -->
+  <div class="p-4 sm:p-5 border-t border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-fog">
+    <p>
+      @if (pageRange().total) {
+        Showing {{ pageRange().from }}–{{ pageRange().to }} of {{ pageRange().total }} suppliers
+      } @else {
+        No matching suppliers found
+      }
+    </p>
+    <div class="flex items-center gap-1">
+      <button type="button"
+        class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="currentPage() <= 1 || loading()"
+        (click)="prevPage()">
+        Previous
+      </button>
+      <span class="px-3 py-1.5 rounded-lg bg-ink text-ivory font-semibold">
+        {{ currentPage() }} / {{ totalPages() }}
+      </span>
+      <button type="button"
+        class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
+        [disabled]="currentPage() >= totalPages() || loading()"
+        (click)="nextPage()">
+        Next
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Add / Edit modal ========== -->
+@if (modalOpen()) {
+  @defer {
+    <app-suppliers-modal
+      [supplier]="modalSupplier()"
+      [categories]="categories()"
+      [saving]="saving()"
+      [error]="saveError()"
+      (saved)="onSaved($event)"
+      (cancelled)="closeModal()"
+    />
+  }
+}
+
+<!-- ========== Details modal ========== -->
+<!-- ========== Details modal ========== -->
+@if (detailsSupplier(); as supplier) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="closeDetails()"></div>
+
+    <div class="relative bg-paper w-full max-w-xl rounded-2xl shadow-soft max-h-[90vh] overflow-y-auto"
+         role="dialog" aria-modal="true" aria-labelledby="supplier-details-title">
+
+      <!-- Header -->
+      <div class="sticky top-0 z-10 bg-paper flex items-center justify-between px-6 py-5 border-b border-inkText/8">
+        <p id="supplier-details-title" class="font-display text-xl text-inkText">Supplier Details</p>
+        <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog" aria-label="Close" (click)="closeDetails()">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="px-6 py-6">
+        <dl class="space-y-4 text-sm">
+          <div class="flex items-start justify-between gap-4">
+            <dt class="text-fog">Name</dt>
+            <dd class="font-semibold text-inkText text-right wrap-break-word">{{ supplier.name }}</dd>
+          </div>
+          <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
+            <dt class="text-fog">Code</dt>
+            <dd class="font-semibold text-inkText text-right">{{ supplier.code }}</dd>
+          </div>
+          <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
+            <dt class="text-fog">Category</dt>
+            <dd class="text-inkText text-right">{{ supplier.categoryName || '—' }}</dd>
+          </div>
+          <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
+            <dt class="text-fog">Address</dt>
+            <dd class="text-inkText text-right wrap-break-word">{{ supplier.address || '—' }}</dd>
+          </div>
+          <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
+            <dt class="text-fog">Notes</dt>
+            <dd class="text-inkText text-right wrap-break-word">{{ supplier.notes || '—' }}</dd>
+          </div>
+
+          @if (detailsResource.error()) {
+            <div class="flex items-center justify-between gap-4 pt-4 border-t border-inkText/8 text-xs text-danger">
+              <span>Could not load the rest of the details.</span>
+              <button type="button" class="font-semibold underline" (click)="detailsResource.reload()">Retry</button>
+            </div>
+          } @else {
+            @let extra = detailsResource.value();
+
+            <!-- Contact people -->
+            <div class="pt-4 border-t border-inkText/8">
+              <div class="flex items-center justify-between mb-3">
+                <dt class="text-fog">Contact People</dt>
+                @if (!detailsResource.isLoading() && extra?.contactPeople?.length) {
+                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-brass/15 text-brassDk">
+                    {{ extra?.contactPeople?.length }}
+                  </span>
+                }
+              </div>
+
+              @if (detailsResource.isLoading()) {
+                <div class="space-y-2" aria-hidden="true">
+                  @for (n of [1, 2]; track n) {
+                    <div class="flex items-center gap-3 p-3 rounded-xl border border-inkText/8 animate-pulse">
+                      <div class="w-10 h-10 rounded-full bg-ink/10"></div>
+                      <div class="flex-1 space-y-2">
+                        <div class="h-3 w-1/3 rounded bg-ink/10"></div>
+                        <div class="h-2.5 w-1/2 rounded bg-ink/5"></div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+                  @for (c of extra?.contactPeople; track c.id) {
+                    <div class="flex items-start gap-3 p-3 rounded-xl border border-inkText/8 bg-ivory/40 hover:border-brass/50 hover:bg-ivory/70 transition-colors">
+                      <!-- Avatar -->
+                      <span class="w-10 h-10 rounded-full shrink-0 flex items-center justify-center bg-ink text-ivory text-sm font-semibold uppercase">
+                        {{ c.name.charAt(0) }}
+                      </span>
+
+                      <div class="min-w-0 flex-1 text-left">
+                        <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                          <p class="text-sm font-semibold text-inkText truncate">{{ c.name }}</p>
+                          @if (c.position) {
+                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-brass/15 text-brassDk">
+                              {{ c.position }}
+                            </span>
+                          }
+                        </div>
+
+                        <div class="mt-2 space-y-1.5">
+                          <div class="flex items-center gap-2 text-xs">
+                            <svg class="w-3.5 h-3.5 text-fog shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z" />
+                            </svg>
+                            @if (c.phone) {
+                              <a [href]="'tel:' + c.phone" class="text-inkText hover:text-brassDk hover:underline" dir="ltr">{{ c.phone }}</a>
+                            } @else {
+                              <span class="text-fog">—</span>
+                            }
+                          </div>
+
+                          <div class="flex items-center gap-2 text-xs min-w-0">
+                            <svg class="w-3.5 h-3.5 text-fog shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <rect x="2" y="4" width="20" height="16" rx="2" />
+                              <path d="m22 7-10 6L2 7" />
+                            </svg>
+                            @if (c.email) {
+                              <a [href]="'mailto:' + c.email" class="text-inkText hover:text-brassDk hover:underline truncate">{{ c.email }}</a>
+                            } @else {
+                              <span class="text-fog">—</span>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  } @empty {
+                    <div class="text-center py-6 rounded-xl border border-dashed border-inkText/15">
+                      <p class="text-xs text-fog">No contact people.</p>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Audit -->
+            <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
+              <dt class="text-fog">Created by</dt>
+              <dd class="text-inkText text-right">{{ extra?.createdByName || '—' }}</dd>
+            </div>
+            <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
+              <dt class="text-fog">Updated by</dt>
+              <dd class="text-inkText text-right">{{ extra?.updatedByName || '—' }}</dd>
+            </div>
+          }
+        </dl>
+
+        <div class="flex justify-end pt-5 mt-5 border-t border-inkText/8">
+          <button type="button"
+            class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft"
+            (click)="closeDetails()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ========== Delete modal ========== -->
+@if (deleteTarget(); as target) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="cancelDelete()"></div>
+
+    <div class="relative bg-paper w-full max-w-md rounded-2xl shadow-soft"
+         role="alertdialog" aria-modal="true"
+         aria-labelledby="delete-supplier-title" aria-describedby="delete-supplier-desc">
+      <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
+        <p id="delete-supplier-title" class="font-display text-xl text-inkText">Delete Supplier</p>
+        <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog disabled:opacity-40"
+                aria-label="Close" [disabled]="deleting()" (click)="cancelDelete()">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="px-6 py-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-dangerBg text-danger">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 6h18" />
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+            </svg>
+          </span>
+          <p id="delete-supplier-desc" class="text-sm text-inkText">
+            Are you sure you want to delete
+            <span class="font-semibold">{{ target.name }}</span>
+            <span class="text-fog">({{ target.code }})</span>?
+            This action cannot be undone.
+          </p>
+        </div>
+
+        @if (deleteError()) {
+          <p class="text-xs text-danger bg-dangerBg rounded-lg px-3 py-2" role="alert">{{ deleteError() }}</p>
+        }
+
+        <div class="flex items-center gap-3 pt-3 border-t border-inkText/8 justify-end">
+          <button type="button"
+            class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5 disabled:opacity-40"
+            [disabled]="deleting()" (click)="cancelDelete()">
+            Cancel
+          </button>
+          <button type="button"
+            class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-danger text-white hover:opacity-90 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed"
+            [disabled]="deleting()" (click)="confirmDelete()">
+            {{ deleting() ? 'Deleting…' : 'Delete supplier' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

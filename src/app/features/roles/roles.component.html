@@ -1,0 +1,138 @@
+<section id="view-roles">
+  <div class="bg-paper rounded-2xl border border-inkText/8 shadow-soft overflow-hidden">
+    <div class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <p class="font-display text-lg text-inkText">Roles &amp; Permissions</p>
+        <p class="text-xs text-fog mt-0.5">Manage role claims assigned to invited users.</p>
+      </div>
+      <button
+        *appHasPermission="'Permissions.Roles.Add'"
+        id="add-role-btn"
+        type="button"
+        (click)="openModal()"
+        class="flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2.5 rounded-lg bg-ink text-ivory hover:bg-ink2 shadow-soft"
+      >
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 5v14M5 12h14"></path>
+        </svg>
+        Add Role
+      </button>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-ivory text-left text-[11px] uppercase tracking-wide text-fog">
+            <th class="px-5 py-3 font-semibold">Role</th>
+            <th class="px-5 py-3 font-semibold">Users</th>
+            <th class="px-5 py-3 font-semibold text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="roles-tbody" class="divide-y divide-inkText/6">
+          @if (loading()) {
+            <tr><td colspan="3" class="px-5 py-6 text-center text-fog">Loading...</td></tr>
+          } @else if (loadError()) {
+            <tr>
+              <td colspan="3" class="px-5 py-6 text-center text-red-600">
+                {{ loadError() }}
+                <button type="button" class="underline ml-2" (click)="loadRoles()">Retry</button>
+              </td>
+            </tr>
+          } @else {
+            @for (role of roles(); track role.id) {
+              <tr class="hover:bg-ivory/60">
+                <td class="px-5 py-3.5 font-semibold text-inkText">{{ role.name }}</td>
+                <td class="px-5 py-3.5"></td>
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center justify-end gap-2">
+                    <button *appHasPermission="'Permissions.Roles.Edit'" (click)="openEditModal(role.id)" type="button" class="px-2.5 py-1.5 rounded-lg hover:bg-ink/5 text-fog">
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="m16.5 3.5 4 4L7 21l-4 1 1-4Z"/></svg>
+                    </button>
+                    <button
+                      *appHasPermission="'Permissions.Roles.Delete'"
+                      type="button"
+                      class="px-2.5 py-1.5 rounded-lg hover:bg-dangerBg text-danger"
+                      (click)="openDeleteModal(role)"
+                    >
+                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="3" class="px-5 py-6 text-center text-fog">No roles yet.</td></tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+@if (isModalOpen()) {
+  <app-rolemodal [roleId]="editRoleId()" (close)="closeModal()" />
+}
+
+@if (isDeleteModalOpen()) {
+  <div
+    id="delete-role-modal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="delete-role-title"
+  >
+    <div
+      class="absolute inset-0 bg-ink/55 backdrop-blur-sm"
+      (click)="!deleting() && closeDeleteModal()"
+    ></div>
+
+    <div class="relative bg-paper w-full max-w-md overflow-hidden rounded-2xl shadow-soft flex flex-col">
+      <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8 shrink-0">
+        <p id="delete-role-title" class="font-display text-xl text-inkText">Delete Role</p>
+        <button
+          type="button"
+          class="p-2 rounded-lg hover:bg-ink/5 text-fog"
+          aria-label="Close delete modal"
+          [disabled]="deleting()"
+          (click)="closeDeleteModal()"
+        >×</button>
+      </div>
+
+      <div class="px-6 py-6 flex flex-col items-center text-center gap-4">
+        <div class="w-14 h-14 rounded-full bg-red-50 text-red-600 flex items-center justify-center">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+          </svg>
+        </div>
+
+        <div>
+          <p class="font-display text-lg text-inkText">Delete “{{ roleToDelete()?.name }}”?</p>
+          <p class="text-sm text-fog mt-2">
+            This action can't be undone. Users assigned to this role will lose all of its permissions.
+          </p>
+        </div>
+
+        @if (deleteError()) {
+          <p class="text-sm text-red-600">{{ deleteError() }}</p>
+        }
+      </div>
+
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-inkText/8 bg-ivory/45 shrink-0">
+        <button
+          type="button"
+          class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5"
+          [disabled]="deleting()"
+          (click)="closeDeleteModal()"
+        >Cancel</button>
+        <button
+          type="button"
+          class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-red-600 text-white hover:bg-red-700 shadow-soft disabled:opacity-60"
+          [disabled]="deleting()"
+          (click)="confirmDelete()"
+        >{{ deleting() ? 'Deleting...' : 'Delete Role' }}</button>
+      </div>
+    </div>
+  </div>
+}

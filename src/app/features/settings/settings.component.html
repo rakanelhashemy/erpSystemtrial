@@ -1,0 +1,35 @@
+<section class="mx-auto max-w-3xl space-y-5">
+  <div>
+    <h1 class="font-display text-2xl text-inkText">System branding</h1>
+    <p class="mt-1 text-sm text-fog">Brand names are configured in the source code.</p>
+  </div>
+
+  <div class="rounded-2xl border border-inkText/8 bg-paper p-5 shadow-soft sm:p-7">
+    <dl class="grid gap-4 sm:grid-cols-2">
+      <div><dt class="text-xs font-semibold uppercase tracking-wide text-fog">Company name</dt><dd class="mt-1 font-semibold text-inkText">{{ branding.companyName() }}</dd></div>
+      <div><dt class="text-xs font-semibold uppercase tracking-wide text-fog">System name</dt><dd class="mt-1 font-semibold text-inkText">{{ branding.systemName() }}</dd></div>
+    </dl>
+    <p class="mt-5 text-sm text-fog">To change these values, edit <code class="rounded bg-ivory px-1.5 py-0.5 text-inkText">src/app/core/config/branding.config.ts</code> and rebuild the app.</p>
+  </div>
+</section>
+
+<section class="mx-auto mt-6 max-w-3xl space-y-5">
+  <div>
+    <h2 class="font-display text-2xl text-inkText">Language</h2>
+    <p class="mt-1 text-sm text-fog">Choose the language used for API responses and interface direction.</p>
+  </div>
+
+  <div class="rounded-2xl border border-inkText/8 bg-paper p-5 shadow-soft sm:p-7">
+    <label for="app-language" class="mb-2 block text-sm font-semibold text-inkText">Display language</label>
+    <select
+      id="app-language"
+      class="w-full max-w-sm rounded-lg border border-inkText/15 bg-white px-3 py-2 text-inkText focus:outline-none focus:ring-2 focus:ring-brassDk"
+      [ngModel]="auth.language()"
+      (ngModelChange)="setLanguage($event)"
+      name="language"
+    >
+      <option value="en">English</option>
+      <option value="ar">العربية</option>
+    </select>
+  </div>
+</section>

@@ -1,0 +1,105 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="cancelled.emit()"></div>
+
+  <div
+    class="relative bg-paper w-full max-w-md rounded-2xl shadow-soft"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="location-modal-title"
+  >
+    <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
+      <p id="location-modal-title" class="font-display text-xl text-inkText">
+        {{ isEdit() ? 'Edit Location' : 'Add Location' }}
+      </p>
+      <button
+        type="button"
+        class="p-2 rounded-lg hover:bg-ink/5 text-fog disabled:opacity-40"
+        aria-label="Close"
+        [disabled]="saving()"
+        (click)="cancelled.emit()"
+      >
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <form class="px-6 py-6 space-y-4" (ngSubmit)="submit()" #f="ngForm">
+      <div class="field">
+        <input
+          type="text"
+          id="location-name"
+          name="name"
+          placeholder=" "
+          required
+          [ngModel]="name()"
+          (ngModelChange)="name.set($event)"
+        />
+        <label for="location-name">Location name</label>
+      </div>
+
+      <div class="field">
+        <select
+          id="location-type"
+          name="locationTypeId"
+          class="has-value"
+          required
+          [disabled]="typesLoading()"
+          [ngModel]="locationTypeId()"
+          (ngModelChange)="locationTypeId.set($event)"
+        >
+          <option value="">{{ typesLoading() ? 'Loading…' : 'Select location type' }}</option>
+          @for (t of types(); track t.id) {
+            <option [value]="t.id">{{ t.name }}</option>
+          }
+        </select>
+        <label for="location-type">Location type</label>
+        <span class="chevron" aria-hidden="true">⌄</span>
+      </div>
+
+      @if (typesError()) {
+        <p class="text-xs text-danger">
+          {{ typesError() }}
+          <button type="button" class="underline ms-1" (click)="loadTypes()">Retry</button>
+        </p>
+      }
+
+      @if (errorMessage()) {
+        <p class="text-xs text-danger bg-dangerBg rounded-lg px-3 py-2" role="alert">
+          {{ errorMessage() }}
+        </p>
+      }
+
+      <div class="flex items-center justify-between gap-3 pt-3 border-t border-inkText/8">
+        @if (isEdit()) {
+          <button
+            type="button"
+            class="text-xs font-semibold text-danger hover:underline disabled:opacity-40"
+            [disabled]="saving()"
+            (click)="deleted.emit()"
+          >
+            Delete location
+          </button>
+        }
+        <div class="flex items-center gap-3 ml-auto">
+          <button
+            type="button"
+            class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5 disabled:opacity-40"
+            [disabled]="saving()"
+            (click)="cancelled.emit()"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed"
+            [disabled]="saving() || !canSave()"
+          >
+            {{ saving() ? 'Saving…' : 'Save location' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

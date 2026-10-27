@@ -1,0 +1,316 @@
+<div
+  id="sidebar-scrim"
+  class="fixed inset-0 bg-ink/50 z-40 lg:hidden"
+  [class.is-visible]="mobileOpen()"
+  (click)="closeMobile.emit()"
+></div>
+
+<aside
+  id="sidebar"
+  [attr.dir]="auth.language() === 'ar' ? 'rtl' : 'ltr'"
+  class="w-72 shrink-0 bg-ink text-ivory flex flex-col h-screen lg:sticky top-0"
+  [class.is-collapsed]="collapsed()"
+  [class.is-mobile-open]="mobileOpen()"
+>
+  <div class="flex items-center gap-3 px-5 h-16 border-b border-ivory/10 shrink-0">
+    <div class="w-9 h-9 rounded-full border border-brassLt/60 flex items-center justify-center shrink-0">
+      <span class="font-display text-base">{{ branding.companyName().charAt(0) }}</span>
+    </div>
+    <div class="brand-word leading-tight">
+      <p class="font-display text-base tracking-wide">{{ branding.companyName() }}</p>
+      <p class="text-[9px] text-brassLt/75 tracking-[0.16em]">{{ branding.systemName() }}</p>
+    </div>
+  </div>
+
+  <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1 text-sm">
+
+    <!-- Dashboard -->
+    <a routerLink="/app/dashboard" routerLinkActive="is-active"
+       class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-ivory/5 duration-500 "
+       (click)="onNavigate()">
+      <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 11.5 12 4l9 7.5" />
+        <path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9" />
+      </svg>
+      <span class="nav-label">{{ auth.language() === 'ar' ? 'لوحة التحكم' : 'Dashboard' }}</span>
+    </a>
+
+    <!-- Businesses -->
+    @if (auth.hasPermission('Permissions.Businesses.View')) {
+    <a routerLink="/app/businesses" routerLinkActive="is-active"
+       class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-ivory/5"duration-500
+       (click)="onNavigate()">
+      <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 21h18" />
+        <path d="M5 21V7l7-4 7 4v14" />
+        <path d="M9 9h1M9 13h1M14 9h1M14 13h1M10 21v-4h4v4" />
+      </svg>
+      <span class="nav-label">{{ auth.language() === 'ar' ? 'الشركات' : 'Businesses' }}</span>
+    </a>
+    }
+
+    <!-- Locations -->
+    @if (auth.hasPermission('Permissions.Locations.View') || auth.hasPermission('Permissions.LocationTypes.View')) {
+    <div>
+      <button type="button"
+              class="nav-toggle nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-ivory/5"duration-500
+              [class.is-open]="openMenus['locations']"
+              (click)="toggleMenu('locations')">
+        <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+          <circle cx="12" cy="10" r="2.5" />
+        </svg>
+        <span class="nav-label flex-1" [class.text-right]="auth.language() === 'ar'" [class.text-left]="auth.language() !== 'ar'">{{ auth.language() === 'ar' ? 'المواقع' : 'Locations' }}</span>
+        <svg class="nav-caret caret-icon w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m9 6 6 6-6 6" />
+        </svg>
+      </button>
+      <div class="submenu text-ivory/70 space-y-0.5" style="padding-inline-start: 2.75rem; padding-inline-end: 0.5rem" [class.is-open]="openMenus['locations']">
+        @if (auth.hasPermission('Permissions.Locations.View')) { <a routerLink="/app/locations" routerLinkActive="text-ivory" class="block py-2 rounded-lg hover:text-ivory" (click)="onNavigate()">{{ auth.language() === 'ar' ? 'كل المواقع' : 'All Locations' }}</a> }
+        @if (auth.hasPermission('Permissions.LocationTypes.View')) { <a routerLink="/app/location-types" routerLinkActive="text-ivory" class="block py-2 rounded-lg hover:text-ivory" (click)="onNavigate()">{{ auth.language() === 'ar' ? 'أنواع المواقع' : 'Location Types' }}</a> }
+      </div>
+    </div>
+    }
+
+    <!-- Groups -->
+    @if (auth.hasPermission('Permissions.Groups.View')) {
+    <a routerLink="/app/groups" routerLinkActive="is-active"
+       class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-ivory/5"duration-500
+       (click)="onNavigate()">
+      <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1.2" />
+        <rect x="14" y="3" width="7" height="7" rx="1.2" />
+        <rect x="3" y="14" width="7" height="7" rx="1.2" />
+        <rect x="14" y="14" width="7" height="7" rx="1.2" />
+      </svg>
+      <span class="nav-label">{{ auth.language() === 'ar' ? 'المجموعات' : 'Groups' }}</span>
+    </a>
+    }
+
+    <!-- Items -->
+    @if (auth.hasPermission('Permissions.Items.View')) {
+    <div>
+      <button type="button"
+              class="nav-toggle nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-ivory/5"duration-500
+              [class.is-open]="openMenus['items']"
+              (click)="toggleMenu('items')">
+        <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 8 12 3 3 8l9 5 9-5Z" />
+          <path d="M3 8v8l9 5 9-5V8M12 13v8" />
+        </svg>
+        <span class="nav-label flex-1" [class.text-right]="auth.language() === 'ar'" [class.text-left]="auth.language() !== 'ar'">{{ auth.language() === 'ar' ? 'الأصناف' : 'Items' }}</span>
+        <svg class="nav-caret caret-icon w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m9 6 6 6-6 6" />
+        </svg>
+      </button>
+      <div class="submenu text-ivory/70 space-y-0.5" style="padding-inline-start: 2.75rem; padding-inline-end: 0.5rem" [class.is-open]="openMenus['items']">
+        @if (auth.hasPermission('Permissions.Items.View')) { <a routerLink="/app/items" routerLinkActive="text-ivory" class="block py-2 rounded-lg hover:text-ivory" (click)="onNavigate()">{{ auth.language() === 'ar' ? 'مخزون الأصول' : 'Asset Inventory' }}</a> }
+        @if (auth.hasPermission('Permissions.Items.Add')) { <a routerLink="/app/bulk-import" routerLinkActive="text-ivory" class="block py-2 rounded-lg hover:text-ivory" (click)="onNavigate()">{{ auth.language() === 'ar' ? 'استيراد الأصناف' : 'Import Items' }}</a> }
+        @if (auth.hasPermission('Permissions.Items.View')) { <a routerLink="/app/depreciation-reports" routerLinkActive="text-ivory" class="block py-2 rounded-lg hover:text-ivory" (click)="onNavigate()">{{ auth.language() === 'ar' ? 'تقارير الإهلاك' : 'Depreciation Reports' }}</a> }
+      </div>
+    </div>
+    }
+
+    <!-- Departments -->
+    @if (auth.hasPermission('Permissions.Departments.View')) {
+    <a routerLink="/app/departments" routerLinkActive="is-active"
+       class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-ivory/5"duration-500
+       (click)="onNavigate()">
+      <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 21V9l8-5 8 5v12" />
+        <path d="M9 21v-6h6v6" />
+      </svg>
+      <span class="nav-label">{{ auth.language() === 'ar' ? 'الأقسام' : 'Departments' }}</span>
+    </a>
+    }
+
+    <!-- Suppliers -->
+    @if (auth.hasPermission('Permissions.Suppliers.View')) {
+    <a routerLink="/app/suppliers" routerLinkActive="is-active"
+       class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-ivory/5"duration-500
+       (click)="onNavigate()">
+      <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="1" y="7" width="15" height="10" rx="1.5" />
+        <path d="M16 10h3l3 3v4h-6" />
+        <circle cx="6" cy="19" r="1.6" />
+        <circle cx="17.5" cy="19" r="1.6" />
+      </svg>
+      <span class="nav-label">{{ auth.language() === 'ar' ? 'الموردون' : 'Suppliers' }}</span>
+    </a>
+    }
+
+    <!-- Maintenance Companies -->
+    @if (auth.hasPermission('Permissions.MaintenanceCompanies.View')) {
+    <a routerLink="/app/maintenance-companies" routerLinkActive="is-active"
+       class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-ivory/5"duration-500
+       (click)="onNavigate()">
+      <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="1" y="7" width="15" height="10" rx="1.5" />
+        <path d="M16 10h3l3 3v4h-6" />
+        <circle cx="6" cy="19" r="1.6" />
+        <circle cx="17.5" cy="19" r="1.6" />
+      </svg>
+      <span class="nav-label">{{ auth.language() === 'ar' ? 'شركات الصيانة' : 'Maintenance Companies' }}</span>
+    </a>
+    }
+
+    <!-- Employees -->
+    @if (auth.hasPermission('Permissions.Employees.View')) {
+    <a routerLink="/app/employees" routerLinkActive="is-active"
+       class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-ivory/5"duration-500
+       (click)="onNavigate()">
+      <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+      <span class="nav-label">{{ auth.language() === 'ar' ? 'الموظفون' : 'Employees' }}</span>
+    </a>
+    }
+
+    <!-- Check List -->
+    @if (auth.hasPermission('Permissions.CheckLists.View')) {
+    <div>
+      <button type="button"
+              class="nav-toggle nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-ivory/5"duration-500
+              [class.is-open]="openMenus['checklist']"
+              (click)="toggleMenu('checklist')">
+        <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="3" width="16" height="18" rx="2" />
+          <path d="m8 11 2 2 4-5" />
+          <path d="M8 16h8" />
+        </svg>
+        <span class="nav-label flex-1" [class.text-right]="auth.language() === 'ar'" [class.text-left]="auth.language() !== 'ar'">{{ auth.language() === 'ar' ? 'قائمة الفحص' : 'Check List' }}</span>
+        <svg class="nav-caret caret-icon w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m9 6 6 6-6 6" />
+        </svg>
+      </button>
+      <div class="submenu text-ivory/70 space-y-0.5" style="padding-inline-start: 2.75rem; padding-inline-end: 0.5rem" [class.is-open]="openMenus['checklist']">
+        <a routerLink="/app/check-item" routerLinkActive="text-ivory" class="block py-2 rounded-lg hover:text-ivory" (click)="onNavigate()">{{ auth.language() === 'ar' ? 'عنصر الفحص' : 'Check Item' }}</a>
+        <a routerLink="/app/check-lists" routerLinkActive="text-ivory" class="block py-2 rounded-lg hover:text-ivory" (click)="onNavigate()">{{ auth.language() === 'ar' ? 'كل قوائم الفحص' : 'All Check Lists' }}</a>
+      </div>
+    </div>
+    }
+
+    <!-- Printing -->
+    @if (auth.hasPermission('Permissions.Printing.View')) {
+    <a routerLink="/app/printing" routerLinkActive="is-active"
+       class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-ivory/5"duration-500
+       (click)="onNavigate()">
+      <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 9V3h12v6" />
+        <rect x="4" y="9" width="16" height="8" rx="1.5" />
+        <path d="M6 17h12v5H6z" />
+      </svg>
+      <span class="nav-label">{{ auth.language() === 'ar' ? 'الطباعة' : 'Printing' }}</span>
+    </a>
+    }
+
+    <!-- Transactions -->
+    @if (auth.hasPermission('Permissions.Transactions.View')) {
+    <a routerLink="/app/transactions" routerLinkActive="is-active"
+       class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-ivory/5"duration-500
+       (click)="onNavigate()">
+      <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m17 2 4 4-4 4" />
+        <path d="M3 11V9a2 2 0 0 1 2-2h16" />
+        <path d="m7 22-4-4 4-4" />
+        <path d="M21 13v2a2 2 0 0 1-2 2H3" />
+      </svg>
+      <span class="nav-label">{{ auth.language() === 'ar' ? 'المعاملات' : 'Transactions' }}</span>
+    </a>
+    }
+
+    <!-- Users -->
+    @if (auth.hasPermission('Permissions.Users.View') || auth.hasPermission('Permissions.Roles.View')) {
+    <div>
+      <button type="button"
+              class="nav-toggle nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-ivory/5"duration-500
+              [class.is-open]="openMenus['users']"
+              (click)="toggleMenu('users')">
+        <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        <span class="nav-label flex-1" [class.text-right]="auth.language() === 'ar'" [class.text-left]="auth.language() !== 'ar'">{{ auth.language() === 'ar' ? 'المستخدمون' : 'Users' }}</span>
+        <svg class="nav-caret caret-icon w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m9 6 6 6-6 6" />
+        </svg>
+      </button>
+      <div class="submenu text-ivory/70 space-y-0.5" style="padding-inline-start: 2.75rem; padding-inline-end: 0.5rem" [class.is-open]="openMenus['users']">
+    
+        @if (auth.hasPermission('Permissions.Users.View') && auth.hasPermission('Permissions.Users.Add')) { <a routerLink="/app/users" [queryParams]="{ add: 1 }" class="block py-2 rounded-lg hover:text-ivory" (click)="onNavigate()">{{ auth.language() === 'ar' ? 'إضافة مستخدم' : 'Add User' }}</a> }
+        @if (auth.hasPermission('Permissions.Users.View')) { <a routerLink="/app/users" routerLinkActive="text-ivory" [routerLinkActiveOptions]="{ exact: true }" class="block py-2 rounded-lg hover:text-ivory" (click)="onNavigate()">{{ auth.language() === 'ar' ? 'كل المستخدمين' : 'All Users' }}</a> }
+        @if (auth.hasPermission('Permissions.Roles.View')) {
+          <a routerLink="/app/roles" routerLinkActive="text-ivory" class="block py-2 rounded-lg hover:text-ivory" (click)="onNavigate()">{{ auth.language() === 'ar' ? 'الأدوار والصلاحيات' : 'Roles & Permission' }}</a>
+        }
+      </div>
+    </div>
+    }
+
+    <!-- Settings -->
+    <a routerLink="/app/settings" routerLinkActive="is-active"
+       class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-ivory/5"duration-500
+       (click)="onNavigate()">
+      <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.42.24.66.24 1.51V15Z" />
+      </svg>
+      <span class="nav-label">{{ auth.language() === 'ar' ? 'الإعدادات' : 'Settings' }}</span>
+    </a>
+
+    <!-- SOE -->
+    <a routerLink="/app/soe" routerLinkActive="is-active"
+       class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-ivory/5"duration-500
+       (click)="onNavigate()">
+      <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+        <path d="M14 2v6h6" />
+        <path d="M8 13h8M8 17h5" />
+      </svg>
+      <span class="nav-label">SOE</span>
+    </a>
+
+    <!-- Reports -->
+    @if (auth.hasPermission('Permissions.Reports.View')) {
+    <a routerLink="/app/reports" routerLinkActive="is-active"
+       class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-ivory/5"duration-500
+       (click)="onNavigate()">
+      <svg class="w-4.5 h-4.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="3" width="16" height="18" rx="2" />
+        <path d="m8 11 2 2 4-5" />
+        <path d="M8 16h8" />
+      </svg>
+      <span class="nav-label">{{ auth.language() === 'ar' ? 'التقارير' : 'Reports' }}</span>
+    </a>
+    }
+
+  </nav>
+
+  <button
+    type="button"
+    class="hidden lg:flex items-center gap-3 px-3 py-3 mx-3 mb-3 rounded-lg hover:bg-ivory/5 duration-500text-ivory/60 text-xs"
+    (click)="collapseToggled.emit()"
+  >
+    <svg
+      class="w-4.5 h-4.5 shrink-0"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      [style.transform]="collapsed() ? 'rotate(180deg)' : 'rotate(0deg)'"
+    >
+      <path d="M15 18l-6-6 6-6" />
+    </svg>
+    <span class="nav-label">{{ auth.language() === 'ar' ? 'طي القائمة' : 'Collapse menu' }}</span>
+  </button>
+</aside>

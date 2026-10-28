@@ -129,11 +129,10 @@
               </div>
 
               <div class="field">
-                <input id="item-quantity" type="number" min="1" formControlName="quantity" placeholder=" " />
-                <label for="item-quantity">Quantity (Qty)</label>
-                @if (showError('quantity')) {
-                  <p class="text-xs text-danger mt-1">Quantity must be at least 1.</p>
-                }
+                <div class="relative w-full rounded-[0.65rem] border border-inkText/15 bg-ivory/50 px-4 pb-2 pt-5 text-[0.95rem] text-fog" aria-label="Quantity: 1">
+                  <span class="absolute left-4 top-1 text-[0.68rem] font-semibold tracking-wide text-brassDk">Quantity (Qty)</span>
+                  <span>1</span>
+                </div>
               </div>
 
               <div class="field sm:col-span-2">
@@ -238,22 +237,26 @@
 
           <div class="grid sm:grid-cols-2 gap-4">
             <div class="field">
-              <input id="item-working-date" type="date" formControlName="workingDate" placeholder=" " />
+              <input id="item-working-date" type="date" formControlName="workingDate" placeholder=" "
+                (input)="recalculateDepreciationDate($any($event.target).value)" />
               <label for="item-working-date">Working date</label>
             </div>
             <div class="field">
-              <input id="item-depreciation-rate" type="number" min="0" max="100" step="0.01" formControlName="depreciationRate" placeholder=" " />
+              <input id="item-depreciation-rate" type="number" min="0" max="100" step="0.01" formControlName="depreciationRate" placeholder=" "
+                (input)="onDepreciationRateInput($any($event.target).value)" />
               <label for="item-depreciation-rate">Depreciation %</label>
               @if (showError('depreciationRate')) {
                 <p class="text-xs text-danger mt-1">Enter a value between 0 and 100.</p>
               }
             </div>
             <div class="field">
-              <input id="item-depreciation-years" type="number" min="0" step="1" formControlName="depreciationYears" placeholder=" " />
+              <input id="item-depreciation-years" type="number" min="0" step="0.01" formControlName="depreciationYears" placeholder=" "
+                (input)="onDepreciationYearsInput($any($event.target).value)" />
               <label for="item-depreciation-years">Depreciation years</label>
             </div>
             <div class="field">
-              <input id="item-depreciation-date" type="date" formControlName="depreciationDate" placeholder=" " />
+              <input id="item-depreciation-date" type="date" formControlName="depreciationDate" placeholder=" " readonly
+                aria-readonly="true" class="read-only:bg-ivory/50 read-only:text-fog read-only:cursor-not-allowed" />
               <label for="item-depreciation-date">Depreciation on date</label>
             </div>
           </div>

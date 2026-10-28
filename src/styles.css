@@ -168,6 +168,8 @@ body {
 }
 .field input:focus + label,
 .field input:not(:placeholder-shown) + label,
+.field textarea:focus + label,
+.field textarea:not(:placeholder-shown) + label,
 .field select + label {
   top: 0.35rem;
   font-size: 0.68rem;
@@ -474,4 +476,3 @@ body {
 button{
   cursor: pointer;
 }
-

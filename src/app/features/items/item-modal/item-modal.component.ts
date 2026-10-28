@@ -172,7 +172,7 @@ export class ItemModalComponent implements OnInit {
       currencyId: d['currencyId'] ?? null,
       exchangeRate: d['exchangeRate'] ?? null,
       departmentId: d['departmentId'] ?? null,
-      quantity: d['quantity'] ?? 1,
+      quantity: 1,
       description: d['description'] ?? '',
 
       serialNumber: d['serialNumber'] ?? '',
@@ -282,6 +282,52 @@ export class ItemModalComponent implements OnInit {
     return this.modalDropdownOptions()[key] ?? [];
   }
 
+  onDepreciationRateInput(rawValue: string): void {
+    const rate = rawValue.trim() === '' ? null : Number(rawValue);
+    this.form.controls.depreciationRate.setValue(rate !== null && Number.isFinite(rate) ? rate : null);
+    if (rate === null || !Number.isFinite(rate) || rate <= 0 || rate > 100) {
+      this.form.controls.depreciationYears.setValue(null);
+      this.form.controls.depreciationDate.setValue('');
+      return;
+    }
+    this.form.controls.depreciationYears.setValue(this.roundToTwo(100 / rate));
+    this.recalculateDepreciationDate();
+  }
+
+  onDepreciationYearsInput(rawValue: string): void {
+    const years = rawValue.trim() === '' ? null : Number(rawValue);
+    this.form.controls.depreciationYears.setValue(years !== null && Number.isFinite(years) ? years : null);
+    if (years === null || !Number.isFinite(years) || years <= 0) {
+      this.form.controls.depreciationRate.setValue(null);
+      this.form.controls.depreciationDate.setValue('');
+      return;
+    }
+    this.form.controls.depreciationRate.setValue(this.roundToTwo(100 / years));
+    this.recalculateDepreciationDate();
+  }
+
+  recalculateDepreciationDate(workingDate = this.form.controls.workingDate.value): void {
+    const years = this.form.controls.depreciationYears.value;
+    if (!workingDate || years === null || !Number.isFinite(years) || years <= 0) {
+      this.form.controls.depreciationDate.setValue('');
+      return;
+    }
+
+    const [year, month, day] = workingDate.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    if (Number.isNaN(date.getTime())) {
+      this.form.controls.depreciationDate.setValue('');
+      return;
+    }
+    date.setDate(date.getDate() + Math.round(years * 365.2425));
+    const formatted = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    this.form.controls.depreciationDate.setValue(formatted);
+  }
+
+  private roundToTwo(value: number): number {
+    return Math.round((value + Number.EPSILON) * 100) / 100;
+  }
+
   // ---------- helpers ----------
   showError(name: keyof ItemModalComponent['form']['controls']): boolean {
     const c = this.form.controls[name];
@@ -320,6 +366,7 @@ export class ItemModalComponent implements OnInit {
   }
 
   submit(): void {
+    this.form.controls.quantity.setValue(1, { emitEvent: false });
     this.submitted.set(true);
     this.form.markAllAsTouched();
     this.status.set('');
@@ -436,7 +483,7 @@ export class ItemModalComponent implements OnInit {
 
       capacity: text(v.capacity),
       dimensions: text(v.dimensions),
-      quantity: v.quantity,
+      quantity: 1,
       description: text(v.description),
       image: this.imageFile(),
 

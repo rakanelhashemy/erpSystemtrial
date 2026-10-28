@@ -18,7 +18,7 @@
     </button>
   </div>
 
-
+  <!-- Search + advanced filters toggle -->
   <div class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div class="relative w-full sm:w-64">
       <svg class="w-4 h-4 text-fog absolute left-3 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none"
@@ -54,7 +54,7 @@
     </button>
   </div>
 
-
+  <!-- Advanced filters -->
   @if (filtersOpen()) {
     <div id="supplier-advanced-filters" class="border-b border-inkText/8 bg-ivory/45">
       <div class="p-4 sm:p-5">
@@ -65,16 +65,12 @@
                    (input)="draftAddress.set($any($event.target).value)" />
             <label for="supplier-filter-address">Address</label>
           </div>
-          <div class="field">
-            <select id="supplier-filter-category"
-                    (change)="draftCategoryId.set($any($event.target).value ? +$any($event.target).value : null)">
-              <option value="" [selected]="draftCategoryId() === null">All categories</option>
-              @for (cat of categories(); track cat.id) {
-                <option [value]="cat.id" [selected]="cat.id === draftCategoryId()">{{ cat.name }}</option>
-              }
-            </select>
-            <label for="supplier-filter-category">Category</label>
-          </div>
+          <app-lazy-dropdown label="Category" placeholder="All categories" [options]="categories()"
+            [selectedValue]="draftCategoryId()" [loading]="categoryLoading()" [hasMore]="categoryHasMore()"
+            [searchable]="true" [searchTerm]="categoryFilterSearch()" searchPlaceholder="Search categories…"
+            [allowClear]="true" (searchChanged)="onCategoryFilterSearch($event)"
+            (loadMore)="loadCategories()" (selected)="draftCategoryId.set(+$event.id)"
+            (cleared)="draftCategoryId.set(null)" />
         </div>
         <div class="mt-5 flex justify-end gap-2">
           <button type="button"
@@ -220,7 +216,6 @@
   @defer {
     <app-suppliers-modal
       [supplier]="modalSupplier()"
-      [categories]="categories()"
       [saving]="saving()"
       [error]="saveError()"
       (saved)="onSaved($event)"
@@ -229,7 +224,6 @@
   }
 }
 
-<!-- ========== Details modal ========== -->
 <!-- ========== Details modal ========== -->
 @if (detailsSupplier(); as supplier) {
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -362,11 +356,19 @@
             <!-- Audit -->
             <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
               <dt class="text-fog">Created by</dt>
-              <dd class="text-inkText text-right">{{ extra?.createdByName || '—' }}</dd>
+              @if (detailsResource.isLoading()) {
+                <dd class="h-3 w-24 rounded bg-ink/10 animate-pulse" aria-hidden="true"></dd>
+              } @else {
+                <dd class="text-inkText text-right">{{ extra?.createdByName || '—' }}</dd>
+              }
             </div>
             <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
               <dt class="text-fog">Updated by</dt>
-              <dd class="text-inkText text-right">{{ extra?.updatedByName || '—' }}</dd>
+              @if (detailsResource.isLoading()) {
+                <dd class="h-3 w-24 rounded bg-ink/10 animate-pulse" aria-hidden="true"></dd>
+              } @else {
+                <dd class="text-inkText text-right">{{ extra?.updatedByName || '—' }}</dd>
+              }
             </div>
           }
         </dl>

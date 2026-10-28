@@ -1,4 +1,3 @@
-
 export interface Supplier {
   id: string;
   code: string;
@@ -7,30 +6,32 @@ export interface Supplier {
   notes: string;
   categoryName: string;
 }
- 
+
 export interface ContactPerson {
-  id: number; // 0 = new contact
+  id: number; // 0 = new contact, real id = existing contact
   name: string;
   position: string;
   phone: string;
   email: string;
 }
- 
+
 export interface SupplierDetail extends Supplier {
   categoryId: number;
   createdByName: string;
   updatedByName: string;
   contactPeople: ContactPerson[];
 }
- 
+
 export interface SupplierRequest {
   name: string;
   address: string;
   notes: string;
-  categoryId: number;
+  categoryId: number | null;
+
+  newCategoryName?: string | null;
   contactPeople: ContactPerson[];
 }
- 
+
 export interface SupplierFilterQuery {
   pageNumber: number;
   pageSize: number;
@@ -38,4 +39,3 @@ export interface SupplierFilterQuery {
   address?: string;
   categoryId?: number | null;
 }
- 

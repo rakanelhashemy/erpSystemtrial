@@ -26,16 +26,36 @@ export class MaintenanceCompanyServices {private readonly http = inject(HttpClie
  
   create(body: MaintenanceCompanyRequest): Observable<ApiResponse<string>> {
     // the create schema has no contact id
+    const normalized = this.normalize(body);
     const payload = {
-      ...body,
-      contactPeople: body.contactPeople.map(({ id, ...rest }) => rest),
+      ...normalized,
+      contactPeople: normalized.contactPeople.map(({ id, ...rest }) => rest),
     };
     return this.http.post<ApiResponse<string>>(`${this.url}/Create`, payload);
   }
  
   update(id: string, body: MaintenanceCompanyRequest): Observable<ApiResponse<unknown>> {
     // the update schema expects the id in the body as well
-    return this.http.put<ApiResponse<unknown>>(`${this.url}/Update/${id}`, { id, ...body });
+    return this.http.put<ApiResponse<unknown>>(`${this.url}/Update/${id}`, { id, ...this.normalize(body) });
+  }
+
+  private normalize(body: MaintenanceCompanyRequest): MaintenanceCompanyRequest {
+    const newName = body.newSpecialtyName?.trim();
+    return {
+      ...body,
+      name: body.name.trim(),
+      address: body.address?.trim() ?? '',
+      notes: body.notes?.trim() ?? '',
+      specialtyId: newName ? null : body.specialtyId,
+      newSpecialtyName: newName || null,
+      contactPeople: (body.contactPeople ?? []).map((contact) => ({
+        ...contact,
+        name: contact.name?.trim() ?? '',
+        position: contact.position?.trim() ?? '',
+        phone: contact.phone?.trim() ?? '',
+        email: contact.email?.trim() ?? '',
+      })),
+    };
   }
  
   delete(id: string): Observable<ApiResponse<unknown>> {

@@ -23,7 +23,7 @@ export class LocationTypesComponent {
   private businessContext = inject(BusinessContextService);
  
   readonly pageSize = 10;
-  readonly businessPageSize = 20;
+  readonly businessPageSize = 10;
   readonly searchDebounceMs = 400;
   readonly businessSearchDebounceMs = 300;
  

@@ -38,14 +38,18 @@
           </div>
 
           <div class="field">
-            <select id="mc-specialty" formControlName="specialtyId">
-              <option [ngValue]="null">Select specialty</option>
-              @for (sp of specialties(); track sp.id) {
-                <option [ngValue]="sp.id">{{ sp.name }}</option>
-              }
-            </select>
-            <label for="mc-specialty">Specialty</label>
-            @if (form.controls.specialtyId.touched && form.controls.specialtyId.invalid) {
+            <app-lazy-dropdown label="Specialty" placeholder="Select specialty" [options]="specialties()"
+              [selectedValue]="form.controls.specialtyId.value" [loading]="specialtyLoading()"
+              [hasMore]="specialtyHasMore()" [searchable]="true" [searchTerm]="specialtySearch()"
+              [customOptionText]="specialtyNoResults() ? 'Use “' + specialtySearch().trim() + '” as a new specialty' : ''"
+              [customOptionValue]="specialtySearch().trim()" searchPlaceholder="Search specialties…"
+              [allowClear]="true" (loadMore)="loadSpecialties()"
+              (searchChanged)="onSpecialtySearch($event)" (selected)="selectSpecialty(+$event.id)"
+              (customSelected)="selectNewSpecialty($event)" (cleared)="clearSpecialty()" />
+            @if (specialtyNoResults()) {
+              <p class="text-xs text-fog mt-1">No matching specialty. Select “Use {{ specialtySearch().trim() }} as a new specialty” from the list.</p>
+            }
+            @if (form.controls.specialtyId.touched && form.controls.specialtyId.value === null && !form.controls.specialtyName.value.trim() && !specialtySearchPending()) {
               <p class="text-xs text-danger mt-1">Specialty is required.</p>
             }
           </div>

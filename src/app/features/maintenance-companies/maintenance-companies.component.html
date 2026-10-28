@@ -64,17 +64,12 @@
                    (input)="draftAddress.set($any($event.target).value)" />
             <label for="maintenance-filter-address">Address</label>
           </div>
-          <div class="field">
-            <select id="maintenance-filter-specialty"
-                    (change)="draftSpecialtyId.set($any($event.target).value ? +$any($event.target).value : null)">
-              <option value="" [selected]="draftSpecialtyId() === null">All specialties</option>
-              @for (sp of specialties(); track sp.id) 
-              {
-                <option [value]="sp.id" [selected]="sp.id === draftSpecialtyId()">{{ sp.name }}</option>
-              }
-            </select>
-            <label for="maintenance-filter-specialty">Specialty</label>
-          </div>
+          <app-lazy-dropdown label="Specialty" placeholder="All specialties" [options]="specialties()"
+            [selectedValue]="draftSpecialtyId()" [loading]="specialtyLoading()" [hasMore]="specialtyHasMore()"
+            [searchable]="true" [searchTerm]="specialtyFilterSearch()" searchPlaceholder="Search specialties…"
+            [allowClear]="true" (searchChanged)="onSpecialtyFilterSearch($event)"
+            (loadMore)="loadSpecialties()" (selected)="draftSpecialtyId.set(+$event.id)"
+            (cleared)="draftSpecialtyId.set(null)" />
         </div>
         <div class="mt-5 flex justify-end gap-2">
           <button type="button"
@@ -220,7 +215,6 @@
   @defer {
     <app-maintenance-Company-modal
       [company]="modalCompany()"
-      [specialties]="specialties()"
       [saving]="saving()"
       [error]="saveError()"
       (saved)="onSaved($event)"

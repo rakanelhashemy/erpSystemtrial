@@ -1,15 +1,17 @@
-import { Component, computed, effect, HostListener, inject, input, output, untracked } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { Component, computed, DestroyRef, effect, HostListener, inject, input, output, signal, untracked } from '@angular/core';
+import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { map } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, Subject, Subscription } from 'rxjs';
 import { Supplier, SupplierRequest, SupplierDetail, ContactPerson } from '../../../core/models/supplires-Modal';
 import { DropdownItem } from '../../../core/services/drop-down-services';
 import { Suppliers } from '../../../core/services/suppliers-service';
+import { DropDownServices } from '../../../core/services/drop-down-services';
+import { LazyDropdownComponent } from '../../../shared/ui/lazy-dropdown/lazy-dropdown.component';
 
    
 
 @Component({
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, LazyDropdownComponent],
   selector: 'app-suppliers-modal',
   styleUrl: './suppliers-modal.component.css',
   templateUrl: './suppliers-modal.component.html',
@@ -17,14 +19,25 @@ import { Suppliers } from '../../../core/services/suppliers-service';
 export class SuppliersModalComponent {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly api = inject(Suppliers);
+  private readonly dropdown = inject(DropDownServices);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly supplier = input<Supplier | null>(null);
-  readonly categories = input<DropdownItem<number>[]>([]);
   readonly saving = input(false);
   readonly error = input<string | null>(null);
 
   readonly saved = output<SupplierRequest>();
   readonly cancelled = output<void>();
+
+  readonly categories = signal<DropdownItem<number>[]>([]);
+  readonly categoryPage = signal(0);
+  readonly categoryHasMore = signal(false);
+  readonly categoryLoading = signal(false);
+  readonly categorySearch = signal('');
+  readonly categoryNoResults = signal(false);
+  readonly categorySearchPending = signal(false);
+  private readonly categorySearch$ = new Subject<string>();
+  private categorySub?: Subscription;
 
   readonly isEdit = computed(() => !!this.supplier());
 
@@ -39,7 +52,8 @@ export class SuppliersModalComponent {
     name: this.fb.control('', [Validators.required, Validators.maxLength(150)]),
     address: this.fb.control(''),
     notes: this.fb.control(''),
-    categoryId: this.fb.control<number | null>(null, [Validators.required]),
+    categoryId: this.fb.control<number | null>(null),
+    categoryName: this.fb.control(''),
     contactPeople: this.fb.array([contactGroup(this.fb)]),
   });
 
@@ -48,6 +62,11 @@ export class SuppliersModalComponent {
   }
 
   constructor() {
+    this.loadCategories(true);
+    this.categorySearch$
+      .pipe(debounceTime(250), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadCategories(true));
+
     // edit mode: fill the form once the details arrive
     effect(() => {
       const detail = this.detailsResource.hasValue() ? this.detailsResource.value() : null;
@@ -61,7 +80,11 @@ export class SuppliersModalComponent {
       address: d.address,
       notes: d.notes,
       categoryId: d.categoryId,
+      categoryName: '',
     });
+    if (d.categoryName && !this.categories().some((category) => category.id === d.categoryId)) {
+      this.categories.update((categories) => [...categories, { id: d.categoryId, name: d.categoryName }]);
+    }
     this.contacts.clear();
     d.contactPeople.forEach((c) => this.contacts.push(contactGroup(this.fb, c)));
     if (!d.contactPeople.length) this.addContact();
@@ -69,6 +92,73 @@ export class SuppliersModalComponent {
 
   addContact(): void {
     this.contacts.push(contactGroup(this.fb));
+  }
+
+  onCategorySearch(term: string): void {
+    this.categorySearch.set(term);
+    this.categoryNoResults.set(false);
+    this.categorySearchPending.set(true);
+    this.form.patchValue({ categoryId: null, categoryName: term.trim() });
+    this.categorySearch$.next(term.trim());
+  }
+
+  selectCategory(id: number): void {
+    this.form.patchValue({ categoryId: id, categoryName: '' });
+    this.categoryNoResults.set(false);
+  }
+
+  selectNewCategory(name: string): void {
+    const categoryName = name.trim();
+    if (!categoryName) return;
+    this.categorySearch.set(categoryName);
+    this.form.patchValue({ categoryId: null, categoryName });
+    this.categoryNoResults.set(true);
+  }
+
+  clearCategory(): void {
+    this.categorySearch.set('');
+    this.categorySearchPending.set(false);
+    this.form.patchValue({ categoryId: null, categoryName: '' });
+    this.categoryNoResults.set(false);
+    this.categorySearch$.next('');
+  }
+
+  loadCategories(reset = false): void {
+    if ((!reset && this.categoryLoading()) || (!reset && !this.categoryHasMore())) return;
+    if (reset) {
+      this.categorySub?.unsubscribe();
+      this.categoryPage.set(0);
+      this.categoryHasMore.set(false);
+    }
+    const pageNumber = reset ? 1 : this.categoryPage() + 1;
+    const search = this.categorySearch().trim();
+    if (reset) this.categories.set([]);
+    this.categoryLoading.set(true);
+    this.categorySub = this.dropdown.supplierCategories({ pageNumber, pageSize: 10, search })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          const page = response.data;
+          const items = reset ? [...page.data] : [...this.categories(), ...page.data];
+          const detail = this.detailsResource.hasValue() ? this.detailsResource.value() : null;
+          if (detail && !items.some((category) => category.id === detail.categoryId)) {
+            items.push({ id: detail.categoryId, name: detail.categoryName });
+          }
+          this.categories.set(items);
+          this.categoryPage.set(page.currentPage);
+          this.categoryHasMore.set(page.hasNextPage);
+          this.categoryNoResults.set(!!search && page.data.length === 0 && pageNumber === 1);
+          this.categorySearchPending.set(false);
+          this.form.controls.categoryName.setValue(this.categoryNoResults() ? search : '');
+          this.categoryLoading.set(false);
+        },
+        error: () => {
+          this.categoryLoading.set(false);
+          this.categorySearchPending.set(false);
+          this.categoryNoResults.set(!!search);
+          this.form.controls.categoryName.setValue(search);
+        },
+      });
   }
 
   removeContact(index: number): void {
@@ -82,12 +172,18 @@ export class SuppliersModalComponent {
       return;
     }
 
+    if (this.form.controls.categoryId.value === null && !this.form.controls.categoryName.value.trim()) {
+      this.form.controls.categoryId.markAsTouched();
+      return;
+    }
+
     const v = this.form.getRawValue();
     this.saved.emit({
       name: v.name.trim(),
       address: v.address.trim(),
       notes: v.notes.trim(),
-      categoryId: v.categoryId!,
+      categoryId: v.categoryId,
+      newCategoryName: v.categoryId === null ? this.categorySearch().trim() || v.categoryName.trim() || null : null,
       contactPeople: v.contactPeople.map((c) => ({
         id: c.id,
         name: c.name.trim(),

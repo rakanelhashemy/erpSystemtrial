@@ -38,14 +38,19 @@
           </div>
 
           <div class="field">
-            <select id="sup-category" formControlName="categoryId">
-              <option [ngValue]="null">Select category</option>
-              @for (cat of categories(); track cat.id) {
-                <option [ngValue]="cat.id">{{ cat.name }}</option>
-              }
-            </select>
-            <label for="sup-category">Category</label>
-            @if (form.controls.categoryId.touched && form.controls.categoryId.invalid) {
+            <app-lazy-dropdown label="Category" placeholder="Select category" [options]="categories()"
+              [selectedValue]="form.controls.categoryId.value" [loading]="categoryLoading()"
+              [hasMore]="categoryHasMore()" [searchable]="true" [searchTerm]="categorySearch()"
+              [customOptionText]="categoryNoResults() ? 'Use “' + categorySearch().trim() + '” as a new category' : ''"
+              [customOptionValue]="categorySearch().trim()"
+              searchPlaceholder="Search categories…" [allowClear]="true" (loadMore)="loadCategories()"
+              (selected)="selectCategory(+$event.id)" (searchChanged)="onCategorySearch($event)"
+              (customSelected)="selectNewCategory($event)"
+              (cleared)="clearCategory()" />
+            @if (categoryNoResults()) {
+              <p class="text-xs text-fog mt-1">No matching category. Select “Use {{ categorySearch().trim() }} as a new category” from the list.</p>
+            }
+            @if (form.controls.categoryId.touched && form.controls.categoryId.value === null && !form.controls.categoryName.value.trim() && !categorySearchPending()) {
               <p class="text-xs text-danger mt-1">Category is required.</p>
             }
           </div>

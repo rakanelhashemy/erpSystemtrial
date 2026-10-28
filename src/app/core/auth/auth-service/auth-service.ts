@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { BusinessContextService } from '../../services/business-context.service';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, finalize, shareReplay, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
@@ -37,7 +36,6 @@ export type AppLanguage = 'en' | 'ar';
 export class AuthService {
   private readonly httpClient = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly businessContext = inject(BusinessContextService);
 
   private readonly tokenKey = 'Token';
   private readonly languageKey = 'AppLanguage';
@@ -108,10 +106,7 @@ export class AuthService {
           headers: { 'X-Client-Type': 'web' },
         },
       )
-      .pipe(finalize(() => {
-        this.clearAuthData();
-        this.businessContext.clear();
-      }));
+      .pipe(finalize(() => this.clearAuthData()));
   }
 
   refreshToken(): Observable<ApiResponse<AuthResponseData>> {

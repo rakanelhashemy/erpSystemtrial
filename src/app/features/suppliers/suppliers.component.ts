@@ -1,23 +1,21 @@
 import { Component, computed, DestroyRef, HostListener, inject, linkedSignal, signal } from '@angular/core';
 import { toSignal, toObservable, rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { debounceTime, map, distinctUntilChanged, tap, catchError, EMPTY, finalize } from 'rxjs';
+import { debounceTime, map, distinctUntilChanged, tap, catchError, EMPTY, finalize, Subject, Subscription } from 'rxjs';
 import { Supplier, SupplierRequest } from '../../core/models/supplires-Modal';
 import { Suppliers } from '../../core/services/suppliers-service';
 import { DropdownItem, DropDownServices } from '../../core/services/drop-down-services';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { SuppliersModalComponent } from './suppliers-modal/suppliers-modal.component';
-interface Category {
-  id: number;
-  name: string;
-}
+import { LazyDropdownComponent } from '../../shared/ui/lazy-dropdown/lazy-dropdown.component';
+
 @Component({
-  imports: [HasPermissionDirective, SuppliersModalComponent],
+  imports: [HasPermissionDirective, SuppliersModalComponent, LazyDropdownComponent],
   selector: 'app-suppliers',
   styleUrl: './suppliers.component.css',
   templateUrl: './suppliers.component.html',
 })
 export class SuppliersComponent {
- private readonly api = inject(Suppliers);
+  private readonly api = inject(Suppliers);
   private readonly dropdown = inject(DropDownServices);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -41,12 +39,13 @@ export class SuppliersComponent {
   );
 
   // ---------- Categories ----------
-  readonly categories = toSignal(
-    this.dropdown
-      .supplierCategories({ pageNumber: 1, pageSize: 100 })
-      .pipe(map((res) => res.data.data)),
-    { initialValue: [] as DropdownItem<number>[] },
-  );
+  readonly categories = signal<DropdownItem<number>[]>([]);
+  readonly categoryPage = signal(0);
+  readonly categoryHasMore = signal(false);
+  readonly categoryLoading = signal(false);
+  readonly categoryFilterSearch = signal('');
+  private readonly categoryFilterSearch$ = new Subject<string>();
+  private categoryRequest?: Subscription;
 
   // ---------- Advanced filters ----------
   readonly filtersOpen = signal(false);
@@ -59,7 +58,47 @@ export class SuppliersComponent {
     () => (this.appliedAddress() ? 1 : 0) + (this.appliedCategoryId() ? 1 : 0),
   );
 
-  
+  constructor() {
+    this.loadCategories(true);
+    this.categoryFilterSearch$
+      .pipe(debounceTime(250), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadCategories(true));
+  }
+
+  loadCategories(reset = false): void {
+    if (!reset && (this.categoryLoading() || !this.categoryHasMore())) return;
+
+    if (reset) {
+      this.categoryRequest?.unsubscribe();
+      this.categoryPage.set(0);
+      this.categoryHasMore.set(false);
+      this.categories.set([]);
+    }
+
+    const pageNumber = reset ? 1 : this.categoryPage() + 1;
+    this.categoryLoading.set(true);
+
+    this.categoryRequest = this.dropdown
+      .supplierCategories({ pageNumber, pageSize: 10, search: this.categoryFilterSearch().trim() })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          const page = response.data;
+          this.categories.update((current) => (reset ? page.data : [...current, ...page.data]));
+          this.categoryPage.set(page.currentPage);
+          this.categoryHasMore.set(page.hasNextPage);
+          this.categoryLoading.set(false);
+        },
+        error: () => this.categoryLoading.set(false),
+      });
+  }
+
+  onCategoryFilterSearch(term: string): void {
+    this.categoryFilterSearch.set(term);
+    this.categoryFilterSearch$.next(term.trim());
+  }
+
+  /** Goes back to page 1 whenever search / size / filters change. */
   readonly currentPage = linkedSignal<
     { search: string; size: number; address: string; categoryId: number | null },
     number
@@ -147,6 +186,8 @@ export class SuppliersComponent {
     this.draftCategoryId.set(null);
     this.appliedAddress.set('');
     this.appliedCategoryId.set(null);
+    this.categoryFilterSearch.set('');
+    this.categoryFilterSearch$.next('');
   }
 
   // ---------- Add / Edit ----------
@@ -184,15 +225,33 @@ export class SuppliersComponent {
           this.saving.set(false); // before closeModal(), which ignores the call while saving
           this.closeModal();
           this.reload();
+          // categories may have changed if a new one was created
+          if (body.newCategoryName?.trim()) this.loadCategories(true);
         }),
         catchError((err) => {
-          this.saveError.set(err?.error?.message ?? 'Could not save the supplier. Please try again.');
+          this.saveError.set(this.formatSaveError(err));
           return EMPTY;
         }),
         finalize(() => this.saving.set(false)),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe();
+  }
+
+  private formatSaveError(err: any): string {
+    const body = err?.error;
+    const errors = body?.errors;
+    if (Array.isArray(errors)) {
+      const details = errors.filter((item) => typeof item === 'string').join(' ');
+      if (details) return details;
+    }
+    if (errors && typeof errors === 'object') {
+      const details = Object.entries(errors)
+        .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(' ') : String(messages)}`)
+        .join(' ');
+      if (details) return details;
+    }
+    return body?.message ?? 'Could not save the supplier. Please try again.';
   }
 
   // ---------- Delete ----------

@@ -1,0 +1,296 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="item-modal-title">
+  <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="close()"></div>
+
+  <div class="relative bg-paper w-full max-w-5xl max-h-[94vh] overflow-hidden rounded-2xl shadow-soft flex flex-col">
+
+    <!-- Header -->
+    <div class="flex items-start justify-between gap-4 px-5 sm:px-7 py-5 border-b border-inkText/8 shrink-0">
+      <div>
+        <p id="item-modal-title" class="font-display text-2xl text-inkText">{{ isEdit() ? 'Edit Item' : 'Add Item' }}</p>
+        <p class="text-xs text-fog mt-1">{{ isEdit() ? 'Update the asset record details.' : 'Create an asset record with its operational and financial details.' }}</p>
+      </div>
+      <button type="button" (click)="close()" class="p-2 rounded-lg hover:bg-ink/5 text-fog" aria-label="Close item modal">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <nav class="flex overflow-x-auto border-b border-inkText/8 bg-ivory/55 px-3 sm:px-5 shrink-0" aria-label="Item form sections" role="tablist">
+      @for (t of tabs; track t.id) {
+        <button type="button" role="tab"
+          class="item-tab shrink-0 px-3 sm:px-4 py-4 text-xs font-semibold"
+          [class.is-active]="activeTab() === t.id"
+          [class.text-brassDk]="activeTab() === t.id"
+          [class.text-fog]="activeTab() !== t.id"
+          [attr.aria-selected]="activeTab() === t.id"
+          (click)="activeTab.set(t.id)">{{ t.label }}</button>
+      }
+    </nav>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="overflow-y-auto flex-1 flex flex-col" novalidate>
+      <div class="px-5 sm:px-7 py-6 flex-1">
+        @if (loadingItem()) {
+          <p class="text-sm text-fog mb-4" role="status">Loading item…</p>
+        }
+
+        <!-- ============ General & Media ============ -->
+        <section [hidden]="activeTab() !== 'general'" role="tabpanel">
+          <div class="mb-5">
+            <p class="text-xs font-bold uppercase tracking-wide text-brassDk">Everyday identity</p>
+            <p class="text-sm text-fog mt-1">Capture the essentials and add a recognizable thumbnail.</p>
+          </div>
+
+          <div class="grid lg:grid-cols-[180px_1fr] gap-5 items-start">
+            <!-- Thumbnail -->
+            <div>
+              <input id="item-image" type="file" accept="image/*" class="hidden" (change)="onImageSelected($event)" />
+              <label for="item-image" class="item-dropzone relative aspect-square overflow-hidden rounded-2xl flex flex-col items-center justify-center text-center p-4 cursor-pointer"
+                     (dragover)="$event.preventDefault()" (drop)="onDrop($event)">
+                @if (imagePreview(); as src) {
+                  <img [src]="src" class="absolute inset-0 h-full w-full object-cover" alt="Selected item preview" />
+                  <span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent px-3 pb-3 pt-8 text-left text-[10px] font-semibold text-white">
+                    {{ imageFile()?.name ?? 'Item image' }}
+                  </span>
+                } @else {
+                  <span class="w-11 h-11 rounded-xl bg-brass/10 text-brassDk flex items-center justify-center mb-3">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="3"></rect>
+                      <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                      <path d="m21 15-5-5L5 21"></path>
+                    </svg>
+                  </span>
+                  <span class="text-xs font-semibold text-inkText">Add thumbnail</span>
+                  <span class="text-[10px] text-fog mt-1.5">Click or drop image</span>
+                }
+              </label>
+              @if (imagePreview()) {
+                <button type="button" (click)="clearImage()" class="mt-2 w-full text-xs font-semibold text-fog hover:text-danger">Remove image</button>
+              }
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+              <!-- Business (taken from the page selection) -->
+              <div class="field sm:col-span-2">
+                <input id="item-business" type="text" class="has-value" readonly
+                       [value]="business()?.name ?? ''" placeholder=" " />
+                <label for="item-business">Business <span class="text-danger">*</span></label>
+              </div>
+
+              <div class="field sm:col-span-2">
+                <input id="item-name" type="text" formControlName="name" placeholder=" " autocomplete="off"
+                       [attr.aria-invalid]="showError('name')" aria-describedby="item-name-error" />
+                <label for="item-name">Item name <span class="text-danger">*</span></label>
+                @if (showError('name')) {
+                  <p id="item-name-error" class="text-xs text-danger mt-1">Item name is required.</p>
+                }
+              </div>
+
+              <div class="field">
+                <input id="item-price" type="number" min="0" step="0.01" formControlName="price" placeholder=" " />
+                <label for="item-price">Price</label>
+              </div>
+
+              <div class="field">
+                <select id="item-currency" class="has-value" formControlName="currencyId">
+                  <option [ngValue]="null">All currencies</option>
+                  @for (c of lookups().currencies; track c.id) {
+                    <option [ngValue]="c.id">{{ c.name }}</option>
+                  }
+                </select>
+                <label for="item-currency">Currency</label>
+                <span class="chevron">⌄</span>
+              </div>
+
+              @if (needsConversion()) {
+                <div class="sm:col-span-2 grid sm:grid-cols-2 gap-4">
+                  <div class="field">
+                    <input id="item-conversion-rate" type="number" min="0" step="0.01" formControlName="exchangeRate" placeholder=" " />
+                    <label for="item-conversion-rate">Exchange Rate</label>
+                  </div>
+                  <div class="rounded-lg border border-inkText/8 bg-ivory/50 px-4 py-3">
+                    <p class="text-xs text-fog">Calculated Cost in {{ baseCurrency }}</p>
+                    <p class="mt-1 text-sm font-semibold text-inkText">
+                      Total: {{ convertedTotal() !== null ? (convertedTotal() | number: '1.2-2') : '—' }}
+                    </p>
+                  </div>
+                </div>
+              }
+
+              <div class="field sm:col-span-2">
+                <app-lazy-dropdown label="Department" placeholder="All departments" [options]="modalOptions('departments')"
+                  [selectedValue]="form.controls.departmentId.value" [loading]="modalDropdownLoading()['departments'] ?? false"
+                  [hasMore]="modalDropdownHasMore()['departments'] ?? false" [searchable]="true"
+                  [searchTerm]="modalDropdownSearch()['departments'] ?? ''" searchPlaceholder="Search departments…"
+                  [allowClear]="true" (searchChanged)="searchModalDropdown('departments', $event)"
+                  (loadMore)="loadModalDropdown('departments')" (selected)="form.controls.departmentId.setValue('' + $event.id)"
+                  (cleared)="form.controls.departmentId.setValue(null); clearModalDropdownSearch('departments')" />
+              </div>
+
+              <div class="field">
+                <input id="item-quantity" type="number" min="1" formControlName="quantity" placeholder=" " />
+                <label for="item-quantity">Quantity (Qty)</label>
+                @if (showError('quantity')) {
+                  <p class="text-xs text-danger mt-1">Quantity must be at least 1.</p>
+                }
+              </div>
+
+              <div class="field sm:col-span-2">
+                <textarea id="item-description" rows="2" formControlName="description" placeholder=" "
+                  class="w-full resize-y rounded-[0.65rem] border border-inkText/14 bg-white/70 px-4 pt-5 pb-2 text-[0.95rem] text-inkText outline-none focus:border-brass focus:ring-2 focus:ring-brass/20"></textarea>
+                <label for="item-description">Description</label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ Specs & Classification ============ -->
+        <section [hidden]="activeTab() !== 'specs'" role="tabpanel">
+          <div class="mb-5">
+            <p class="text-xs font-bold uppercase tracking-wide text-brassDk">Identity &amp; location</p>
+            <p class="text-sm text-fog mt-1">Keep technical details and hierarchical classification together.</p>
+          </div>
+
+          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="field">
+              <input id="item-serial" type="text" formControlName="serialNumber" placeholder=" " />
+              <label for="item-serial">Serial number (SN)</label>
+            </div>
+
+            <div class="field">
+              <app-lazy-dropdown label="Mark / Brand" placeholder="All brands" [options]="modalOptions('brands')"
+                [selectedValue]="form.controls.brandId.value" [loading]="modalDropdownLoading()['brands'] ?? false"
+                [hasMore]="modalDropdownHasMore()['brands'] ?? false" [searchable]="true"
+                [searchTerm]="modalDropdownSearch()['brands'] ?? ''" searchPlaceholder="Search brands…"
+                [allowClear]="true" (searchChanged)="searchModalDropdown('brands', $event)"
+                (loadMore)="loadModalDropdown('brands')" (selected)="form.controls.brandId.setValue(+$event.id)"
+                (cleared)="form.controls.brandId.setValue(null); clearModalDropdownSearch('brands')" />
+            </div>
+
+            <div class="field">
+              <app-lazy-dropdown label="Model" placeholder="All models" [options]="modalOptions('models')"
+                [selectedValue]="form.controls.modelId.value" [loading]="modalDropdownLoading()['models'] ?? false"
+                [hasMore]="modalDropdownHasMore()['models'] ?? false" [searchable]="true"
+                [searchTerm]="modalDropdownSearch()['models'] ?? ''" searchPlaceholder="Search models…"
+                [allowClear]="true" (searchChanged)="searchModalDropdown('models', $event)"
+                (loadMore)="loadModalDropdown('models')" (selected)="form.controls.modelId.setValue(+$event.id)"
+                (cleared)="form.controls.modelId.setValue(null); clearModalDropdownSearch('models')" />
+            </div>
+
+            <div class="field">
+              <app-lazy-dropdown label="Material" placeholder="All materials" [options]="modalOptions('materials')"
+                [selectedValue]="form.controls.materialId.value" [loading]="modalDropdownLoading()['materials'] ?? false"
+                [hasMore]="modalDropdownHasMore()['materials'] ?? false" [searchable]="true"
+                [searchTerm]="modalDropdownSearch()['materials'] ?? ''" searchPlaceholder="Search materials…"
+                [allowClear]="true" (searchChanged)="searchModalDropdown('materials', $event)"
+                (loadMore)="loadModalDropdown('materials')" (selected)="form.controls.materialId.setValue(+$event.id)"
+                (cleared)="form.controls.materialId.setValue(null); clearModalDropdownSearch('materials')" />
+            </div>
+
+            <div class="field">
+              <select id="item-origin" class="has-value" formControlName="countryId">
+                <option [ngValue]="null">All countries</option>
+                @for (c of lookups().countries; track c.id) { <option [ngValue]="c.id">{{ c.name }}</option> }
+              </select>
+              <label for="item-origin">Country of origin</label><span class="chevron">⌄</span>
+            </div>
+
+            <div class="field">
+              <input id="item-capacity" type="text" formControlName="capacity" placeholder=" " />
+              <label for="item-capacity">Capacity</label>
+            </div>
+
+            <div class="field">
+              <input id="item-dimensions" type="text" formControlName="dimensions" placeholder=" " />
+              <label for="item-dimensions">Dimensions (L x W x H)</label>
+              <p class="mt-1 text-[10px] text-fog">Example: 120 x 60 x 75 cm</p>
+            </div>
+
+            <div class="field">
+              <app-lazy-dropdown label="Group" placeholder="All groups" [options]="modalOptions('groups')"
+                [selectedValue]="form.controls.groupId.value" [loading]="modalDropdownLoading()['groups'] ?? false"
+                [hasMore]="modalDropdownHasMore()['groups'] ?? false" [searchable]="true"
+                [searchTerm]="modalDropdownSearch()['groups'] ?? ''" searchPlaceholder="Search groups…"
+                [allowClear]="true" (searchChanged)="searchModalDropdown('groups', $event)"
+                (loadMore)="loadModalDropdown('groups')" (selected)="form.controls.groupId.setValue('' + $event.id)"
+                (cleared)="form.controls.groupId.setValue(null); clearModalDropdownSearch('groups')" />
+            </div>
+
+            <div class="field">
+              <app-lazy-dropdown label="Location" placeholder="All locations" [options]="modalOptions('locations')"
+                [selectedValue]="form.controls.locationId.value" [loading]="modalDropdownLoading()['locations'] ?? false"
+                [hasMore]="modalDropdownHasMore()['locations'] ?? false" [searchable]="true"
+                [searchTerm]="modalDropdownSearch()['locations'] ?? ''" searchPlaceholder="Search locations…"
+                [allowClear]="true" (searchChanged)="searchModalDropdown('locations', $event)"
+                (loadMore)="loadModalDropdown('locations')" (selected)="form.controls.locationId.setValue('' + $event.id)"
+                (cleared)="form.controls.locationId.setValue(null); clearModalDropdownSearch('locations')" />
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ Financials ============ -->
+        <section [hidden]="activeTab() !== 'financials'" role="tabpanel">
+          <div class="mb-5">
+            <p class="text-xs font-bold uppercase tracking-wide text-brassDk">Lifecycle &amp; accounting</p>
+            <p class="text-sm text-fog mt-1">Keep valuation, useful life, and write-off status in one focused place.</p>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="field">
+              <input id="item-working-date" type="date" formControlName="workingDate" placeholder=" " />
+              <label for="item-working-date">Working date</label>
+            </div>
+            <div class="field">
+              <input id="item-depreciation-rate" type="number" min="0" max="100" step="0.01" formControlName="depreciationRate" placeholder=" " />
+              <label for="item-depreciation-rate">Depreciation %</label>
+              @if (showError('depreciationRate')) {
+                <p class="text-xs text-danger mt-1">Enter a value between 0 and 100.</p>
+              }
+            </div>
+            <div class="field">
+              <input id="item-depreciation-years" type="number" min="0" step="1" formControlName="depreciationYears" placeholder=" " />
+              <label for="item-depreciation-years">Depreciation years</label>
+            </div>
+            <div class="field">
+              <input id="item-depreciation-date" type="date" formControlName="depreciationDate" placeholder=" " />
+              <label for="item-depreciation-date">Depreciation on date</label>
+            </div>
+          </div>
+
+          <label class="mt-6 flex items-center justify-between gap-4 rounded-xl border border-inkText/10 bg-ivory/60 px-4 py-4 cursor-pointer">
+            <span>
+              <span class="block text-sm font-semibold text-inkText">Scraping</span>
+              <span class="block text-xs text-fog mt-0.5">Mark this item as discarded or written off.</span>
+            </span>
+            <span class="switch">
+              <input type="checkbox" formControlName="scraping" />
+              <span class="track"></span>
+            </span>
+          </label>
+        </section>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex items-center justify-between gap-3 px-5 sm:px-7 py-4 border-t border-inkText/8 bg-ivory/45 shrink-0">
+        <p class="text-xs text-danger" role="alert">{{ status() }}</p>
+
+        <div class="flex items-center gap-3 ml-auto">
+          @if (!isEdit()) {
+            <label class="flex items-center gap-2 text-xs font-semibold text-fog mr-2">
+              Create multiple copies:
+              <input type="number" min="1" [max]="maxCopies" formControlName="copyCount"
+                class="w-16 rounded-lg border border-inkText/15 bg-white px-2 py-2 text-sm text-inkText focus:border-brass focus:outline-none focus:ring-2 focus:ring-brass/20" />
+            </label>
+          }
+          <button type="button" (click)="close()" [disabled]="saving()"
+            class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5">Cancel</button>
+          <button type="submit" [disabled]="saving() || loadingItem()"
+            class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed">
+            {{ saving() ? 'Saving…' : isEdit() ? 'Save Changes' : 'Save Item' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

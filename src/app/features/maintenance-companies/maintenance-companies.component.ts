@@ -1,14 +1,15 @@
 import { Component, computed, DestroyRef, HostListener, inject, linkedSignal, signal } from '@angular/core';
 import { toSignal, toObservable, rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { debounceTime, map, distinctUntilChanged, tap, catchError, EMPTY, finalize } from 'rxjs';
+import { debounceTime, map, distinctUntilChanged, tap, catchError, EMPTY, finalize, Subscription, Subject } from 'rxjs';
 import { DropDownServices, DropdownItem } from '../../core/services/drop-down-services';
 import { MaintenanceCompanyServices } from '../../core/services/maintenance-company-services';
 import { MaintenanceCompany, MaintenanceCompanyRequest } from '../../core/models/maintenance-company-modal';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import {  MaintenanceCompyModalComponent } from './maintenance-compnaey-modal/maintenance-compnaey-modal.component';
+import { LazyDropdownComponent } from '../../shared/ui/lazy-dropdown/lazy-dropdown.component';
 
 @Component({
-  imports: [HasPermissionDirective, MaintenanceCompyModalComponent],
+  imports: [HasPermissionDirective, MaintenanceCompyModalComponent, LazyDropdownComponent],
   selector: 'app-maintenance-companies',
   styleUrl: './maintenance-companies.component.css',
   templateUrl: './maintenance-companies.component.html',
@@ -38,13 +39,13 @@ export class MaintenanceCompaniesComponent {
   );
  
   // ---------- Specialties ----------
-  // TODO: adjust the method name to the one that exists in DropDownServices
-  readonly specialties = toSignal(
-    this.dropdown
-      .maintenanceCompanySpecialties({ pageNumber: 1, pageSize: 100 })
-      .pipe(map((res) => res.data.data)),
-    { initialValue: [] as DropdownItem<number>[] },
-  );
+  readonly specialties = signal<DropdownItem<number>[]>([]);
+  readonly specialtyPage = signal(0);
+  readonly specialtyHasMore = signal(false);
+  readonly specialtyLoading = signal(false);
+  private specialtyRequest?: Subscription;
+  readonly specialtyFilterSearch = signal('');
+  private readonly specialtyFilterSearch$ = new Subject<string>();
  
   // ---------- Advanced filters ----------
   readonly filtersOpen = signal(false);
@@ -56,6 +57,44 @@ export class MaintenanceCompaniesComponent {
   readonly activeFiltersCount = computed(
     () => (this.appliedAddress() ? 1 : 0) + (this.appliedSpecialtyId() ? 1 : 0),
   );
+
+  constructor() {
+    this.loadSpecialties(true);
+    this.specialtyFilterSearch$
+      .pipe(debounceTime(250), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadSpecialties(true));
+  }
+
+  loadSpecialties(reset = false): void {
+    if ((!reset && this.specialtyLoading()) || (!reset && !this.specialtyHasMore())) return;
+    if (reset) {
+      this.specialtyRequest?.unsubscribe();
+      this.specialtyPage.set(0);
+      this.specialtyHasMore.set(false);
+      this.specialties.set([]);
+    }
+    const pageNumber = reset ? 1 : this.specialtyPage() + 1;
+    this.specialtyLoading.set(true);
+    this.specialtyRequest = this.dropdown.maintenanceCompanySpecialties({
+      pageNumber,
+      pageSize: 10,
+      search: this.specialtyFilterSearch().trim(),
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (response) => {
+        const page = response.data;
+        this.specialties.update((current) => reset ? page.data : [...current, ...page.data]);
+        this.specialtyPage.set(page.currentPage);
+        this.specialtyHasMore.set(page.hasNextPage);
+        this.specialtyLoading.set(false);
+      },
+      error: () => this.specialtyLoading.set(false),
+    });
+  }
+
+  onSpecialtyFilterSearch(term: string): void {
+    this.specialtyFilterSearch.set(term);
+    this.specialtyFilterSearch$.next(term.trim());
+  }
  
   /** resets itself to 1 whenever search, page size or filters change */
   readonly currentPage = linkedSignal<
@@ -145,6 +184,8 @@ export class MaintenanceCompaniesComponent {
     this.draftSpecialtyId.set(null);
     this.appliedAddress.set('');
     this.appliedSpecialtyId.set(null);
+    this.specialtyFilterSearch.set('');
+    this.specialtyFilterSearch$.next('');
   }
  
   // ---------- Add / Edit ----------
@@ -182,6 +223,7 @@ export class MaintenanceCompaniesComponent {
           this.saving.set(false); // before closeModal(), which ignores the call while saving
           this.closeModal();
           this.reload();
+          if (body.newSpecialtyName?.trim()) this.loadSpecialties(true);
         }),
         catchError((err) => {
           this.saveError.set(err?.error?.message ?? 'Could not save the company. Please try again.');

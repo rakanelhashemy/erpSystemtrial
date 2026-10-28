@@ -35,7 +35,8 @@ export interface MaintenanceCompanyRequest {
   name: string;
   address: string;
   notes: string;
-  specialtyId: number;
+  specialtyId: number | null;
+  newSpecialtyName?: string | null;
   contactPeople: ContactPersonRequest[];
 }
  
@@ -46,4 +47,3 @@ export interface MaintenanceCompanyFilterQuery {
   address: string;
   specialtyId: number | null;
 }
- 

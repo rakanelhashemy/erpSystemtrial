@@ -9,7 +9,7 @@
 
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
     <!-- Locations -->
-    <a routerLink="/app/locations" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+    <a *appHasPermission="'Permissions.Locations.View'" routerLink="/app/locations" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
       <span class="w-12 h-12 rounded-xl bg-ink text-brassLt flex items-center justify-center mb-4 group-hover:bg-brass group-hover:text-ink transition-colors duration-300">
         <svg class="w-5.5 h-5.5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
@@ -21,7 +21,7 @@
     </a>
 
     <!-- Groups -->
-    <a routerLink="/app/groups" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+    <a *appHasPermission="'Permissions.Groups.View'" routerLink="/app/groups" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
       <span class="w-12 h-12 rounded-xl bg-ink text-brassLt flex items-center justify-center mb-4 group-hover:bg-brass group-hover:text-ink transition-colors duration-300">
         <svg class="w-5.5 h-5.5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="3" width="7" height="7" rx="1.2"></rect>
@@ -35,7 +35,7 @@
     </a>
 
     <!-- Items -->
-    <a routerLink="/app/items" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+    <a *appHasPermission="'Permissions.Items.View'" routerLink="/app/items" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
       <span class="w-12 h-12 rounded-xl bg-ink text-brassLt flex items-center justify-center mb-4 group-hover:bg-brass group-hover:text-ink transition-colors duration-300">
         <svg class="w-5.5 h-5.5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 8 12 3 3 8l9 5 9-5Z"></path>
@@ -47,7 +47,7 @@
     </a>
 
     <!-- Departments -->
-    <a routerLink="/app/departments" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+    <a *appHasPermission="'Permissions.Departments.View'" routerLink="/app/departments" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
       <span class="w-12 h-12 rounded-xl bg-ink text-brassLt flex items-center justify-center mb-4 group-hover:bg-brass group-hover:text-ink transition-colors duration-300">
         <svg class="w-5.5 h-5.5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <path d="M4 21V9l8-5 8 5v12"></path>
@@ -59,7 +59,7 @@
     </a>
 
     <!-- Suppliers -->
-    <a routerLink="/app/suppliers" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+    <a *appHasPermission="'Permissions.Suppliers.View'" routerLink="/app/suppliers" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
       <span class="w-12 h-12 rounded-xl bg-ink text-brassLt flex items-center justify-center mb-4 group-hover:bg-brass group-hover:text-ink transition-colors duration-300">
         <svg class="w-5.5 h-5.5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 7h11v10H3zM14 10h4l3 3v4h-7z"></path>
@@ -72,7 +72,7 @@
     </a>
 
     <!-- Maintenance Companies -->
-    <a routerLink="/app/maintenance-companies" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+    <a *appHasPermission="'Permissions.MaintenanceCompanies.View'" routerLink="/app/maintenance-companies" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
       <span class="w-12 h-12 rounded-xl bg-ink text-brassLt flex items-center justify-center mb-4 group-hover:bg-brass group-hover:text-ink transition-colors duration-300">
         <svg class="w-5.5 h-5.5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <path d="m14.7 6.3 3-3a4.2 4.2 0 0 1-5.6 5.6L5 16a2.8 2.8 0 1 0 4 4l7.1-7.1a4.2 4.2 0 0 1 5.6-5.6l-3 3"></path>
@@ -84,7 +84,7 @@
     </a>
 
     <!-- Employees -->
-    <a routerLink="/app/employees" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+    <a *appHasPermission="'Permissions.Employees.View'" routerLink="/app/employees" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
       <span class="w-12 h-12 rounded-xl bg-ink text-brassLt flex items-center justify-center mb-4 group-hover:bg-brass group-hover:text-ink transition-colors duration-300">
         <svg class="w-5.5 h-5.5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="5" width="18" height="16" rx="2"></rect>
@@ -96,7 +96,7 @@
     </a>
 
     <!-- Check List -->
-    <a routerLink="/app/check-lists" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+    <a *appHasPermission="'Permissions.CheckLists.View'" routerLink="/app/check-lists" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
       <span class="w-12 h-12 rounded-xl bg-ink text-brassLt flex items-center justify-center mb-4 group-hover:bg-brass group-hover:text-ink transition-colors duration-300">
         <svg class="w-5.5 h-5.5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <rect x="4" y="3" width="16" height="18" rx="2"></rect>
@@ -108,7 +108,7 @@
     </a>
 
     <!-- Printing -->
-    <a routerLink="/app/printing" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+    <a *appHasPermission="'Permissions.Printing.View'" routerLink="/app/printing" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
       <span class="w-12 h-12 rounded-xl bg-ink text-brassLt flex items-center justify-center mb-4 group-hover:bg-brass group-hover:text-ink transition-colors duration-300">
         <svg class="w-5.5 h-5.5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <path d="M6 9V3h12v6"></path>
@@ -121,7 +121,7 @@
     </a>
 
     <!-- Transactions -->
-    <a routerLink="/app/transactions" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+    <a *appHasPermission="'Permissions.Transactions.View'" routerLink="/app/transactions" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
       <span class="w-12 h-12 rounded-xl bg-ink text-brassLt flex items-center justify-center mb-4 group-hover:bg-brass group-hover:text-ink transition-colors duration-300">
         <svg class="w-5.5 h-5.5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <path d="m17 2 4 4-4 4"></path>
@@ -135,7 +135,7 @@
     </a>
 
     <!-- Users -->
-    <a routerLink="/app/users" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+    <a *appHasPermission="'Permissions.Users.View'" routerLink="/app/users" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
       <span class="w-12 h-12 rounded-xl bg-ink text-brassLt flex items-center justify-center mb-4 group-hover:bg-brass group-hover:text-ink transition-colors duration-300">
         <svg class="w-5.5 h-5.5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -175,7 +175,7 @@
     </a>
 
     <!-- Reports -->
-    <a routerLink="/app/reports" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+    <a *appHasPermission="'Permissions.Reports.View'" routerLink="/app/reports" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
       <span class="absolute top-4 right-4 text-[9px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-brass/15 text-brassDk">Soon</span>
       <span class="w-12 h-12 rounded-xl bg-ink text-brassLt flex items-center justify-center mb-4 group-hover:bg-brass group-hover:text-ink transition-colors duration-300">
         <svg class="w-5.5 h-5.5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">

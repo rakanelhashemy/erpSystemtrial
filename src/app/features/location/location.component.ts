@@ -24,7 +24,7 @@ export class LocationComponent implements OnInit {
   private readonly businessContext = inject(BusinessContextService);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly businessPageSize = 20;
+  readonly businessPageSize = 10;
   readonly businessSearchDebounceMs = 300;
 
   // ---------- Business dropdown (infinite scroll + server-side search) ----------

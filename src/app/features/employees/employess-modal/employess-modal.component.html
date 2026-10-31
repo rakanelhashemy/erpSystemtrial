@@ -43,13 +43,11 @@
           </div>
 
           <div class="field">
-            <select id="emp-department" formControlName="departmentId">
-              <option [ngValue]="null">Select department</option>
-              @for (d of departments(); track d.id) {
-                <option [ngValue]="d.id">{{ d.title }}</option>
-              }
-            </select>
-            <label for="emp-department">Department</label>
+            <app-lazy-dropdown label="Department" placeholder="Select department" [options]="departments()"
+              [selectedValue]="form.controls.departmentId.value" [searchable]="true"
+              [searchTerm]="departmentSearch()" [loading]="departmentLoading()" [hasMore]="departmentHasMore()"
+              searchPlaceholder="Search departments" (searchChanged)="searchDepartments($event)"
+              (loadMore)="loadDepartments()" (selected)="selectDepartment($event)" />
             @if (form.controls.departmentId.touched && form.controls.departmentId.invalid) {
               <p class="text-xs text-danger mt-1">Department is required.</p>
             }

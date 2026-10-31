@@ -1,6 +1,7 @@
-import { Component, computed, DestroyRef, HostListener, inject, linkedSignal, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject, linkedSignal, signal } from '@angular/core';
 import { toSignal, toObservable, rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, map, distinctUntilChanged, tap, catchError, EMPTY, finalize, Subscription, Subject } from 'rxjs';
+import { toast } from 'ngx-sonner';
 import { DropDownServices, DropdownItem } from '../../core/services/drop-down-services';
 import { MaintenanceCompanyServices } from '../../core/services/maintenance-company-services';
 import { MaintenanceCompany, MaintenanceCompanyRequest } from '../../core/models/maintenance-company-modal';
@@ -9,6 +10,7 @@ import {  MaintenanceCompyModalComponent } from './maintenance-compnaey-modal/ma
 import { LazyDropdownComponent } from '../../shared/ui/lazy-dropdown/lazy-dropdown.component';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HasPermissionDirective, MaintenanceCompyModalComponent, LazyDropdownComponent],
   selector: 'app-maintenance-companies',
   styleUrl: './maintenance-companies.component.css',
@@ -220,6 +222,7 @@ export class MaintenanceCompaniesComponent {
     request$
       .pipe(
         tap(() => {
+          toast.success(edited ? 'Maintenance company updated successfully' : 'Maintenance company created successfully');
           this.saving.set(false); // before closeModal(), which ignores the call while saving
           this.closeModal();
           this.reload();
@@ -261,6 +264,7 @@ export class MaintenanceCompaniesComponent {
       .delete(target.id)
       .pipe(
         tap(() => {
+          toast.success('Maintenance company deleted successfully');
           this.closeDelete();
           if (this.items().length === 1 && this.currentPage() > 1) {
             this.currentPage.update((p) => p - 1);

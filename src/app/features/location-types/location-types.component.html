@@ -46,7 +46,7 @@
 
         <button *appHasPermission="'Permissions.LocationTypes.Add'" type="button" (click)="openAdd()" [disabled]="!businessId()"
                 class="flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2.5 rounded-lg bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-40">
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 5v14M5 12h14"></path>
           </svg>
           Add Type
@@ -54,9 +54,9 @@
       </div>
     </div>
 
-   
+
     <div class="p-4 sm:p-5 border-b border-inkText/8 flex justify-end">
-      <input type="search" placeholder="Search location types..." maxlength="100"
+      <input type="search" placeholder="Search location types..." maxlength="100" aria-label="Search location types"
              class="w-full sm:w-64 pl-3 pr-3 py-2.5 text-sm rounded-lg border border-inkText/15 focus:outline-none focus:ring-2 focus:ring-brass/30"
              [value]="search()" (input)="onSearch($any($event.target).value)" />
     </div>
@@ -85,18 +85,27 @@
                 <td class="px-5 py-3.5 text-fog">{{ selectedBusiness()?.name }}</td>
                 <td class="px-5 py-3.5">
                   <div class="flex items-center justify-end gap-1">
+                    <!-- View details -->
+                    <button type="button" class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
+                            title="View details" [attr.aria-label]="'View ' + item.name"
+                            (click)="openDetails(item)">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    </button>
                     <button *appHasPermission="'Permissions.LocationTypes.Edit'" type="button" class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
                             title="Edit type" [attr.aria-label]="'Edit ' + item.name"
                             (click)="openEdit(item)">
-                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M12 20h9"></path>
                         <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
                       </svg>
                     </button>
                     <button *appHasPermission="'Permissions.LocationTypes.Delete'" type="button" class="p-1.5 rounded-lg hover:bg-dangerBg text-danger"
                             title="Delete type" [attr.aria-label]="'Delete ' + item.name"
-                            (click)="remove(item)">
-                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            (click)="openDelete(item)">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M3 6h18"></path>
                         <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                         <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
@@ -132,6 +141,7 @@
     </div>
   </div>
 
+  <!-- ========== Add / Edit modal ========== -->
   @if (modalOpen()) {
     <app-location-type-modal
       [businessId]="businessId()"
@@ -139,5 +149,144 @@
       [locationType]="editing()"
       (saved)="onSaved()"
       (cancelled)="closeModal()" />
+  }
+
+  <!-- ========== Details modal ========== -->
+  @if (detailsOpen()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="closeDetails()"></div>
+
+      <div
+        class="relative bg-paper w-full max-w-md rounded-2xl shadow-soft"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="location-type-details-title"
+      >
+        <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
+          <p id="location-type-details-title" class="font-display text-xl text-inkText">Location Type Details</p>
+          <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog" aria-label="Close" (click)="closeDetails()">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="px-6 py-6">
+          @if (detailsLoading()) {
+            <p class="text-sm text-fog text-center py-6">Loading…</p>
+          } @else if (detailsError()) {
+            <div class="text-sm text-danger text-center py-6">
+              {{ detailsError() }}
+              <button type="button" class="underline ms-2" (click)="retryDetails()">Retry</button>
+            </div>
+          } @else if (detailsItem(); as t) {
+            <dl class="space-y-4 text-sm">
+              <div class="flex items-start justify-between gap-4">
+                <dt class="text-fog">Name</dt>
+                <dd class="font-semibold text-inkText text-right wrap-break-word">{{ t.name }}</dd>
+              </div>
+         
+              <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
+                <dt class="text-fog">Business</dt>
+                <dd class="text-inkText text-right">{{ t.businessName || selectedBusiness()?.name || '—' }}</dd>
+              </div>
+              <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
+                <dt class="text-fog">Created by</dt>
+                <dd class="text-inkText text-right">{{ t.createdByName || '—' }}</dd>
+              </div>
+              <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
+                <dt class="text-fog">Updated by</dt>
+                <dd class="text-inkText text-right">{{ t.updatedByName || '—' }}</dd>
+              </div>
+            </dl>
+          }
+
+          <div class="flex justify-end pt-5 mt-5 border-t border-inkText/8">
+            <button
+              type="button"
+              class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft"
+              (click)="closeDetails()"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========== Delete modal ========== -->
+  @if (deleteTarget(); as target) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="cancelDelete()"></div>
+
+      <div
+        class="relative bg-paper w-full max-w-md rounded-2xl shadow-soft"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="delete-location-type-title"
+        aria-describedby="delete-location-type-desc"
+      >
+        <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
+          <p id="delete-location-type-title" class="font-display text-xl text-inkText">Delete Location Type</p>
+          <button
+            type="button"
+            class="p-2 rounded-lg hover:bg-ink/5 text-fog disabled:opacity-40"
+            aria-label="Close"
+            [disabled]="deleting()"
+            (click)="cancelDelete()"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="px-6 py-6 space-y-4">
+          <div class="flex items-start gap-3">
+            <span class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-dangerBg text-danger">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 6h18" />
+                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+              </svg>
+            </span>
+            <p id="delete-location-type-desc" class="text-sm text-inkText">
+              Are you sure you want to delete
+              <span class="font-semibold">{{ target.name }}</span>?
+              This action cannot be undone.
+            </p>
+          </div>
+
+          @if (deleteError()) {
+            <p class="text-xs text-danger bg-dangerBg rounded-lg px-3 py-2" role="alert">
+              {{ deleteError() }}
+            </p>
+          }
+
+          <div class="flex items-center gap-3 pt-3 border-t border-inkText/8 justify-end">
+            <button
+              type="button"
+              class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5 disabled:opacity-40"
+              [disabled]="deleting()"
+              (click)="cancelDelete()"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-danger text-white hover:opacity-90 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed"
+              [disabled]="deleting()"
+              (click)="confirmDelete()"
+            >
+              {{ deleting() ? 'Deleting…' : 'Delete type' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   }
 </section>

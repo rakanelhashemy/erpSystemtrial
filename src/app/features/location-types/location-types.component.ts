@@ -1,6 +1,6 @@
-import { Component, computed, effect, ElementRef, inject, input, linkedSignal, output, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, HostListener, inject, OnInit, signal, viewChild } from '@angular/core';
 import { LocationTypeService } from '../../core/services/location-type-service';
-import { LocationType } from '../../core/models/location-type-model';
+import { LocationType, LocationTypeDetails } from '../../core/models/location-type-model';
 import { FormsModule } from '@angular/forms';
 
 import { LocationTypeModalComponent } from './location-type-modal/location-type-modal.component';
@@ -12,21 +12,22 @@ import { toast } from 'ngx-sonner';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, LocationTypeModalComponent, HasPermissionDirective],
   selector: 'app-location-types',
   styleUrl: './location-types.component.css',
   templateUrl: './location-types.component.html',
 })
-export class LocationTypesComponent {
-    private service = inject(LocationTypeService);
+export class LocationTypesComponent implements OnInit {
+  private service = inject(LocationTypeService);
   private dropdownService = inject(DropDownServices);
   private businessContext = inject(BusinessContextService);
- 
+
   readonly pageSize = 10;
   readonly businessPageSize = 10;
   readonly searchDebounceMs = 400;
   readonly businessSearchDebounceMs = 300;
- 
+
   private tableSearch$ = new Subject<string>();
   private businessSearch$ = new Subject<string>();
   private lastTableSearch = '';
@@ -34,11 +35,9 @@ export class LocationTypesComponent {
   private loadSub?: Subscription;
   private businessSub?: Subscription;
   private businessCache: { items: DropdownItem[]; hasNext: boolean; page: number } | null = null;
- 
- 
+
   private businessSentinel = viewChild<ElementRef<HTMLElement>>('businessSentinel');
- 
- 
+
   businesses = signal<DropdownItem[]>([]);
   selectedBusiness = signal<DropdownItem | null>(null);
   businessSearch = signal('');
@@ -46,11 +45,11 @@ export class LocationTypesComponent {
   businessHasNext = signal(false);
   businessLoading = signal(false);
   dropdownOpen = signal(false);
- 
+
   businessId = signal('');
   search = signal('');
   pageNumber = signal(1);
- 
+
   items = signal<LocationType[]>([]);
   totalCount = signal(0);
   totalPages = signal(1);
@@ -58,13 +57,27 @@ export class LocationTypesComponent {
   hasNextPage = signal(false);
   loading = signal(false);
   error = signal<string | null>(null);
- 
+
+  // ---------- Add / Edit modal ----------
   modalOpen = signal(false);
   editing = signal<LocationType | null>(null);
- 
+
+  // ---------- Delete modal ----------
+  readonly deleteTarget = signal<LocationType | null>(null);
+  readonly deleting = signal(false);
+  readonly deleteError = signal<string | null>(null);
+
+  // ---------- Details modal ----------
+  readonly detailsOpen = signal(false);
+  readonly detailsItem = signal<LocationTypeDetails | null>(null);
+  readonly detailsLoading = signal(false);
+  readonly detailsError = signal<string | null>(null);
+  private detailsRequestId = 0;
+  private lastDetailsId: string | null = null;
+
   from = computed(() => (this.totalCount() === 0 ? 0 : (this.pageNumber() - 1) * this.pageSize + 1));
   to = computed(() => Math.min(this.pageNumber() * this.pageSize, this.totalCount()));
- 
+
   constructor() {
     effect(() => {
       const selection = this.businessContext.selectedBusiness();
@@ -89,7 +102,7 @@ export class LocationTypesComponent {
       observer.observe(el);
       onCleanup(() => observer.disconnect());
     });
- 
+
     // Table search: wait until the user stops typing, skip if nothing really changed
     this.tableSearch$
       .pipe(debounceTime(this.searchDebounceMs), takeUntilDestroyed())
@@ -100,7 +113,7 @@ export class LocationTypesComponent {
         this.pageNumber.set(1);
         this.load();
       });
- 
+
     // Business dropdown search
     this.businessSearch$
       .pipe(debounceTime(this.businessSearchDebounceMs), takeUntilDestroyed())
@@ -109,21 +122,21 @@ export class LocationTypesComponent {
         this.loadBusinesses(true);
       });
   }
- 
+
   ngOnInit(): void {
     this.loadBusinesses(true);
   }
- 
+
   // ---------- Business dropdown ----------
- 
+
   loadBusinesses(reset = false): void {
     const page = reset ? 1 : this.businessPage() + 1;
     const term = this.businessSearch().trim();
     if (reset) this.lastBusinessSearch = term;
- 
+
     this.businessSub?.unsubscribe();
     this.businessLoading.set(true);
- 
+
     this.businessSub = this.dropdownService
       .businesses({
         pageNumber: page,
@@ -137,12 +150,12 @@ export class LocationTypesComponent {
           this.businessPage.set(p.currentPage);
           this.businessHasNext.set(p.hasNextPage);
           this.businessLoading.set(false);
- 
+
           // keep the first unfiltered page so closing a search needs no extra request
           if (reset && !term) {
             this.businessCache = { items: p.data, hasNext: p.hasNextPage, page: p.currentPage };
           }
- 
+
           const sharedSelection = this.businessContext.selectedBusiness();
           if (sharedSelection) {
             const selected = p.data.find((item) => item.id === sharedSelection.id);
@@ -155,24 +168,23 @@ export class LocationTypesComponent {
         },
       });
   }
- 
+
   onBusinessSearch(term: string): void {
     this.businessSearch.set(term);
     this.businessSearch$.next(term);
   }
- 
+
   openBusinessDropdown(): void {
     this.dropdownOpen.set(true);
   }
- 
+
   closeBusinessDropdown(): void {
     this.dropdownOpen.set(false);
     if (!this.businessSearch()) return;
- 
+
     this.businessSearch.set('');
     const cache = this.businessCache;
     if (cache) {
-    
       this.businessSub?.unsubscribe();
       this.businessLoading.set(false);
       this.lastBusinessSearch = '';
@@ -183,21 +195,21 @@ export class LocationTypesComponent {
       this.loadBusinesses(true);
     }
   }
- 
+
   selectBusiness(b: DropdownItem): void {
     this.businessContext.select(b);
     this.closeBusinessDropdown();
   }
- 
+
   // ---------- Location types ----------
- 
+
   load(): void {
     const businessId = this.businessId();
     if (!businessId) return;
- 
+
     this.loading.set(true);
     this.error.set(null);
- 
+
     this.loadSub?.unsubscribe(); // cancel the previous request
     this.loadSub = this.service
       .list({
@@ -222,65 +234,138 @@ export class LocationTypesComponent {
         },
       });
   }
- 
+
   onBusinessChange(id: string): void {
     const business = this.businesses().find((item) => item.id === id);
     if (business) this.businessContext.select(business);
   }
- 
+
   onSearch(term: string): void {
     this.search.set(term);
     this.tableSearch$.next(term);
   }
- 
+
   prev(): void {
     if (!this.hasPreviousPage()) return;
     this.pageNumber.update((p) => p - 1);
     this.load();
   }
- 
+
   next(): void {
     if (!this.hasNextPage()) return;
     this.pageNumber.update((p) => p + 1);
     this.load();
   }
- 
+
+  // ---------- Add / Edit ----------
   openAdd(): void {
     this.editing.set(null);
     this.modalOpen.set(true);
   }
- 
+
   openEdit(item: LocationType): void {
     this.editing.set(item);
     this.modalOpen.set(true);
   }
- 
+
   closeModal(): void {
     this.modalOpen.set(false);
     this.editing.set(null);
   }
- 
+
   onSaved(): void {
     this.closeModal();
     this.load();
   }
- 
-  remove(item: LocationType): void {
-    if (!confirm(`Delete "${item.name}"?`)) return;
- 
-    this.service.delete(item.id).subscribe({
+
+  // ---------- Delete ----------
+  openDelete(item: LocationType): void {
+    this.deleteTarget.set(item);
+    this.deleteError.set(null);
+  }
+
+  closeDelete(): void {
+    this.deleteTarget.set(null);
+    this.deleteError.set(null);
+  }
+
+  /** ignores cancel while the request is running */
+  cancelDelete(): void {
+    if (!this.deleting()) this.closeDelete();
+  }
+
+  confirmDelete(): void {
+    const target = this.deleteTarget();
+    if (!target || this.deleting()) return;
+
+    this.deleting.set(true);
+    this.deleteError.set(null);
+
+    this.service.delete(target.id).subscribe({
       next: () => {
+        this.deleting.set(false);
+        this.closeDelete();
         toast.success('Location type deleted successfully');
-        // لو ده كان آخر عنصر في الصفحة ارجع صفحة
+        // if it was the last item on the page, go back one page
         if (this.items().length === 1 && this.pageNumber() > 1) {
           this.pageNumber.update((p) => p - 1);
         }
         this.load();
       },
-      error: () => {
-        this.error.set('Could not delete the location type.');
-        toast.error('Could not delete location type');
+      error: (err) => {
+        this.deleting.set(false);
+        this.deleteError.set(
+          err?.error?.message ?? 'Could not delete this location type. It may be linked to locations.',
+        );
       },
     });
+  }
+
+  // ---------- Details ----------
+  openDetails(item: LocationType): void {
+    this.detailsItem.set(null);
+    this.detailsOpen.set(true);
+    this.fetchDetails(item.id);
+  }
+
+  fetchDetails(id: string): void {
+    this.lastDetailsId = id;
+    const requestId = ++this.detailsRequestId;
+    this.detailsLoading.set(true);
+    this.detailsError.set(null);
+
+    this.service.getById(id).subscribe({
+      next: (res) => {
+          console.log('details response', res.data);
+        if (requestId !== this.detailsRequestId) return; // ignore stale response
+        this.detailsItem.set(res.data ?? null);
+        if (!res.data) this.detailsError.set('Location type not found.');
+        this.detailsLoading.set(false);
+      },
+      error: (err) => {
+        if (requestId !== this.detailsRequestId) return;
+        this.detailsError.set(err?.error?.message ?? 'Could not load location type details.');
+        this.detailsLoading.set(false);
+      },
+    });
+  }
+
+  retryDetails(): void {
+    if (this.lastDetailsId) this.fetchDetails(this.lastDetailsId);
+  }
+
+  closeDetails(): void {
+    this.detailsRequestId++; // cancels any pending response
+    this.detailsOpen.set(false);
+    this.detailsItem.set(null);
+    this.detailsError.set(null);
+    this.detailsLoading.set(false);
+  }
+
+  // ---------- Escape ----------
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.detailsOpen()) this.closeDetails();
+    else if (this.deleteTarget()) this.cancelDelete();
   }
 }

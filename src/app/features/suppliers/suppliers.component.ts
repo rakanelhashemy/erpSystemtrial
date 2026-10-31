@@ -1,6 +1,7 @@
-import { Component, computed, DestroyRef, HostListener, inject, linkedSignal, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject, linkedSignal, signal } from '@angular/core';
 import { toSignal, toObservable, rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, map, distinctUntilChanged, tap, catchError, EMPTY, finalize, Subject, Subscription } from 'rxjs';
+import { toast } from 'ngx-sonner';
 import { Supplier, SupplierRequest } from '../../core/models/supplires-Modal';
 import { Suppliers } from '../../core/services/suppliers-service';
 import { DropdownItem, DropDownServices } from '../../core/services/drop-down-services';
@@ -9,6 +10,7 @@ import { SuppliersModalComponent } from './suppliers-modal/suppliers-modal.compo
 import { LazyDropdownComponent } from '../../shared/ui/lazy-dropdown/lazy-dropdown.component';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HasPermissionDirective, SuppliersModalComponent, LazyDropdownComponent],
   selector: 'app-suppliers',
   styleUrl: './suppliers.component.css',
@@ -222,6 +224,7 @@ export class SuppliersComponent {
     request$
       .pipe(
         tap(() => {
+          toast.success(edited ? 'Supplier updated successfully' : 'Supplier created successfully');
           this.saving.set(false); // before closeModal(), which ignores the call while saving
           this.closeModal();
           this.reload();
@@ -280,6 +283,7 @@ export class SuppliersComponent {
       .delete(target.id)
       .pipe(
         tap(() => {
+          toast.success('Supplier deleted successfully');
           this.closeDelete();
           if (this.items().length === 1 && this.currentPage() > 1) {
             this.currentPage.update((p) => p - 1);

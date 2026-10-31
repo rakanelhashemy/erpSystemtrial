@@ -60,66 +60,111 @@
           </div>
 
           <div class="field sm:col-span-2">
-            <input id="mc-notes" formControlName="notes" placeholder=" " />
+            <textarea id="mc-notes" rows="2" formControlName="notes" placeholder=" "></textarea>
             <label for="mc-notes">Notes</label>
           </div>
         </div>
 
         <!-- Contact people -->
         <div class="pt-4 border-t border-inkText/8">
-          <div class="flex items-center justify-between mb-3">
-            <p class="text-sm font-semibold text-inkText">Contact People</p>
-            <button type="button"
-                    class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg border border-brass/60 text-brassDk hover:bg-brass/10"
-                    (click)="addContact()">
-              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="2" stroke-linecap="round" aria-hidden="true">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-              Add contact
-            </button>
+          <p class="text-xs font-semibold uppercase tracking-wider text-brassDk mb-3">Contacts</p>
+
+          <!-- Draft row (Enter adds the contact instead of submitting the company) -->
+          <div [formGroup]="contactDraft" class="grid sm:grid-cols-2 gap-4"
+               (keydown.enter)="$event.preventDefault(); addContact()">
+            <div class="field">
+              <input id="cd-name" formControlName="name" placeholder=" " />
+              <label for="cd-name">Contact Name</label>
+              @if (contactDraft.controls.name.touched && contactDraft.controls.name.invalid) {
+                <p class="text-xs text-danger mt-1">Name is required.</p>
+              }
+            </div>
+            <div class="field">
+              <input id="cd-pos" formControlName="position" placeholder=" " />
+              <label for="cd-pos">Position</label>
+            </div>
+            <div class="field">
+              <input id="cd-phone" formControlName="phone" placeholder=" " />
+              <label for="cd-phone">Phone</label>
+            </div>
+            <div class="field">
+              <input id="cd-email" type="email" formControlName="email" placeholder=" " />
+              <label for="cd-email">Email</label>
+              @if (contactDraft.controls.email.touched && contactDraft.controls.email.invalid) {
+                <p class="text-xs text-danger mt-1">Invalid email.</p>
+              }
+            </div>
           </div>
 
-          <div formArrayName="contactPeople" class="space-y-3">
-            @for (c of contacts.controls; track c; let i = $index) {
-              <div [formGroupName]="i" class="border border-inkText/8 rounded-xl p-3 sm:p-4">
-                <div class="grid sm:grid-cols-2 gap-4">
-                  <div class="field">
-                    <input [id]="'c-name-' + i" formControlName="name" placeholder=" " />
-                    <label [for]="'c-name-' + i">Name</label>
-                    @if (c.controls.name.touched && c.controls.name.invalid) {
-                      <p class="text-xs text-danger mt-1">Name is required.</p>
-                    }
-                  </div>
-                  <div class="field">
-                    <input [id]="'c-pos-' + i" formControlName="position" placeholder=" " />
-                    <label [for]="'c-pos-' + i">Position</label>
-                  </div>
-                  <div class="field">
-                    <input [id]="'c-phone-' + i" formControlName="phone" placeholder=" " />
-                    <label [for]="'c-phone-' + i">Phone</label>
-                  </div>
-                  <div class="field">
-                    <input [id]="'c-email-' + i" type="email" formControlName="email" placeholder=" " />
-                    <label [for]="'c-email-' + i">Email</label>
-                    @if (c.controls.email.touched && c.controls.email.invalid) {
-                      <p class="text-xs text-danger mt-1">Invalid email.</p>
-                    }
-                  </div>
-                </div>
-
-                @if (contacts.length > 1) {
-                  <div class="flex justify-end mt-3">
-                    <button type="button"
-                            class="text-xs font-semibold text-danger hover:underline"
-                            (click)="removeContact(i)">
-                      Remove
-                    </button>
-                  </div>
-                }
-              </div>
+          <div class="mt-4 flex items-center gap-3">
+            <button type="button"
+                    class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-brass text-white hover:bg-brassDk"
+                    (click)="addContact()">
+              {{ editingIndex() !== null ? 'Update Contact' : '+ Add Contact' }}
+            </button>
+            @if (editingIndex() !== null) {
+              <button type="button" class="text-xs font-semibold text-fog hover:underline"
+                      (click)="cancelEdit()">
+                Cancel edit
+              </button>
             }
           </div>
+
+          <!-- Contacts table -->
+          @if (contacts.length) {
+            <div class="mt-4 rounded-xl overflow-x-auto border border-inkText/8">
+              <table class="w-full text-sm table-fixed">
+                <colgroup>
+                  <col class="w-[20%]" />
+                  <col class="w-[19%]" />
+                  <col class="w-[17%]" />
+                  <col class="w-[26%]" />
+                  <col class="w-[18%]" />
+                </colgroup>
+                <thead class="bg-ivory text-xs uppercase text-fog">
+                  <tr>
+                    <th class="text-start font-semibold px-3 py-3">Name</th>
+                    <th class="text-start font-semibold px-3 py-3">Position</th>
+                    <th class="text-start font-semibold px-3 py-3">Phone</th>
+                    <th class="text-start font-semibold px-3 py-3">Email</th>
+                    <th class="text-end font-semibold px-3 py-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of contacts.controls; track c; let i = $index) {
+                    <tr class="border-t border-inkText/8" [class.bg-brass/10]="editingIndex() === i">
+                      <td class="px-3 py-3 font-semibold text-inkText wrap-break-word">{{ c.controls.name.value }}</td>
+                      <td class="px-3 py-3 text-fog wrap-break-word">{{ c.controls.position.value }}</td>
+                      <td class="px-3 py-3 text-fog wrap-break-word">{{ c.controls.phone.value }}</td>
+                      <td class="px-3 py-3 text-fog break-all">{{ c.controls.email.value }}</td>
+                      <td class="px-3 py-3 text-end whitespace-nowrap">
+                        <button type="button"
+                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-brassDk hover:bg-brass/15 transition-colors"
+                                aria-label="Edit contact" title="Edit" (click)="editContact(i)">
+                          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 20h9" />
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                          </svg>
+                        </button>
+                        <button type="button"
+                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-danger hover:bg-dangerBg transition-colors"
+                                aria-label="Remove contact" title="Remove" (click)="removeContact(i)">
+                          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M3 6h18" />
+                            <path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" />
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                            <path d="M10 11v6M14 11v6" />
+                          </svg>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
         </div>
 
         @if (error()) {
@@ -136,7 +181,7 @@
           <button type="submit"
                   class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed"
                   [disabled]="saving()">
-            {{ saving() ? 'Saving…' : (isEdit() ? 'Save changes' : 'Create company') }}
+            {{ saving() ? 'Saving…' : (isEdit() ? 'Save changes' : 'Save Company') }}
           </button>
         </div>
       </form>

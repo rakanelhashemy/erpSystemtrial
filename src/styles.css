@@ -38,6 +38,16 @@ html.no-scroll body {
   overflow: hidden;
   height: 100%;
 }
+/* Keep wheel/touch scrolling inside an open modal instead of chaining to the page. */
+html:has([aria-modal="true"]),
+html:has([aria-modal="true"]) body {
+  overflow: hidden;
+  height: 100%;
+}
+[aria-modal="true"],
+[aria-modal="true"] * {
+  overscroll-behavior: contain;
+}
 body {
   font-family: "Manrope", sans-serif;
   background: #faf7f1;
@@ -137,7 +147,8 @@ body {
   position: relative;
 }
 .field input,
-.field select {
+.field select,
+.field textarea {
   width: 100%;
   padding: 1.25rem 1rem 0.5rem 1rem;
   border-radius: 0.65rem;
@@ -151,8 +162,14 @@ body {
     box-shadow 0.15s ease;
   appearance: none;
 }
+.field textarea {
+  min-height: 3.25rem;
+  line-height: 1.35;
+  resize: vertical;
+}
 .field input:focus,
-.field select:focus {
+.field select:focus,
+.field textarea:focus {
   border-color: #b6894a;
   box-shadow: 0 0 0 3px rgba(182, 137, 74, 0.18);
 }
@@ -180,7 +197,13 @@ body {
 .field.has-error input {
   border-color: #ac4a32;
 }
+.field.has-error textarea {
+  border-color: #ac4a32;
+}
 .field.has-error input:focus {
+  box-shadow: 0 0 0 3px rgba(172, 74, 50, 0.16);
+}
+.field.has-error textarea:focus {
   box-shadow: 0 0 0 3px rgba(172, 74, 50, 0.16);
 }
 .field .chevron {

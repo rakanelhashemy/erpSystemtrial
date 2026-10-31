@@ -1,4 +1,4 @@
-import { Component, computed, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, HostListener, inject, OnInit, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, Subject, Subscription } from 'rxjs';
 import { toast } from 'ngx-sonner';
@@ -27,12 +27,13 @@ const EMPTY_FILTERS: AppliedFilters = {
 };
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HasPermissionDirective, EmployessModalComponent],
   selector: 'app-employees',
   styleUrl: './employees.component.css',
   templateUrl: './employees.component.html',
 })
-export class EmployeesComponent {
+export class EmployeesComponent implements OnInit {
   private api = inject(EmployeesServices);
   private dropdown = inject(DropDownServices);
 
@@ -64,7 +65,6 @@ export class EmployeesComponent {
   hasNextPage = computed(() => this.pageNumber() < this.totalPages());
 
   // Lookups (used by the modal + details)
-  departments = signal<DropdownItem<string>[]>([]);
   genders = signal<DropdownItem<number>[]>([]);
 
   genderLabel(id: number | null | undefined): string {
@@ -107,9 +107,14 @@ export class EmployeesComponent {
   saving = signal(false);
   saveError = signal<string | null>(null);
 
+  // Delete modal
+  deleteTarget = signal<Employee | null>(null);
+  deleting = signal(false);
+  deleteError = signal<string | null>(null);
+
   // Details modal
   detailsEmployee = signal<Employee | null>(null);
-detailsExtra = signal<EmployeeDetail | null>(null);
+  detailsExtra = signal<EmployeeDetail | null>(null);
   detailsLoading = signal(false);
 
   constructor() {
@@ -145,10 +150,6 @@ detailsExtra = signal<EmployeeDetail | null>(null);
   ngOnInit(): void {
     this.load();
     this.loadDepartments(true);
-
-    this.dropdown
-      .departments({ pageNumber: 1, pageSize: 100 })
-      .subscribe((res) => this.departments.set(res.data.data));
 
     this.dropdown.staticLookups().subscribe((res) => this.genders.set(res.genders));
   }
@@ -314,6 +315,7 @@ detailsExtra = signal<EmployeeDetail | null>(null);
     request$.subscribe({
       next: () => {
         this.saving.set(false);
+        toast.success(edited ? 'Employee updated successfully' : 'Employee created successfully');
         this.closeModal();
         this.load();
       },
@@ -326,19 +328,44 @@ detailsExtra = signal<EmployeeDetail | null>(null);
 
   // ---------- Delete ----------
 
-  remove(employee: Employee): void {
-    if (!confirm(`Delete "${employee.name}"?`)) return;
+  openDelete(employee: Employee): void {
+    this.deleteTarget.set(employee);
+    this.deleteError.set(null);
+  }
 
-    this.api.delete(employee.id).subscribe({
+  closeDelete(): void {
+    this.deleteTarget.set(null);
+    this.deleteError.set(null);
+  }
+
+  /** ignores cancel while the request is running */
+  cancelDelete(): void {
+    if (!this.deleting()) this.closeDelete();
+  }
+
+  confirmDelete(): void {
+    const target = this.deleteTarget();
+    if (!target || this.deleting()) return;
+
+    this.deleting.set(true);
+    this.deleteError.set(null);
+
+    this.api.delete(target.id).subscribe({
       next: () => {
+        this.deleting.set(false);
+        this.closeDelete();
         toast.success('Employee deleted successfully');
+        // if it was the last item on the page, go back one page
         if (this.items().length === 1 && this.pageNumber() > 1) {
           this.pageNumber.update((p) => p - 1);
         }
         this.load();
       },
-      error: () => {
-        toast.error('Could not delete employee');
+      error: (err) => {
+        this.deleting.set(false);
+        this.deleteError.set(
+          err?.error?.message ?? 'Could not delete this employee. It may be linked to other records.',
+        );
       },
     });
   }
@@ -362,5 +389,13 @@ detailsExtra = signal<EmployeeDetail | null>(null);
   closeDetails(): void {
     this.detailsEmployee.set(null);
     this.detailsExtra.set(null);
+  }
+
+  // ---------- Escape ----------
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.deleteTarget()) this.cancelDelete();
+    else if (this.detailsEmployee()) this.closeDetails();
   }
 }

@@ -15,15 +15,15 @@ import { LazyDropdownComponent } from '../../../shared/ui/lazy-dropdown/lazy-dro
   templateUrl: './maintenance-compnaey-modal.component.html',
 })
 export class MaintenanceCompyModalComponent {
- private readonly fb = inject(NonNullableFormBuilder);
+  private readonly fb = inject(NonNullableFormBuilder);
   private readonly api = inject(MaintenanceCompanyServices);
   private readonly dropdown = inject(DropDownServices);
   private readonly destroyRef = inject(DestroyRef);
- 
+
   readonly company = input<MaintenanceCompany | null>(null);
   readonly saving = input(false);
   readonly error = input<string | null>(null);
- 
+
   readonly saved = output<MaintenanceCompanyRequest>();
   readonly cancelled = output<void>();
 
@@ -36,42 +36,59 @@ export class MaintenanceCompyModalComponent {
   readonly specialtySearchPending = signal(false);
   private readonly specialtySearch$ = new Subject<string>();
   private specialtySub?: Subscription;
- 
+
   readonly isEdit = computed(() => !!this.company());
- 
+
   readonly detailsResource = rxResource({
     params: () => this.company()?.id,
     stream: ({ params }) => this.api.getById(params).pipe(map((res) => res.data)),
   });
- 
+
   readonly ready = computed(() => !this.isEdit() || this.detailsResource.hasValue());
- 
+
   readonly form = this.fb.group({
     name: this.fb.control('', [Validators.required, Validators.maxLength(150)]),
     address: this.fb.control(''),
     notes: this.fb.control(''),
     specialtyId: this.fb.control<number | null>(null),
     specialtyName: this.fb.control(''),
-    contactPeople: this.fb.array([contactGroup(this.fb)]),
+    // the table renders this array; it starts empty
+    contactPeople: this.fb.array<ReturnType<typeof contactGroup>>([]),
   });
- 
+
+  // temporary row used to type a new contact before pressing "Add Contact"
+  readonly contactDraft = this.fb.group({
+    name: this.fb.control('', [Validators.required, Validators.maxLength(100)]),
+    position: this.fb.control(''),
+    phone: this.fb.control(''),
+    email: this.fb.control('', [Validators.email]),
+  });
+
+  // index of the contact currently being edited in the draft row (null = adding a new one)
+  readonly editingIndex = signal<number | null>(null);
+
+  private patched = false;
+
   get contacts() {
     return this.form.controls.contactPeople;
   }
- 
+
   constructor() {
     this.loadSpecialties(true);
     this.specialtySearch$
       .pipe(debounceTime(250), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.loadSpecialties(true));
 
-    // edit mode: fill the form once the details arrive
+    // edit mode: fill the form once the details arrive (only once)
     effect(() => {
       const detail = this.detailsResource.hasValue() ? this.detailsResource.value() : null;
-      if (detail) untracked(() => this.patch(detail));
+      if (detail && !this.patched) {
+        this.patched = true;
+        untracked(() => this.patch(detail));
+      }
     });
   }
- 
+
   private patch(d: MaintenanceCompanyDetail): void {
     this.form.patchValue({
       name: d.name,
@@ -84,12 +101,57 @@ export class MaintenanceCompyModalComponent {
       this.specialties.update((specialties) => [...specialties, { id: d.specialtyId, name: d.specialtyName! }]);
     }
     this.contacts.clear();
-    d.contactPeople.forEach((c) => this.contacts.push(contactGroup(this.fb, c)));
-    if (!d.contactPeople.length) this.addContact();
+    this.editingIndex.set(null);
+    (d.contactPeople ?? []).forEach((c) => this.contacts.push(contactGroup(this.fb, c)));
   }
- 
+
   addContact(): void {
-    this.contacts.push(contactGroup(this.fb));
+    const draft = this.contactDraft;
+    if (draft.invalid) {
+      draft.markAllAsTouched();
+      return;
+    }
+    const v = draft.getRawValue();
+    const value = {
+      name: (v.name ?? '').trim(),
+      position: (v.position ?? '').trim(),
+      phone: (v.phone ?? '').trim(),
+      email: (v.email ?? '').trim(),
+    };
+
+    const editing = this.editingIndex();
+    if (editing !== null) {
+      // update the existing contact (its id is preserved)
+      this.contacts.at(editing).patchValue(value);
+    } else {
+      this.contacts.push(contactGroup(this.fb, value));
+    }
+    this.cancelEdit();
+  }
+
+  editContact(index: number): void {
+    const c = this.contacts.at(index).getRawValue();
+    // the API may return null for empty fields, so fall back to ''
+    this.contactDraft.reset({
+      name: c.name ?? '',
+      position: c.position ?? '',
+      phone: c.phone ?? '',
+      email: c.email ?? '',
+    });
+    this.contactDraft.markAsUntouched();
+    this.editingIndex.set(index);
+  }
+
+  cancelEdit(): void {
+    this.contactDraft.reset({ name: '', position: '', phone: '', email: '' });
+    this.editingIndex.set(null);
+  }
+
+  removeContact(index: number): void {
+    const editing = this.editingIndex();
+    if (editing === index) this.cancelEdit();
+    else if (editing !== null && index < editing) this.editingIndex.set(editing - 1);
+    this.contacts.removeAt(index);
   }
 
   onSpecialtySearch(term: string): void {
@@ -132,7 +194,8 @@ export class MaintenanceCompyModalComponent {
     const pageNumber = reset ? 1 : this.specialtyPage() + 1;
     const search = this.specialtySearch().trim();
     this.specialtyLoading.set(true);
-    this.specialtySub = this.dropdown.maintenanceCompanySpecialties({ pageNumber, pageSize: 10, search })
+    this.specialtySub = this.dropdown
+      .maintenanceCompanySpecialties({ pageNumber, pageSize: 10, search })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
@@ -158,13 +221,20 @@ export class MaintenanceCompyModalComponent {
         },
       });
   }
- 
-  removeContact(index: number): void {
-    this.contacts.removeAt(index);
-  }
- 
+
   submit(): void {
     if (this.saving() || !this.ready()) return;
+
+    // if the user typed a contact but forgot to press "Add Contact", add it automatically
+    const d = this.contactDraft.getRawValue();
+    if (d.name.trim() || d.position.trim() || d.phone.trim() || d.email.trim()) {
+      if (this.contactDraft.invalid) {
+        this.contactDraft.markAllAsTouched();
+        return;
+      }
+      this.addContact();
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -174,7 +244,7 @@ export class MaintenanceCompyModalComponent {
       this.form.controls.specialtyId.markAsTouched();
       return;
     }
- 
+
     const v = this.form.getRawValue();
     this.saved.emit({
       name: v.name.trim(),
@@ -191,14 +261,14 @@ export class MaintenanceCompyModalComponent {
       })),
     });
   }
- 
+
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (!this.saving()) this.cancelled.emit();
   }
 }
- 
-function contactGroup(fb: NonNullableFormBuilder, c?: ContactPerson) {
+
+function contactGroup(fb: NonNullableFormBuilder, c?: Partial<ContactPerson>) {
   return fb.group({
     id: fb.control(c?.id ?? 0), // 0 = new contact
     name: fb.control(c?.name ?? '', [Validators.required, Validators.maxLength(100)]),

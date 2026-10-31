@@ -9,7 +9,7 @@
       </div>
       <button *appHasPermission="'Permissions.Employees.Add'" type="button" (click)="openAdd()"
               class="flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2.5 rounded-lg bg-ink text-ivory hover:bg-ink2 shadow-soft">
-        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M12 5v14M5 12h14"></path>
         </svg>
         Add Employee
@@ -19,10 +19,10 @@
     <!-- Search + filters toggle -->
     <div class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div class="field w-full sm:w-64">
-  <input id="employee-search" type="search" placeholder=" " maxlength="100" autocomplete="off"
-         [value]="search()" (input)="onSearch($any($event.target).value)" />
-  <label for="employee-search">Search employees</label>
-</div>
+        <input id="employee-search" type="search" placeholder=" " maxlength="100" autocomplete="off"
+               [value]="search()" (input)="onSearch($any($event.target).value)" />
+        <label for="employee-search">Search employees</label>
+      </div>
 
       <button type="button" (click)="filtersOpen.set(!filtersOpen())"
               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-brass/60 text-sm font-semibold text-brassDk hover:bg-brass/10">
@@ -166,7 +166,7 @@
                     <button type="button" class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
                             title="View details" [attr.aria-label]="'View ' + emp.name"
                             (click)="$event.stopPropagation(); openDetails(emp)">
-                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
                         <circle cx="12" cy="12" r="3"></circle>
                       </svg>
@@ -175,7 +175,7 @@
                             class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
                             title="Edit employee" [attr.aria-label]="'Edit ' + emp.name"
                             (click)="$event.stopPropagation(); openEdit(emp)">
-                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M12 20h9"></path>
                         <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
                       </svg>
@@ -183,8 +183,8 @@
                     <button *appHasPermission="'Permissions.Employees.Delete'" type="button"
                             class="p-1.5 rounded-lg hover:bg-dangerBg text-danger"
                             title="Delete employee" [attr.aria-label]="'Delete ' + emp.name"
-                            (click)="$event.stopPropagation(); remove(emp)">
-                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            (click)="$event.stopPropagation(); openDelete(emp)">
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M3 6h18"></path>
                         <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                         <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
@@ -224,7 +224,6 @@
   @if (modalOpen()) {
     <app-employess-modal
       [employee]="modalEmployee()"
-      [departments]="departments()"
       [genders]="genders()"
       [saving]="saving()"
       [error]="saveError()"
@@ -242,7 +241,7 @@
         <div class="sticky top-0 bg-paper flex items-center justify-between px-6 py-5 border-b border-inkText/8">
           <p class="font-display text-xl text-inkText">Employee Details</p>
           <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog" aria-label="Close" (click)="closeDetails()">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M18 6 6 18M6 6l12 12"></path>
             </svg>
           </button>
@@ -302,6 +301,81 @@
             <button type="button" (click)="closeDetails()"
                     class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft">
               Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Delete modal -->
+  @if (deleteTarget(); as target) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="cancelDelete()"></div>
+
+      <div
+        class="relative bg-paper w-full max-w-md rounded-2xl shadow-soft"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="delete-employee-title"
+        aria-describedby="delete-employee-desc"
+      >
+        <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
+          <p id="delete-employee-title" class="font-display text-xl text-inkText">Delete Employee</p>
+          <button
+            type="button"
+            class="p-2 rounded-lg hover:bg-ink/5 text-fog disabled:opacity-40"
+            aria-label="Close"
+            [disabled]="deleting()"
+            (click)="cancelDelete()"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="px-6 py-6 space-y-4">
+          <div class="flex items-start gap-3">
+            <span class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-dangerBg text-danger">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 6h18" />
+                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+              </svg>
+            </span>
+            <p id="delete-employee-desc" class="text-sm text-inkText">
+              Are you sure you want to delete
+              <span class="font-semibold">{{ target.name }}</span>
+              <span class="text-fog">({{ target.code }})</span>?
+              This action cannot be undone.
+            </p>
+          </div>
+
+          @if (deleteError()) {
+            <p class="text-xs text-danger bg-dangerBg rounded-lg px-3 py-2" role="alert">
+              {{ deleteError() }}
+            </p>
+          }
+
+          <div class="flex items-center gap-3 pt-3 border-t border-inkText/8 justify-end">
+            <button
+              type="button"
+              class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5 disabled:opacity-40"
+              [disabled]="deleting()"
+              (click)="cancelDelete()"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-danger text-white hover:opacity-90 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed"
+              [disabled]="deleting()"
+              (click)="confirmDelete()"
+            >
+              {{ deleting() ? 'Deleting…' : 'Delete employee' }}
             </button>
           </div>
         </div>

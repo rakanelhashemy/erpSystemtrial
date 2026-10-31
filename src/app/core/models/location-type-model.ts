@@ -5,6 +5,13 @@ export interface LocationType {
   name: string;
 }
 
+export interface LocationTypeDetails extends LocationType {
+  businessName?: string;
+  createdByName?: string | null;
+  updatedByName?: string | null;
+
+}
+
 export interface LocationTypeRequest {
   name: string;
   businessId: string;

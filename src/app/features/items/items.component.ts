@@ -1,5 +1,6 @@
 import {
   Component,
+  ChangeDetectionStrategy,
   computed,
   effect,
   ElementRef,
@@ -66,6 +67,7 @@ const emptyFilters = (): ItemFilters => ({
 });
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, ItemModalComponent, HasPermissionDirective, LazyDropdownComponent],
   selector: 'app-items',
   styleUrl: './items.component.css',

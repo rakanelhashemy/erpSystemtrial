@@ -2,6 +2,7 @@ import { Component, computed, effect, ElementRef, DestroyRef, HostListener, inje
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject, Subscription, tap, switchMap, catchError, EMPTY, debounceTime, filter } from 'rxjs';
 import { FormsModule } from '@angular/forms';
+import { toast } from 'ngx-sonner';
 
 import { LocationService } from '../../core/services/location-service';
 
@@ -332,7 +333,7 @@ export class LocationComponent implements OnInit {
     request$.subscribe({
       next: (res) => {
         this.saving.set(false);
-        console.log(res);
+        toast.success(edited ? 'Location updated successfully' : 'Location created successfully');
         
         // keep the breadcrumb in sync if the renamed location is part of the path
         if (edited) {
@@ -376,6 +377,7 @@ export class LocationComponent implements OnInit {
     this.api.delete(target.id).subscribe({
       next: () => {
         this.deleting.set(false);
+        toast.success('Location deleted successfully');
         this.closeDelete();
         // if it was the last item on the page, go back one page
         if (this.items().length === 1 && this.currentPage() > 1) {

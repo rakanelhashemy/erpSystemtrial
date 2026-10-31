@@ -3,7 +3,7 @@ import { inject, Service } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponse, Paged } from '../models/general-model';
-import { LocationTypeFilterQuery, LocationType, LocationTypeRequest } from '../models/location-type-model';
+import { LocationTypeFilterQuery, LocationType, LocationTypeRequest, LocationTypeDetails } from '../models/location-type-model';
 
 @Service()
 export class LocationTypeService {
@@ -29,8 +29,8 @@ export class LocationTypeService {
     return this.http.get<ApiResponse<Paged<LocationType>>>(`${this.url}/List`, { params });
   }
 
-  getById(id: string): Observable<ApiResponse<LocationType>> {
-    return this.http.get<ApiResponse<LocationType>>(`${this.url}/${id}`);
+  getById(id: string): Observable<ApiResponse<LocationTypeDetails>> {
+    return this.http.get<ApiResponse<LocationTypeDetails>>(`${this.url}/${id}`);
   }
 
  

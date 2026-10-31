@@ -1,6 +1,7 @@
-import { Component, computed, DestroyRef, effect, HostListener, inject, linkedSignal, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, HostListener, inject, linkedSignal, signal } from '@angular/core';
 import { rxResource, takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { EMPTY, Observable, catchError, debounceTime, distinctUntilChanged, finalize, map, tap } from 'rxjs';
+import { toast } from 'ngx-sonner';
 import { Department, DepartmentRequest } from '../../core/models/depatment-modal';
 
 import { DepartmentService } from '../../core/services/depatment-service';
@@ -9,6 +10,7 @@ import { HasPermissionDirective } from '../../shared/directives/has-permission.d
 const SEARCH_DEBOUNCE_MS = 300;
 const NO_ITEMS: Department[] = [];
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DepartmentModalComponent, HasPermissionDirective],
   selector: 'app-departments',
   styleUrl: './departments.component.css',
@@ -178,6 +180,7 @@ export class DepartmentsComponent {
     request$
       .pipe(
         tap(() => {
+          toast.success(edited ? 'Department updated successfully' : 'Department created successfully');
           this.saving.set(false); // before closeModal(), which ignores the call while saving
           // keep the breadcrumb in sync if the renamed department is part of the path
           if (edited) {
@@ -225,6 +228,7 @@ export class DepartmentsComponent {
       .delete(target.id)
       .pipe(
         tap(() => {
+          toast.success('Department deleted successfully');
           this.closeDelete();
           // last item on the page: going back one page re-fetches by itself
           if (this.items().length === 1 && this.currentPage() > 1) {

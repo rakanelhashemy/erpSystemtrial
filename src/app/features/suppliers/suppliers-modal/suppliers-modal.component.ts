@@ -1,14 +1,12 @@
 import { Component, computed, DestroyRef, effect, HostListener, inject, input, output, signal, untracked } from '@angular/core';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, map, Subject, Subscription } from 'rxjs';
 import { Supplier, SupplierRequest, SupplierDetail, ContactPerson } from '../../../core/models/supplires-Modal';
 import { DropdownItem } from '../../../core/services/drop-down-services';
 import { Suppliers } from '../../../core/services/suppliers-service';
 import { DropDownServices } from '../../../core/services/drop-down-services';
 import { LazyDropdownComponent } from '../../../shared/ui/lazy-dropdown/lazy-dropdown.component';
-
-   
 
 @Component({
   imports: [ReactiveFormsModule, LazyDropdownComponent],
@@ -54,8 +52,20 @@ export class SuppliersModalComponent {
     notes: this.fb.control(''),
     categoryId: this.fb.control<number | null>(null),
     categoryName: this.fb.control(''),
-    contactPeople: this.fb.array([contactGroup(this.fb)]),
+    // the table renders this array; it starts empty
+    contactPeople: this.fb.array<ReturnType<typeof contactGroup>>([]),
   });
+
+  // temporary row used to type a new contact before pressing "Add Contact"
+  readonly contactDraft = this.fb.group({
+    name: this.fb.control('', [Validators.required, Validators.maxLength(100)]),
+    position: this.fb.control(''),
+    phone: this.fb.control(''),
+    email: this.fb.control('', [Validators.email]),
+  });
+
+  // index of the contact currently being edited in the draft row (null = adding a new one)
+  readonly editingIndex = signal<number | null>(null);
 
   get contacts() {
     return this.form.controls.contactPeople;
@@ -87,11 +97,53 @@ export class SuppliersModalComponent {
     }
     this.contacts.clear();
     d.contactPeople.forEach((c) => this.contacts.push(contactGroup(this.fb, c)));
-    if (!d.contactPeople.length) this.addContact();
   }
 
   addContact(): void {
-    this.contacts.push(contactGroup(this.fb));
+    const draft = this.contactDraft;
+    if (draft.invalid) {
+      draft.markAllAsTouched();
+      return;
+    }
+    const v = draft.getRawValue();
+    const value = {
+      name: v.name.trim(),
+      position: v.position.trim(),
+      phone: v.phone.trim(),
+      email: v.email.trim(),
+    };
+
+    const editing = this.editingIndex();
+    if (editing !== null) {
+      // update the existing contact (its id is preserved)
+      this.contacts.at(editing).patchValue(value);
+    } else {
+      this.contacts.push(contactGroup(this.fb, value));
+    }
+    this.cancelEdit();
+  }
+
+  editContact(index: number): void {
+    const c = this.contacts.at(index).getRawValue();
+    this.contactDraft.reset({
+      name: c.name,
+      position: c.position,
+      phone: c.phone,
+      email: c.email,
+    });
+    this.editingIndex.set(index);
+  }
+
+  cancelEdit(): void {
+    this.contactDraft.reset({ name: '', position: '', phone: '', email: '' });
+    this.editingIndex.set(null);
+  }
+
+  removeContact(index: number): void {
+    const editing = this.editingIndex();
+    if (editing === index) this.cancelEdit();
+    else if (editing !== null && index < editing) this.editingIndex.set(editing - 1);
+    this.contacts.removeAt(index);
   }
 
   onCategorySearch(term: string): void {
@@ -134,7 +186,8 @@ export class SuppliersModalComponent {
     const search = this.categorySearch().trim();
     if (reset) this.categories.set([]);
     this.categoryLoading.set(true);
-    this.categorySub = this.dropdown.supplierCategories({ pageNumber, pageSize: 10, search })
+    this.categorySub = this.dropdown
+      .supplierCategories({ pageNumber, pageSize: 10, search })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
@@ -161,12 +214,19 @@ export class SuppliersModalComponent {
       });
   }
 
-  removeContact(index: number): void {
-    this.contacts.removeAt(index);
-  }
-
   submit(): void {
     if (this.saving() || !this.ready()) return;
+
+    // if the user typed a contact but forgot to press "Add Contact", add it automatically
+    const d = this.contactDraft.getRawValue();
+    if (d.name.trim() || d.position.trim() || d.phone.trim() || d.email.trim()) {
+      if (this.contactDraft.invalid) {
+        this.contactDraft.markAllAsTouched();
+        return;
+      }
+      this.addContact();
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

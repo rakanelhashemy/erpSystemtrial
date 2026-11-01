@@ -91,10 +91,22 @@
                 </div>
               </div>
 
-              <div class="field sm:col-span-2">
-                <input id="item-name" type="text" formControlName="name" placeholder=" " autocomplete="off"
-                       [attr.aria-invalid]="showError('name')" aria-describedby="item-name-error" />
-                <label for="item-name">Item name <span class="text-danger">*</span></label>
+                <div class="field sm:col-span-2 relative">
+                  <input id="item-name" type="text" class="has-value" formControlName="name" placeholder=" " autocomplete="off"
+                         role="combobox" [attr.aria-expanded]="itemNameSuggestionsOpen()"
+                         (focus)="itemNameSuggestionsOpen.set(true)" (blur)="itemNameSuggestionsOpen.set(false)"
+                         (input)="searchItemNames($any($event.target).value)"
+                         [attr.aria-invalid]="showError('name')" aria-describedby="item-name-error" />
+                  <label for="item-name">Item name <span class="text-danger">*</span></label>
+                  @if (itemNameSuggestionsOpen() && modalOptions('itemNames').length) {
+                    <ul class="absolute left-0 right-0 top-full mt-1 z-30 max-h-60 overflow-auto rounded-lg border border-inkText/15 bg-paper shadow-soft py-1"
+                        role="listbox" aria-label="Item name suggestions">
+                      @for (option of modalOptions('itemNames'); track option.id) {
+                        <li role="option" class="px-3 py-2 text-sm text-inkText cursor-pointer hover:bg-ivory"
+                            (pointerdown)="$event.preventDefault()" (click)="selectItemName(option)">{{ option.name }}</li>
+                      }
+                    </ul>
+                  }
                 @if (showError('name')) {
                   <p id="item-name-error" class="text-xs text-danger mt-1">Item name is required.</p>
                 }
@@ -168,9 +180,11 @@
                 [selectedValue]="form.controls.brandId.value" [loading]="modalDropdownLoading()['brands'] ?? false"
                 [hasMore]="modalDropdownHasMore()['brands'] ?? false" [searchable]="true"
                 [searchTerm]="modalDropdownSearch()['brands'] ?? ''" searchPlaceholder="Search brands…"
+                [customOptionText]="newOptionText('brands')" [customOptionValue]="modalDropdownSearch()['brands'] ?? ''"
                 [allowClear]="true" (searchChanged)="searchModalDropdown('brands', $event)"
-                (loadMore)="loadModalDropdown('brands')" (selected)="form.controls.brandId.setValue(+$event.id)"
-                (cleared)="form.controls.brandId.setValue(null); clearModalDropdownSearch('brands')" />
+                (loadMore)="loadModalDropdown('brands')" (selected)="form.controls.brandId.setValue(+$event.id); clearNewDropdownName('brands')"
+                (customSelected)="selectNewDropdownName('brands', $event)"
+                (cleared)="form.controls.brandId.setValue(null); clearNewDropdownName('brands'); clearModalDropdownSearch('brands')" />
             </div>
 
             <div class="field">
@@ -178,9 +192,11 @@
                 [selectedValue]="form.controls.modelId.value" [loading]="modalDropdownLoading()['models'] ?? false"
                 [hasMore]="modalDropdownHasMore()['models'] ?? false" [searchable]="true"
                 [searchTerm]="modalDropdownSearch()['models'] ?? ''" searchPlaceholder="Search models…"
+                [customOptionText]="newOptionText('models')" [customOptionValue]="modalDropdownSearch()['models'] ?? ''"
                 [allowClear]="true" (searchChanged)="searchModalDropdown('models', $event)"
-                (loadMore)="loadModalDropdown('models')" (selected)="form.controls.modelId.setValue(+$event.id)"
-                (cleared)="form.controls.modelId.setValue(null); clearModalDropdownSearch('models')" />
+                (loadMore)="loadModalDropdown('models')" (selected)="form.controls.modelId.setValue(+$event.id); clearNewDropdownName('models')"
+                (customSelected)="selectNewDropdownName('models', $event)"
+                (cleared)="form.controls.modelId.setValue(null); clearNewDropdownName('models'); clearModalDropdownSearch('models')" />
             </div>
 
             <div class="field">
@@ -188,9 +204,11 @@
                 [selectedValue]="form.controls.materialId.value" [loading]="modalDropdownLoading()['materials'] ?? false"
                 [hasMore]="modalDropdownHasMore()['materials'] ?? false" [searchable]="true"
                 [searchTerm]="modalDropdownSearch()['materials'] ?? ''" searchPlaceholder="Search materials…"
+                [customOptionText]="newOptionText('materials')" [customOptionValue]="modalDropdownSearch()['materials'] ?? ''"
                 [allowClear]="true" (searchChanged)="searchModalDropdown('materials', $event)"
-                (loadMore)="loadModalDropdown('materials')" (selected)="form.controls.materialId.setValue(+$event.id)"
-                (cleared)="form.controls.materialId.setValue(null); clearModalDropdownSearch('materials')" />
+                (loadMore)="loadModalDropdown('materials')" (selected)="form.controls.materialId.setValue(+$event.id); clearNewDropdownName('materials')"
+                (customSelected)="selectNewDropdownName('materials', $event)"
+                (cleared)="form.controls.materialId.setValue(null); clearNewDropdownName('materials'); clearModalDropdownSearch('materials')" />
             </div>
 
             <div class="field">

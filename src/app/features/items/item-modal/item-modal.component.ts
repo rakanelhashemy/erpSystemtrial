@@ -33,7 +33,7 @@ export class ItemModalComponent implements OnInit {
   itemNames = input<DropdownItem[]>([]);
   lookups = input<StaticLookups>({ countries: [], currencies: [], genders: [] });
 
-  private readonly dropdownKeys = ['brands', 'models', 'materials', 'groups', 'departments', 'locations'];
+  private readonly dropdownKeys = ['itemNames', 'brands', 'models', 'materials', 'groups', 'departments', 'locations'];
   private readonly dropdownSearchSubjects: Record<string, Subject<string>> = Object.fromEntries(
     this.dropdownKeys.map((key) => [key, new Subject<string>()]),
   );
@@ -45,6 +45,7 @@ export class ItemModalComponent implements OnInit {
   readonly modalDropdownHasMore = signal<Record<string, boolean>>({});
   readonly modalDropdownLoading = signal<Record<string, boolean>>({});
   readonly modalDropdownSearch = signal<Record<string, string>>({});
+  readonly newDropdownNames = signal<Record<string, string>>({});
   readonly modalDropdownPageSize = 10;
 
   closed = output<void>();
@@ -70,10 +71,12 @@ export class ItemModalComponent implements OnInit {
 
   // ---------- state ----------
   activeTab = signal<TabId>('general');
+  itemNameSuggestionsOpen = signal(false);
   saving = signal(false);
   loadingItem = signal(false);
   private loadedItemNameId: number | null = null;
   private loadedItemName = '';
+  readonly selectedItemNameId = signal<number | null>(null);
   isEdit = computed(() => !!this.itemId());
   status = signal('');
   submitted = signal(false);
@@ -163,6 +166,7 @@ export class ItemModalComponent implements OnInit {
     const d = ((res as { data?: unknown } | null)?.data ?? res ?? {}) as Record<string, any>;
     this.loadedItemNameId = d['itemNameId'] ?? null;
     this.loadedItemName = d['itemName'] ?? '';
+    this.selectedItemNameId.set(this.loadedItemNameId);
     const date = (v: unknown) => (typeof v === 'string' ? v.slice(0, 10) : '');
 
     this.form.patchValue({
@@ -191,6 +195,7 @@ export class ItemModalComponent implements OnInit {
     });
 
     const detailOptions: Record<string, { id: string | number; name: string }> = {
+      itemNames: { id: d['itemNameId'], name: d['itemName'] ?? '' },
       brands: { id: d['brandId'], name: d['brandName'] ?? '' },
       models: { id: d['modelId'], name: d['modelName'] ?? '' },
       materials: { id: d['materialId'], name: d['materialName'] ?? '' },
@@ -228,6 +233,7 @@ export class ItemModalComponent implements OnInit {
         next: (lookups) => {
           this.formItemNames = lookups.itemNames ?? [];
           const firstPages: Record<string, LazyDropdownOption[]> = {
+            itemNames: (lookups.itemNames ?? []).map(({ id, name }) => ({ id, name })),
             brands: (lookups.brands ?? []).map(({ id, name }) => ({ id, name })),
             models: (lookups.itemModels ?? []).map(({ id, name }) => ({ id, name })),
             materials: (lookups.materials ?? []).map(({ id, name }) => ({ id, name })),
@@ -276,7 +282,8 @@ export class ItemModalComponent implements OnInit {
       pageSize: this.modalDropdownPageSize,
       search: this.modalDropdownSearch()[key]?.trim() ?? '',
     };
-    const request = key === 'brands' ? this.dropdownService.brands(query)
+    const request = key === 'itemNames' ? this.dropdownService.itemNames(query)
+      : key === 'brands' ? this.dropdownService.brands(query)
       : key === 'models' ? this.dropdownService.itemModels(query)
       : key === 'materials' ? this.dropdownService.materials(query)
       : key === 'groups' ? this.dropdownService.groups(query)
@@ -290,6 +297,10 @@ export class ItemModalComponent implements OnInit {
         const loaded = page.data.map((item) => ({ id: item.id, name: item.title ?? item.name }));
         const options = reset ? loaded : [...(this.modalDropdownOptions()[key] ?? []), ...loaded];
         this.modalDropdownOptions.update((all) => ({ ...all, [key]: this.withLoadedDropdownOption(key, options) }));
+        if (key === 'itemNames') {
+          const names = loaded.map((item) => ({ id: Number(item.id), name: item.name }));
+          this.formItemNames = reset ? names : [...this.formItemNames, ...names];
+        }
         this.modalDropdownPages.update((pages) => ({ ...pages, [key]: page.currentPage }));
         this.modalDropdownHasMore.update((state) => ({ ...state, [key]: page.hasNextPage }));
         this.modalDropdownLoading.update((state) => ({ ...state, [key]: false }));
@@ -306,7 +317,61 @@ export class ItemModalComponent implements OnInit {
 
   searchModalDropdown(key: string, term: string): void {
     this.modalDropdownSearch.update((search) => ({ ...search, [key]: term }));
+    if (this.newDropdownNames()[key] !== term.trim()) {
+      this.newDropdownNames.update((names) => ({ ...names, [key]: '' }));
+    }
     this.dropdownSearchSubjects[key]?.next(term.trim());
+  }
+
+  searchItemNames(term: string): void {
+    this.form.controls.name.setValue(term);
+    const exactMatch = this.modalOptions('itemNames').find((option) => option.name.trim().toLowerCase() === term.trim().toLowerCase());
+    if (exactMatch) {
+      this.selectItemName(exactMatch);
+    } else if (term.trim().toLowerCase() !== this.loadedItemName.toLowerCase()) {
+      this.selectedItemNameId.set(null);
+      this.loadedItemNameId = null;
+      this.loadedItemName = '';
+      this.newDropdownNames.update((names) => ({ ...names, itemNames: '' }));
+    }
+    this.searchModalDropdown('itemNames', term);
+  }
+
+  selectItemName(option: LazyDropdownOption): void {
+    const id = Number(option.id);
+    this.form.controls.name.setValue(option.name);
+    this.selectedItemNameId.set(id);
+    this.loadedItemNameId = id;
+    this.loadedItemName = option.name;
+    this.newDropdownNames.update((names) => ({ ...names, itemNames: '' }));
+    this.modalDropdownSearch.update((search) => ({ ...search, itemNames: '' }));
+    this.itemNameSuggestionsOpen.set(false);
+  }
+
+  newOptionText(key: string): string {
+    const value = this.modalDropdownSearch()[key]?.trim();
+    if (!value || this.modalDropdownLoading()[key] || this.modalOptions(key).some((option) => option.name.trim().toLowerCase() === value.toLowerCase())) return '';
+    const labels: Record<string, string> = { itemNames: 'item name', brands: 'brand', models: 'model', materials: 'material' };
+    const label = labels[key];
+    return label ? `Add “${value}” as new ${label}` : '';
+  }
+
+  selectNewDropdownName(key: string, value: string): void {
+    const name = value.trim();
+    if (!name) return;
+    this.newDropdownNames.update((names) => ({ ...names, [key]: name }));
+    if (key === 'itemNames') {
+      this.form.controls.name.setValue(name);
+      this.selectedItemNameId.set(null);
+      this.loadedItemNameId = null;
+      this.loadedItemName = '';
+    } else if (key === 'brands') this.form.controls.brandId.setValue(null);
+    else if (key === 'models') this.form.controls.modelId.setValue(null);
+    else if (key === 'materials') this.form.controls.materialId.setValue(null);
+  }
+
+  clearNewDropdownName(key: string): void {
+    this.newDropdownNames.update((names) => ({ ...names, [key]: '' }));
   }
 
   clearModalDropdownSearch(key: string): void {
@@ -483,6 +548,8 @@ export class ItemModalComponent implements OnInit {
 
   /** Matches the item name to an existing one (id) or sends it as a new name. */
   private resolveItemName(name: string): { itemNameId: number | null; newItemName: string | null } {
+    const newName = this.newDropdownNames()['itemNames'];
+    if (newName) return { itemNameId: null, newItemName: newName };
     const key = name.toLowerCase();
     const match = [...this.itemNames(), ...this.formItemNames].find((n) => n.name.trim().toLowerCase() === key);
     if (match) return { itemNameId: Number(match.id), newItemName: null };
@@ -514,9 +581,12 @@ export class ItemModalComponent implements OnInit {
       currencyId: v.currencyId,
       exchangeRate: this.needsConversion() ? v.exchangeRate : null,
 
-      brandId: v.brandId,
-      modelId: v.modelId,
-      materialId: v.materialId,
+      brandId: this.newDropdownNames()['brands'] ? null : v.brandId,
+      newBrandName: this.newDropdownNames()['brands'] || null,
+      modelId: this.newDropdownNames()['models'] ? null : v.modelId,
+      newModelName: this.newDropdownNames()['models'] || null,
+      materialId: this.newDropdownNames()['materials'] ? null : v.materialId,
+      newMaterialName: this.newDropdownNames()['materials'] || null,
       countryId: v.countryId,
 
       capacity: text(v.capacity),

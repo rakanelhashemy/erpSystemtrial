@@ -37,9 +37,15 @@
 
         <!-- ============ General & Media ============ -->
         <section [hidden]="activeTab() !== 'general'" role="tabpanel">
-          <div class="mb-5">
-            <p class="text-xs font-bold uppercase tracking-wide text-brassDk">Everyday identity</p>
-            <p class="text-sm text-fog mt-1">Capture the essentials and add a recognizable thumbnail.</p>
+          <div class="mb-5 flex items-start justify-between gap-4">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-wide text-brassDk">Everyday identity</p>
+              <p class="text-sm text-fog mt-1">Capture the essentials and add a recognizable thumbnail.</p>
+            </div>
+            <div class="shrink-0 rounded-xl border border-brass/20 bg-brass/5 px-4 py-2.5 text-right">
+              <span class="block text-[10px] font-bold uppercase tracking-wider text-brassDk">Quantity (Qty)</span>
+              <span class="mt-0.5 block font-display text-xl leading-6 text-inkText">1</span>
+            </div>
           </div>
 
           <div class="grid lg:grid-cols-[180px_1fr] gap-5 items-start">
@@ -72,10 +78,17 @@
 
             <div class="grid sm:grid-cols-2 gap-4">
               <!-- Business (taken from the page selection) -->
-              <div class="field sm:col-span-2">
-                <input id="item-business" type="text" class="has-value" readonly
-                       [value]="business()?.name ?? ''" placeholder=" " />
-                <label for="item-business">Business <span class="text-danger">*</span></label>
+              <div class="sm:col-span-2 flex items-center gap-3 rounded-xl border border-inkText/8 bg-ivory/45 px-4 py-3">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-ink text-brassLt" aria-hidden="true">
+                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4" />
+                    <path d="M8 9v.01M8 12v.01M8 15v.01M8 18v.01M15 12v.01M15 15v.01M15 18v.01" />
+                  </svg>
+                </span>
+                <div class="min-w-0">
+                  <p class="text-[10px] font-bold uppercase tracking-wider text-fog">Business <span class="text-danger">*</span></p>
+                  <p id="item-business" class="mt-0.5 truncate text-sm font-semibold text-inkText">{{ business()?.name ?? '—' }}</p>
+                </div>
               </div>
 
               <div class="field sm:col-span-2">
@@ -126,13 +139,6 @@
                   [allowClear]="true" (searchChanged)="searchModalDropdown('departments', $event)"
                   (loadMore)="loadModalDropdown('departments')" (selected)="form.controls.departmentId.setValue('' + $event.id)"
                   (cleared)="form.controls.departmentId.setValue(null); clearModalDropdownSearch('departments')" />
-              </div>
-
-              <div class="field">
-                <div class="relative w-full rounded-[0.65rem] border border-inkText/15 bg-ivory/50 px-4 pb-2 pt-5 text-[0.95rem] text-fog" aria-label="Quantity: 1">
-                  <span class="absolute left-4 top-1 text-[0.68rem] font-semibold tracking-wide text-brassDk">Quantity (Qty)</span>
-                  <span>1</span>
-                </div>
               </div>
 
               <div class="field sm:col-span-2">
@@ -250,7 +256,7 @@
               }
             </div>
             <div class="field">
-              <input id="item-depreciation-years" type="number" min="0" step="0.01" formControlName="depreciationYears" placeholder=" "
+              <input id="item-depreciation-years" type="number" min="1" step="1" formControlName="depreciationYears" placeholder=" "
                 (input)="onDepreciationYearsInput($any($event.target).value)" />
               <label for="item-depreciation-years">Depreciation years</label>
             </div>
@@ -261,16 +267,6 @@
             </div>
           </div>
 
-          <label class="mt-6 flex items-center justify-between gap-4 rounded-xl border border-inkText/10 bg-ivory/60 px-4 py-4 cursor-pointer">
-            <span>
-              <span class="block text-sm font-semibold text-inkText">Scraping</span>
-              <span class="block text-xs text-fog mt-0.5">Mark this item as discarded or written off.</span>
-            </span>
-            <span class="switch">
-              <input type="checkbox" formControlName="scraping" />
-              <span class="track"></span>
-            </span>
-          </label>
         </section>
       </div>
 

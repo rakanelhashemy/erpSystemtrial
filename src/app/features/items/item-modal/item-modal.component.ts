@@ -4,7 +4,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { debounceTime, map, Observable, startWith, Subject, Subscription } from 'rxjs';
 import { toast } from 'ngx-sonner';
-import { DropDownServices, DropdownItem, StaticLookups } from '../../../core/services/drop-down-services';
+import { DropDownServices, DropdownItem, ItemFormLookups, StaticLookups } from '../../../core/services/drop-down-services';
 import { ItemRequest } from '../../../core/models/items-modal';
 import { ItemsServices } from '../../../core/services/items-services';
 import { toImageUrl } from '../../../core/config/image-url';
@@ -39,6 +39,7 @@ export class ItemModalComponent implements OnInit {
   );
   private readonly dropdownRequests: Record<string, Subscription> = {};
   private readonly loadedDropdownDetails: Record<string, { id: string | number; name: string }> = {};
+  private formItemNames: DropdownItem<number>[] = [];
   readonly modalDropdownOptions = signal<Record<string, LazyDropdownOption[]>>({});
   readonly modalDropdownPages = signal<Record<string, number>>({});
   readonly modalDropdownHasMore = signal<Record<string, boolean>>({});
@@ -64,7 +65,7 @@ export class ItemModalComponent implements OnInit {
   private readonly tabControls: Record<TabId, string[]> = {
     general: ['name', 'price', 'currencyId', 'exchangeRate', 'departmentId', 'quantity', 'description'],
     specs: ['serialNumber', 'brandId', 'modelId', 'materialId', 'countryId', 'capacity', 'dimensions', 'groupId', 'locationId'],
-    financials: ['workingDate', 'depreciationRate', 'depreciationYears', 'depreciationDate', 'scraping'],
+    financials: ['workingDate', 'depreciationRate', 'depreciationYears', 'depreciationDate'],
   };
 
   // ---------- state ----------
@@ -102,10 +103,8 @@ export class ItemModalComponent implements OnInit {
 
     workingDate: [''],
     depreciationRate: this.fb.control<number | null>(null, [Validators.min(0), Validators.max(100)]),
-    depreciationYears: this.fb.control<number | null>(null, Validators.min(0)),
+    depreciationYears: this.fb.control<number | null>(null, Validators.min(1)),
     depreciationDate: [''],
-    scraping: [false],
-
     copyCount: [1, [Validators.required, Validators.min(1), Validators.max(this.maxCopies)]],
   });
 
@@ -189,7 +188,6 @@ export class ItemModalComponent implements OnInit {
       depreciationRate: d['depreciationRate'] ?? null,
       depreciationYears: d['depreciationYears'] ?? null,
       depreciationDate: date(d['depreciationDate']),
-      scraping: !!d['scraping'],
     });
 
     const detailOptions: Record<string, { id: string | number; name: string }> = {
@@ -217,7 +215,46 @@ export class ItemModalComponent implements OnInit {
   }
 
   private loadModalDropdowns(): void {
-    for (const key of this.dropdownKeys) this.loadModalDropdown(key, true);
+    const businessId = this.business()?.id;
+    if (!businessId) return;
+
+    for (const key of this.dropdownKeys) {
+      this.modalDropdownLoading.update((state) => ({ ...state, [key]: true }));
+    }
+
+    this.dropdownService.itemFormLookups({ businessId, pageSize: this.modalDropdownPageSize })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (lookups) => {
+          this.formItemNames = lookups.itemNames ?? [];
+          const firstPages: Record<string, LazyDropdownOption[]> = {
+            brands: (lookups.brands ?? []).map(({ id, name }) => ({ id, name })),
+            models: (lookups.itemModels ?? []).map(({ id, name }) => ({ id, name })),
+            materials: (lookups.materials ?? []).map(({ id, name }) => ({ id, name })),
+            // The consolidated endpoint returns numeric group keys, while ItemRequest.GroupId expects a UUID.
+            // Load groups from the business-scoped dropdown endpoint, which returns the correct IDs.
+            groups: [],
+            departments: (lookups.departments ?? []).map(({ id, title }) => ({ id, name: title })),
+            locations: (lookups.locations ?? []).map(({ id, name }) => ({ id, name })),
+          };
+
+          for (const key of this.dropdownKeys) {
+            const options = this.withLoadedDropdownOption(key, firstPages[key] ?? []);
+            this.modalDropdownOptions.update((all) => ({ ...all, [key]: options }));
+            this.modalDropdownPages.update((pages) => ({ ...pages, [key]: 1 }));
+            this.modalDropdownHasMore.update((state) => ({ ...state, [key]: (firstPages[key]?.length ?? 0) >= this.modalDropdownPageSize }));
+            this.modalDropdownLoading.update((state) => ({ ...state, [key]: false }));
+          }
+
+          // The consolidated endpoint currently omits location options; keep this list business scoped.
+          if (!firstPages['locations']?.length) this.loadModalDropdown('locations', true);
+          this.loadModalDropdown('groups', true);
+        },
+        error: () => {
+          // Preserve the existing individual endpoints as a fallback if the consolidated lookup fails.
+          for (const key of this.dropdownKeys) this.loadModalDropdown(key, true);
+        },
+      });
   }
 
   loadModalDropdown(key: string, reset = false): void {
@@ -290,12 +327,13 @@ export class ItemModalComponent implements OnInit {
       this.form.controls.depreciationDate.setValue('');
       return;
     }
-    this.form.controls.depreciationYears.setValue(this.roundToTwo(100 / rate));
+    this.form.controls.depreciationYears.setValue(Math.max(1, Math.round(100 / rate)));
     this.recalculateDepreciationDate();
   }
 
   onDepreciationYearsInput(rawValue: string): void {
-    const years = rawValue.trim() === '' ? null : Number(rawValue);
+    const parsedYears = rawValue.trim() === '' ? null : Number(rawValue);
+    const years = parsedYears === null || !Number.isFinite(parsedYears) ? null : Math.max(1, Math.round(parsedYears));
     this.form.controls.depreciationYears.setValue(years !== null && Number.isFinite(years) ? years : null);
     if (years === null || !Number.isFinite(years) || years <= 0) {
       this.form.controls.depreciationRate.setValue(null);
@@ -446,7 +484,7 @@ export class ItemModalComponent implements OnInit {
   /** Matches the item name to an existing one (id) or sends it as a new name. */
   private resolveItemName(name: string): { itemNameId: number | null; newItemName: string | null } {
     const key = name.toLowerCase();
-    const match = this.itemNames().find((n) => n.name.trim().toLowerCase() === key);
+    const match = [...this.itemNames(), ...this.formItemNames].find((n) => n.name.trim().toLowerCase() === key);
     if (match) return { itemNameId: Number(match.id), newItemName: null };
 
     if (this.loadedItemNameId !== null && this.loadedItemName.trim().toLowerCase() === key) {
@@ -489,9 +527,9 @@ export class ItemModalComponent implements OnInit {
 
       workingDate: v.workingDate || null,
       depreciationRate: v.depreciationRate,
-      depreciationYears: v.depreciationYears,
+      depreciationYears: v.depreciationYears === null ? null : Math.max(1, Math.round(v.depreciationYears)),
       depreciationDate: v.depreciationDate || null,
-      scraping: v.scraping,
+      scraping: false,
     };
   }
 }

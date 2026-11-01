@@ -337,6 +337,14 @@ export class ItemModalComponent implements OnInit {
     this.searchModalDropdown('itemNames', term);
   }
 
+  onItemNameSuggestionsScroll(event: Event): void {
+    const list = event.target as HTMLElement;
+    if (this.modalDropdownHasMore()['itemNames'] && !this.modalDropdownLoading()['itemNames']
+        && list.scrollTop + list.clientHeight >= list.scrollHeight - 24) {
+      this.loadModalDropdown('itemNames');
+    }
+  }
+
   selectItemName(option: LazyDropdownOption): void {
     const id = Number(option.id);
     this.form.controls.name.setValue(option.name);

@@ -98,16 +98,24 @@
                          (input)="searchItemNames($any($event.target).value)"
                          [attr.aria-invalid]="showError('name')" aria-describedby="item-name-error" />
                   <label for="item-name">Item name <span class="text-danger">*</span></label>
-                  @if (itemNameSuggestionsOpen() && modalOptions('itemNames').length) {
-                    <ul class="absolute left-0 right-0 top-full mt-1 z-30 max-h-60 overflow-auto rounded-lg border border-inkText/15 bg-paper shadow-soft py-1"
-                        role="listbox" aria-label="Item name suggestions">
+                  @if (itemNameSuggestionsOpen() && (modalOptions('itemNames').length || modalDropdownLoading()['itemNames'])) {
+                    <ul class="absolute left-0 right-0 top-full mt-1 z-30 max-h-60 overflow-auto snap-y snap-mandatory rounded-lg border border-inkText/15 bg-paper shadow-soft py-1"
+                        role="listbox" aria-label="Item name suggestions" (scroll)="onItemNameSuggestionsScroll($event)">
                       @for (option of modalOptions('itemNames'); track option.id) {
-                        <li role="option" class="px-3 py-2 text-sm text-inkText cursor-pointer hover:bg-ivory"
+                        <li role="option" class="snap-start px-3 py-2 text-sm text-inkText cursor-pointer hover:bg-ivory"
                             (pointerdown)="$event.preventDefault()" (click)="selectItemName(option)">{{ option.name }}</li>
+                      }
+                      @if (modalDropdownLoading()['itemNames']) {
+                        <li class="snap-start px-3 py-2 text-xs text-fog text-center" aria-live="polite">Loading…</li>
+                      }
+                      @if (showError('name')) {
+                        <li class="snap-start border-t border-inkText/8 px-3 py-2 text-xs text-danger" role="presentation">
+                          <span id="item-name-error" role="alert">Item name is required.</span>
+                        </li>
                       }
                     </ul>
                   }
-                @if (showError('name')) {
+                @if (showError('name') && !itemNameSuggestionsOpen()) {
                   <p id="item-name-error" class="text-xs text-danger mt-1">Item name is required.</p>
                 }
               </div>

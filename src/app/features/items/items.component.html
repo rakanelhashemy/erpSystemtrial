@@ -1,34 +1,48 @@
 <div class="bg-paper rounded-2xl border border-inkText/8 shadow-soft overflow-hidden">
-
   <!-- Header -->
   <div class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col gap-4">
     <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
       <div>
         <p class="font-display text-xl text-inkText">Asset Inventory</p>
-        <p class="text-xs text-fog mt-0.5">Search, classify and manage every item across the property.</p>
+        <p class="text-xs text-fog mt-0.5">
+          Search, classify and manage every item across the property.
+        </p>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
         <div class="field min-w-55 relative">
-          <input id="items-business-filter" type="text" class="has-value"
-                 autocomplete="off" role="combobox" maxlength="100"
-                 [attr.aria-expanded]="dropdownOpen()"
-                 [value]="dropdownOpen() ? businessSearch() : (selectedBusiness()?.name ?? '')"
-                 (focus)="openBusinessDropdown()"
-                 (input)="onBusinessSearch($any($event.target).value)"
-                 (keydown.escape)="closeBusinessDropdown()" />
+          <input
+            id="items-business-filter"
+            type="text"
+            class="has-value"
+            autocomplete="off"
+            role="combobox"
+            maxlength="100"
+            [attr.aria-expanded]="dropdownOpen()"
+            [value]="dropdownOpen() ? businessSearch() : (selectedBusiness()?.name ?? '')"
+            (focus)="openBusinessDropdown()"
+            (input)="onBusinessSearch($any($event.target).value)"
+            (keydown.escape)="closeBusinessDropdown()"
+          />
           <label for="items-business-filter">Business</label>
           <span class="chevron">⌄</span>
 
           @if (dropdownOpen()) {
             <div class="fixed inset-0 z-10" (click)="closeBusinessDropdown()"></div>
-            <ul class="absolute left-0 right-0 top-full mt-1 z-20 max-h-60 overflow-auto rounded-lg border border-inkText/15 bg-paper shadow-soft py-1"
-                role="listbox">
+            <ul
+              class="absolute left-0 right-0 top-full mt-1 z-20 max-h-60 overflow-auto rounded-lg border border-inkText/15 bg-paper shadow-soft py-1"
+              role="listbox"
+            >
               @for (b of businesses(); track b.id) {
-                <li role="option" [attr.aria-selected]="b.id === businessId()"
-                    class="px-3 py-2 text-sm text-inkText cursor-pointer hover:bg-ivory"
-                    [class.font-semibold]="b.id === businessId()"
-                    (click)="selectBusiness(b)">{{ b.name }}</li>
+                <li
+                  role="option"
+                  [attr.aria-selected]="b.id === businessId()"
+                  class="px-3 py-2 text-sm text-inkText cursor-pointer hover:bg-ivory"
+                  [class.font-semibold]="b.id === businessId()"
+                  (click)="selectBusiness(b)"
+                >
+                  {{ b.name }}
+                </li>
               }
               @if (businessHasNext()) {
                 <li #businessSentinel class="h-px" aria-hidden="true"></li>
@@ -42,9 +56,21 @@
           }
         </div>
 
-        <button *appHasPermission="'Permissions.Items.Add'" type="button" (click)="add()"
-          class="flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2.5 rounded-lg bg-ink text-ivory hover:bg-ink2 shadow-soft">
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button
+          *appHasPermission="'Permissions.Items.Add'"
+          type="button"
+          (click)="add()"
+          class="flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2.5 rounded-lg bg-ink text-ivory hover:bg-ink2 shadow-soft"
+        >
+          <svg
+            class="w-3.5 h-3.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M12 5v14M5 12h14"></path>
           </svg>
           Add Item
@@ -55,23 +81,49 @@
     <!-- Quick search + advanced toggle -->
     <div class="flex flex-col md:flex-row md:items-center gap-3">
       <div class="relative flex-1">
-        <svg class="w-4 h-4 text-fog absolute left-3 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          class="w-4 h-4 text-fog absolute left-3 top-1/2 -translate-y-1/2"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <circle cx="11" cy="11" r="8"></circle>
           <path d="m21 21-4.35-4.35"></path>
         </svg>
-        <input type="search" placeholder="Search by item name or serial number…"
-          [ngModel]="search()" (ngModelChange)="onSearch($event)"
-          class="w-full pl-9 pr-4 py-3 text-sm rounded-xl border border-inkText/15 bg-ivory/40 focus:outline-none focus:ring-2 focus:ring-brass/30 focus:border-brass" />
+        <input
+          type="search"
+          placeholder="Search by item name or serial number…"
+          [ngModel]="search()"
+          (ngModelChange)="onSearch($event)"
+          class="w-full pl-9 pr-4 py-3 text-sm rounded-xl border border-inkText/15 bg-ivory/40 focus:outline-none focus:ring-2 focus:ring-brass/30 focus:border-brass"
+        />
       </div>
 
-      <button type="button" (click)="toggleFilters()" [attr.aria-expanded]="filtersOpen()"
-        class="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-brass/60 text-sm font-semibold text-brassDk hover:bg-brass/10 transition-colors">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <button
+        type="button"
+        (click)="toggleFilters()"
+        [attr.aria-expanded]="filtersOpen()"
+        class="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-brass/60 text-sm font-semibold text-brassDk hover:bg-brass/10 transition-colors"
+      >
+        <svg
+          class="w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M4 6h16M7 12h10M10 18h4"></path>
         </svg>
         <span>Advanced Filters</span>
         @if (activeFiltersCount() > 0) {
-          <span class="min-w-5 h-5 px-1.5 rounded-full bg-brass text-white text-[10px] leading-5">{{ activeFiltersCount() }}</span>
+          <span class="min-w-5 h-5 px-1.5 rounded-full bg-brass text-white text-[10px] leading-5">{{
+            activeFiltersCount()
+          }}</span>
         }
       </button>
     </div>
@@ -79,7 +131,10 @@
 
   <!-- Error -->
   @if (error()) {
-    <div class="px-4 sm:px-5 py-2.5 text-xs text-danger bg-dangerBg border-b border-inkText/8" role="alert">
+    <div
+      class="px-4 sm:px-5 py-2.5 text-xs text-danger bg-dangerBg border-b border-inkText/8"
+      role="alert"
+    >
       {{ error() }}
     </div>
   }
@@ -91,130 +146,244 @@
         <div class="flex items-start justify-between gap-3 mb-5">
           <div>
             <p class="text-xs font-bold uppercase tracking-wide text-brassDk">Advanced filters</p>
-            <p class="text-xs text-fog mt-1">Refine the inventory by identity, classification or financial lifecycle.</p>
+            <p class="text-xs text-fog mt-1">
+              Refine the inventory by identity, classification or financial lifecycle.
+            </p>
           </div>
-          <button type="button" (click)="toggleFilters()" class="p-1.5 rounded-lg text-fog hover:bg-ink/5" aria-label="Close advanced filters">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <button
+            type="button"
+            (click)="toggleFilters()"
+            class="p-1.5 rounded-lg text-fog hover:bg-ink/5"
+            aria-label="Close advanced filters"
+          >
+            <svg
+              class="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <path d="M18 6 6 18M6 6l12 12"></path>
             </svg>
           </button>
         </div>
 
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-
           <div class="field">
-            <input id="f-fromPrice" type="number" min="0" placeholder=" " [(ngModel)]="filters.fromPrice" />
+            <input
+              id="f-fromPrice"
+              type="number"
+              min="0"
+              placeholder=" "
+              [(ngModel)]="filters.fromPrice"
+            />
             <label for="f-fromPrice">Price from</label>
           </div>
           <div class="field">
-            <input id="f-toPrice" type="number" min="0" placeholder=" " [(ngModel)]="filters.toPrice" />
+            <input
+              id="f-toPrice"
+              type="number"
+              min="0"
+              placeholder=" "
+              [(ngModel)]="filters.toPrice"
+            />
             <label for="f-toPrice">Price to</label>
           </div>
 
           <div class="field">
             <select id="f-currency" [(ngModel)]="filters.currencyId">
               <option [ngValue]="null">All currencies</option>
-              @for (c of lookups().currencies; track c.id) { <option [ngValue]="c.id">{{ c.name }}</option> }
+              @for (c of lookups().currencies; track c.id) {
+                <option [ngValue]="c.id">{{ c.name }}</option>
+              }
             </select>
             <label for="f-currency">Currency</label><span class="chevron">⌄</span>
           </div>
 
           <div class="field">
-            <app-lazy-dropdown label="Mark / Brand" placeholder="All brands" [options]="filterOptions('brands')"
-              [selectedValue]="filters.brandId" [loading]="filterDropdownLoading()['brands'] ?? false"
-              [hasMore]="filterDropdownHasMore()['brands'] ?? false" [searchable]="true"
-              [searchTerm]="filterDropdownSearch()['brands'] ?? ''" searchPlaceholder="Search brands…"
+            <app-lazy-dropdown
+              label="Mark / Brand"
+              placeholder="All brands"
+              [options]="filterOptions('brands')"
+              [selectedValue]="filters.brandId"
+              [loading]="filterDropdownLoading()['brands'] ?? false"
+              [hasMore]="filterDropdownHasMore()['brands'] ?? false"
+              [searchable]="true"
+              [searchTerm]="filterDropdownSearch()['brands'] ?? ''"
+              searchPlaceholder="Search brands…"
               (opened)="ensureFilterDropdownLoaded('brands')"
-              (searchChanged)="onFilterDropdownSearch('brands', $event)" (loadMore)="loadFilterDropdown('brands')"
-              (selected)="filters.brandId = +$event.id" />
+              (searchChanged)="onFilterDropdownSearch('brands', $event)"
+              (loadMore)="loadFilterDropdown('brands')"
+              (selected)="filters.brandId = +$event.id"
+            />
           </div>
 
           <div class="field">
-            <app-lazy-dropdown label="Model" placeholder="All models" [options]="filterOptions('models')"
-              [selectedValue]="filters.modelId" [loading]="filterDropdownLoading()['models'] ?? false"
-              [hasMore]="filterDropdownHasMore()['models'] ?? false" [searchable]="true"
-              [searchTerm]="filterDropdownSearch()['models'] ?? ''" searchPlaceholder="Search models…"
+            <app-lazy-dropdown
+              label="Model"
+              placeholder="All models"
+              [options]="filterOptions('models')"
+              [selectedValue]="filters.modelId"
+              [loading]="filterDropdownLoading()['models'] ?? false"
+              [hasMore]="filterDropdownHasMore()['models'] ?? false"
+              [searchable]="true"
+              [searchTerm]="filterDropdownSearch()['models'] ?? ''"
+              searchPlaceholder="Search models…"
               (opened)="ensureFilterDropdownLoaded('models')"
-              (searchChanged)="onFilterDropdownSearch('models', $event)" (loadMore)="loadFilterDropdown('models')"
-              (selected)="filters.modelId = +$event.id" />
+              (searchChanged)="onFilterDropdownSearch('models', $event)"
+              (loadMore)="loadFilterDropdown('models')"
+              (selected)="filters.modelId = +$event.id"
+            />
           </div>
 
           <div class="field">
-            <app-lazy-dropdown label="Material" placeholder="All materials" [options]="filterOptions('materials')"
-              [selectedValue]="filters.materialId" [loading]="filterDropdownLoading()['materials'] ?? false"
-              [hasMore]="filterDropdownHasMore()['materials'] ?? false" [searchable]="true"
-              [searchTerm]="filterDropdownSearch()['materials'] ?? ''" searchPlaceholder="Search materials…"
+            <app-lazy-dropdown
+              label="Material"
+              placeholder="All materials"
+              [options]="filterOptions('materials')"
+              [selectedValue]="filters.materialId"
+              [loading]="filterDropdownLoading()['materials'] ?? false"
+              [hasMore]="filterDropdownHasMore()['materials'] ?? false"
+              [searchable]="true"
+              [searchTerm]="filterDropdownSearch()['materials'] ?? ''"
+              searchPlaceholder="Search materials…"
               (opened)="ensureFilterDropdownLoaded('materials')"
-              (searchChanged)="onFilterDropdownSearch('materials', $event)" (loadMore)="loadFilterDropdown('materials')"
-              (selected)="filters.materialId = +$event.id" />
+              (searchChanged)="onFilterDropdownSearch('materials', $event)"
+              (loadMore)="loadFilterDropdown('materials')"
+              (selected)="filters.materialId = +$event.id"
+            />
           </div>
 
           <div class="field">
             <select id="f-country" [(ngModel)]="filters.countryId">
               <option [ngValue]="null">All countries</option>
-              @for (c of lookups().countries; track c.id) { <option [ngValue]="c.id">{{ c.name }}</option> }
+              @for (c of lookups().countries; track c.id) {
+                <option [ngValue]="c.id">{{ c.name }}</option>
+              }
             </select>
             <label for="f-country">Country</label><span class="chevron">⌄</span>
           </div>
 
           <div class="field">
-            <app-lazy-dropdown label="Department" placeholder="All departments" [options]="filterOptions('departments')"
-              [selectedValue]="filters.departmentId" [loading]="filterDropdownLoading()['departments'] ?? false"
-              [hasMore]="filterDropdownHasMore()['departments'] ?? false" [searchable]="true"
-              [searchTerm]="filterDropdownSearch()['departments'] ?? ''" searchPlaceholder="Search departments…"
+            <app-lazy-dropdown
+              label="Department"
+              placeholder="All departments"
+              [options]="filterOptions('departments')"
+              [selectedValue]="filters.departmentId"
+              [loading]="filterDropdownLoading()['departments'] ?? false"
+              [hasMore]="filterDropdownHasMore()['departments'] ?? false"
+              [searchable]="true"
+              [searchTerm]="filterDropdownSearch()['departments'] ?? ''"
+              searchPlaceholder="Search departments…"
               (opened)="ensureFilterDropdownLoaded('departments')"
-              (searchChanged)="onFilterDropdownSearch('departments', $event)" (loadMore)="loadFilterDropdown('departments')"
-              (selected)="filters.departmentId = '' + $event.id" />
+              (searchChanged)="onFilterDropdownSearch('departments', $event)"
+              (loadMore)="loadFilterDropdown('departments')"
+              (selected)="filters.departmentId = '' + $event.id"
+            />
           </div>
 
           <div class="field">
-            <app-lazy-dropdown label="Group" placeholder="All groups" [options]="filterOptions('groups')"
-              [selectedValue]="filters.groupId" [loading]="filterDropdownLoading()['groups'] ?? false"
-              [hasMore]="filterDropdownHasMore()['groups'] ?? false" [searchable]="true"
-              [searchTerm]="filterDropdownSearch()['groups'] ?? ''" searchPlaceholder="Search groups…"
+            <app-lazy-dropdown
+              label="Group"
+              placeholder="All groups"
+              [options]="filterOptions('groups')"
+              [selectedValue]="filters.groupId"
+              [loading]="filterDropdownLoading()['groups'] ?? false"
+              [hasMore]="filterDropdownHasMore()['groups'] ?? false"
+              [searchable]="true"
+              [searchTerm]="filterDropdownSearch()['groups'] ?? ''"
+              searchPlaceholder="Search groups…"
               (opened)="ensureFilterDropdownLoaded('groups')"
-              (searchChanged)="onFilterDropdownSearch('groups', $event)" (loadMore)="loadFilterDropdown('groups')"
-              (selected)="filters.groupId = '' + $event.id" />
+              (searchChanged)="onFilterDropdownSearch('groups', $event)"
+              (loadMore)="loadFilterDropdown('groups')"
+              (selected)="filters.groupId = '' + $event.id"
+            />
           </div>
 
-          <div class="field">
-            <app-lazy-dropdown label="Location" placeholder="All locations" [options]="filterOptions('locations')"
-              [selectedValue]="filters.locationId" [loading]="filterDropdownLoading()['locations'] ?? false"
-              [hasMore]="filterDropdownHasMore()['locations'] ?? false" [searchable]="true"
-              [searchTerm]="filterDropdownSearch()['locations'] ?? ''" searchPlaceholder="Search locations…"
-              (opened)="ensureFilterDropdownLoaded('locations')"
-              (searchChanged)="onFilterDropdownSearch('locations', $event)" (loadMore)="loadFilterDropdown('locations')"
-              (selected)="filters.locationId = '' + $event.id" />
-          </div>
+          @for (options of locationFilterLevels(); track $index; let level = $index) {
+            <div class="field">
+              <app-lazy-dropdown
+                [label]="level === 0 ? 'Location' : 'Sub-location ' + level"
+                [placeholder]="level === 0 ? 'All locations' : 'Select a child location'"
+                [options]="locationLevelOptions(level)"
+                [selectedValue]="locationSelectedIds()[level] ?? null"
+                [loading]="locationLevelLoading()[level] ?? false"
+                [searchable]="false"
+                [allowClear]="true"
+                (opened)="
+                  loadLocationLevel(
+                    level,
+                    level === 0 ? null : (locationSelectedIds()[level - 1] ?? null)
+                  )
+                "
+                (selected)="selectLocationLevel(level, $event)"
+                (cleared)="clearLocationLevel(level)"
+              />
+            </div>
+          }
 
           <div class="field">
             <input id="f-capacity" type="text" placeholder=" " [(ngModel)]="filters.capacity" />
             <label for="f-capacity">Capacity</label>
           </div>
           <div class="field">
-            <input id="f-depYears" type="number" min="0" placeholder=" " [(ngModel)]="filters.depreciationYears" />
+            <input
+              id="f-depYears"
+              type="number"
+              min="0"
+              placeholder=" "
+              [(ngModel)]="filters.depreciationYears"
+            />
             <label for="f-depYears">Depreciation years</label>
           </div>
           <div class="field">
-            <input id="f-depRate" type="number" min="0" placeholder=" " [(ngModel)]="filters.depreciationRate" />
+            <input
+              id="f-depRate"
+              type="number"
+              min="0"
+              placeholder=" "
+              [(ngModel)]="filters.depreciationRate"
+            />
             <label for="f-depRate">Depreciation rate</label>
           </div>
 
           <div class="field">
-            <input id="f-fromWorking" type="date" placeholder=" " [(ngModel)]="filters.fromWorkingDate" />
+            <input
+              id="f-fromWorking"
+              type="date"
+              placeholder=" "
+              [(ngModel)]="filters.fromWorkingDate"
+            />
             <label for="f-fromWorking">Working date from</label>
           </div>
           <div class="field">
-            <input id="f-toWorking" type="date" placeholder=" " [(ngModel)]="filters.toWorkingDate" />
+            <input
+              id="f-toWorking"
+              type="date"
+              placeholder=" "
+              [(ngModel)]="filters.toWorkingDate"
+            />
             <label for="f-toWorking">Working date to</label>
           </div>
 
           <div class="field">
-            <input id="f-fromDep" type="date" placeholder=" " [(ngModel)]="filters.fromDepreciationDate" />
+            <input
+              id="f-fromDep"
+              type="date"
+              placeholder=" "
+              [(ngModel)]="filters.fromDepreciationDate"
+            />
             <label for="f-fromDep">Depreciation from</label>
           </div>
           <div class="field">
-            <input id="f-toDep" type="date" placeholder=" " [(ngModel)]="filters.toDepreciationDate" />
+            <input
+              id="f-toDep"
+              type="date"
+              placeholder=" "
+              [(ngModel)]="filters.toDepreciationDate"
+            />
             <label for="f-toDep">Depreciation to</label>
           </div>
         </div>
@@ -229,10 +398,20 @@
           </label>
 
           <div class="flex items-center gap-2">
-            <button type="button" (click)="resetFilters()"
-              class="px-4 py-2.5 rounded-lg text-sm font-semibold text-fog hover:bg-ink/5">Reset</button>
-            <button type="button" (click)="applyFilters()"
-              class="px-4 py-2.5 rounded-lg text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft">Apply Filters</button>
+            <button
+              type="button"
+              (click)="resetFilters()"
+              class="px-4 py-2.5 rounded-lg text-sm font-semibold text-fog hover:bg-ink/5"
+            >
+              Reset
+            </button>
+            <button
+              type="button"
+              (click)="applyFilters()"
+              class="px-4 py-2.5 rounded-lg text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft"
+            >
+              Apply Filters
+            </button>
           </div>
         </div>
       </div>
@@ -243,8 +422,11 @@
   <div class="px-4 sm:px-5 py-3 border-b border-inkText/8 flex items-center justify-between gap-3">
     <label class="flex items-center gap-2 text-xs text-fog">
       Show
-      <select [ngModel]="pageSize()" (ngModelChange)="onPageSizeChange($event)"
-        class="border border-inkText/15 rounded-lg px-2 py-1.5 text-xs text-inkText focus:outline-none focus:ring-2 focus:ring-brass/30">
+      <select
+        [ngModel]="pageSize()"
+        (ngModelChange)="onPageSizeChange($event)"
+        class="border border-inkText/15 rounded-lg px-2 py-1.5 text-xs text-inkText focus:outline-none focus:ring-2 focus:ring-brass/30"
+      >
         <option [ngValue]="5">5</option>
         <option [ngValue]="10">10</option>
         <option [ngValue]="25">25</option>
@@ -271,29 +453,47 @@
 
       <tbody class="divide-y divide-inkText/6">
         @if (loading()) {
-          <tr><td colspan="6" class="px-5 py-10 text-center text-sm text-fog">Loading…</td></tr>
+          <tr>
+            <td colspan="6" class="px-5 py-10 text-center text-sm text-fog">Loading…</td>
+          </tr>
         } @else {
           @for (item of items(); track item.id) {
             <tr class="hover:bg-ivory/60">
               <td class="px-5 py-3.5">
                 <div class="flex items-center gap-3">
-                  <span class="w-10 h-10 rounded-lg bg-ink/5 text-fog flex items-center justify-center shrink-0 overflow-hidden">
-
-                      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m4 7 8-4 8 4-8 4-8-4Z"></path>
-                        <path d="M4 7v10l8 4 8-4V7M12 11v10"></path>
-                      </svg>
-
+                  <span
+                    class="w-10 h-10 rounded-lg bg-ink/5 text-fog flex items-center justify-center shrink-0 overflow-hidden"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.7"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="m4 7 8-4 8 4-8 4-8-4Z"></path>
+                      <path d="M4 7v10l8 4 8-4V7M12 11v10"></path>
+                    </svg>
                   </span>
                   <span class="min-w-0">
-                    <span class="block text-sm font-semibold text-inkText truncate">{{ item.itemName }}</span>
-                    <span class="block text-xs text-fog mt-0.5 truncate">{{ item.code }} · SN {{ item.serialNumber }}</span>
+                    <span class="block text-sm font-semibold text-inkText truncate">{{
+                      item.itemName
+                    }}</span>
+                    <span class="block text-xs text-fog mt-0.5 truncate"
+                      >{{ item.code }} · SN {{ item.serialNumber }}</span
+                    >
                   </span>
                 </div>
               </td>
 
-              <td class="px-5 py-3.5"><span class="text-sm text-inkText">{{ item.groupName }}</span></td>
-              <td class="px-5 py-3.5"><span class="text-sm text-inkText">{{ item.locationName }}</span></td>
+              <td class="px-5 py-3.5">
+                <span class="text-sm text-inkText">{{ item.groupName }}</span>
+              </td>
+              <td class="px-5 py-3.5">
+                <span class="text-sm text-inkText">{{ item.locationName }}</span>
+              </td>
 
               <td class="px-5 py-3.5">
                 <span class="font-semibold text-inkText">{{ item.price }}</span>
@@ -301,27 +501,76 @@
               </td>
 
               <td class="px-5 py-3.5">
-                <span class="perm-chip" [class.is-granted]="item.status === 'Active'" [class.is-denied]="item.status !== 'Active'">
+                <span
+                  class="perm-chip"
+                  [class.is-granted]="item.status === 'Active'"
+                  [class.is-denied]="item.status !== 'Active'"
+                >
                   {{ item.status }}
                 </span>
               </td>
 
               <td class="px-5 py-3.5">
                 <div class="flex items-center justify-end gap-1">
-                  <button type="button" (click)="openDetails(item)" class="p-1.5 rounded-lg hover:bg-ink/5 text-fog" title="View details" [attr.aria-label]="'View ' + item.itemName">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <button
+                    type="button"
+                    (click)="openDetails(item)"
+                    class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
+                    title="View details"
+                    [attr.aria-label]="'View ' + item.itemName"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
                       <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
                       <circle cx="12" cy="12" r="3"></circle>
                     </svg>
                   </button>
-                  <button *appHasPermission="'Permissions.Items.Edit'" type="button" (click)="edit(item)" class="p-1.5 rounded-lg hover:bg-ink/5 text-fog" title="Edit item" [attr.aria-label]="'Edit ' + item.itemName">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <button
+                    *appHasPermission="'Permissions.Items.Edit'"
+                    type="button"
+                    (click)="edit(item)"
+                    class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
+                    title="Edit item"
+                    [attr.aria-label]="'Edit ' + item.itemName"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
                       <path d="M12 20h9"></path>
                       <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
                     </svg>
                   </button>
-                  <button *appHasPermission="'Permissions.Items.Delete'" type="button" (click)="openDelete(item)" class="p-1.5 rounded-lg hover:bg-dangerBg text-danger" title="Delete item" [attr.aria-label]="'Delete ' + item.itemName">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <button
+                    *appHasPermission="'Permissions.Items.Delete'"
+                    type="button"
+                    (click)="openDelete(item)"
+                    class="p-1.5 rounded-lg hover:bg-dangerBg text-danger"
+                    title="Delete item"
+                    [attr.aria-label]="'Delete ' + item.itemName"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
                       <path d="M3 6h18"></path>
                       <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                       <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
@@ -343,14 +592,30 @@
   </div>
 
   <!-- Pagination -->
-  <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-fog">
+  <div
+    class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-fog"
+  >
     <p>Showing {{ from() }} to {{ to() }} of {{ totalCount() }} items</p>
     <div class="flex items-center gap-1">
-      <button type="button" (click)="prev()" [disabled]="pageNumber() <= 1"
-        class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed">Previous</button>
-      <span class="px-3 py-1.5 rounded-lg bg-ink text-ivory font-semibold">{{ pageNumber() }} / {{ totalPages() }}</span>
-      <button type="button" (click)="next()" [disabled]="pageNumber() >= totalPages()"
-        class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed">Next</button>
+      <button
+        type="button"
+        (click)="prev()"
+        [disabled]="pageNumber() <= 1"
+        class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        Previous
+      </button>
+      <span class="px-3 py-1.5 rounded-lg bg-ink text-ivory font-semibold"
+        >{{ pageNumber() }} / {{ totalPages() }}</span
+      >
+      <button
+        type="button"
+        (click)="next()"
+        [disabled]="pageNumber() >= totalPages()"
+        class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        Next
+      </button>
     </div>
   </div>
 </div>
@@ -361,7 +626,8 @@
     [business]="selectedBusiness()"
     [lookups]="lookups()"
     (closed)="closeModal()"
-    (saved)="onSaved()" />
+    (saved)="onSaved()"
+  />
 }
 
 <!-- ========== Details modal ========== -->
@@ -377,9 +643,22 @@
     >
       <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8 shrink-0">
         <p id="item-details-title" class="font-display text-xl text-inkText">Item Details</p>
-        <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog" aria-label="Close" (click)="closeDetails()">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <button
+          type="button"
+          class="p-2 rounded-lg hover:bg-ink/5 text-fog"
+          aria-label="Close"
+          (click)="closeDetails()"
+        >
+          <svg
+            class="w-5 h-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
             <path d="M18 6 6 18M6 6l12 12" />
           </svg>
         </button>
@@ -388,12 +667,26 @@
       <div class="px-6 py-6 overflow-y-auto">
         <!-- Header: image + name -->
         <div class="flex items-center gap-4 mb-6 pb-6 border-b border-inkText/8">
-          <span class="w-28 h-28 sm:w-40 sm:h-40 rounded-2xl bg-ink/5 text-fog flex items-center justify-center shrink-0 overflow-hidden">
+          <span
+            class="w-28 h-28 sm:w-40 sm:h-40 rounded-2xl bg-ink/5 text-fog flex items-center justify-center shrink-0 overflow-hidden"
+          >
             @if (detailsImage(); as src) {
-              <img [src]="src" [alt]="item.itemName" class="w-full h-full object-cover"
-                   (error)="$any($event.target).style.display = 'none'" />
+              <img
+                [src]="src"
+                [alt]="item.itemName"
+                class="w-full h-full object-cover"
+                (error)="$any($event.target).style.display = 'none'"
+              />
             } @else {
-              <svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                class="w-12 h-12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="m4 7 8-4 8 4-8 4-8-4Z"></path>
                 <path d="M4 7v10l8 4 8-4V7M12 11v10"></path>
               </svg>
@@ -418,7 +711,9 @@
         @if (detailsError()) {
           <div class="flex items-center justify-between gap-4 mt-4 text-xs text-danger">
             <span>Could not load the rest of the details.</span>
-            <button type="button" class="font-semibold underline" (click)="reloadDetails()">Retry</button>
+            <button type="button" class="font-semibold underline" (click)="reloadDetails()">
+              Retry
+            </button>
           </div>
         } @else if (detailsLoading()) {
           <p class="mt-4 text-xs text-fog" role="status">Loading more details…</p>
@@ -459,8 +754,16 @@
           [disabled]="deleting()"
           (click)="cancelDelete()"
         >
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg
+            class="w-5 h-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
             <path d="M18 6 6 18M6 6l12 12" />
           </svg>
         </button>
@@ -468,9 +771,19 @@
 
       <div class="px-6 py-6 space-y-4">
         <div class="flex items-start gap-3">
-          <span class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-dangerBg text-danger">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <span
+            class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-dangerBg text-danger"
+          >
+            <svg
+              class="w-5 h-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
               <path d="M3 6h18" />
               <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
               <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
@@ -479,8 +792,7 @@
           <p id="delete-item-desc" class="text-sm text-inkText">
             Are you sure you want to delete
             <span class="font-semibold">{{ target.itemName }}</span>
-            <span class="text-fog">({{ target.code }})</span>?
-            This action cannot be undone.
+            <span class="text-fog">({{ target.code }})</span>? This action cannot be undone.
           </p>
         </div>
 

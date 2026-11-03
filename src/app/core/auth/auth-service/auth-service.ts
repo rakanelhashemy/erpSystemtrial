@@ -10,6 +10,27 @@ export interface SignInRequest {
   password: string;
 }
 
+export interface ChangePasswordRequest {
+  userId: string;
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface VerifyResetCodeRequest {
+  email: string;
+  code: string;
+}
+
+export interface ResetPasswordRequest extends VerifyResetCodeRequest {
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export interface AuthResponseData {
   accessToken?: string;
   token?: string;
@@ -21,6 +42,7 @@ export interface AuthResponseData {
 export interface ApiResponse<T> {
   succeeded: boolean;
   message?: string;
+  errors?: string[];
   data: T;
 }
 
@@ -144,31 +166,31 @@ export class AuthService {
       .pipe(catchError(this.handleAuthError));
   }
 
-  revokeAllSessions(): Observable<unknown> {
+  revokeAllSessions(userId: string): Observable<unknown> {
     return this.httpClient
-      .post(`${environment.baseUrl}Auth/RevokeAllSessions`, {})
+      .post(`${environment.baseUrl}Auth/RevokeAllSessions`, { userId })
       .pipe(catchError(this.handleAuthError));
   }
 
-  forgotPassword(data: { email: string }): Observable<unknown> {
+  forgotPassword(data: ForgotPasswordRequest): Observable<ApiResponse<unknown>> {
     return this.httpClient
-      .post(`${environment.baseUrl}Auth/ForgotPassword`, data)
+      .post<ApiResponse<unknown>>(`${environment.baseUrl}Auth/ForgotPassword`, data)
       .pipe(catchError(this.handleAuthError));
   }
 
-  verifyResetCode(data: { email: string; code: string }): Observable<unknown> {
+  verifyResetCode(data: VerifyResetCodeRequest): Observable<ApiResponse<unknown>> {
     return this.httpClient
-      .post(`${environment.baseUrl}Auth/VerifyResetCode`, data)
+      .post<ApiResponse<unknown>>(`${environment.baseUrl}Auth/VerifyResetCode`, data)
       .pipe(catchError(this.handleAuthError));
   }
 
-  resetPassword(data: { email: string; code: string; newPassword: string }): Observable<unknown> {
+  resetPassword(data: ResetPasswordRequest): Observable<ApiResponse<unknown>> {
     return this.httpClient
-      .post(`${environment.baseUrl}Auth/ResetPassword`, data)
+      .post<ApiResponse<unknown>>(`${environment.baseUrl}Auth/ResetPassword`, data)
       .pipe(catchError(this.handleAuthError));
   }
 
-  changePassword(data: { oldPassword: string; newPassword: string }): Observable<unknown> {
+  changePassword(data: ChangePasswordRequest): Observable<unknown> {
     return this.httpClient
       .post(`${environment.baseUrl}Auth/ChangePassword`, data)
       .pipe(catchError(this.handleAuthError));
@@ -177,12 +199,6 @@ export class AuthService {
   verifyCode(data: { email: string; code: string }): Observable<unknown> {
     return this.httpClient
       .post(`${environment.baseUrl}Auth/VerifyCode`, data)
-      .pipe(catchError(this.handleAuthError));
-  }
-
-  resendCode(data: { email: string }): Observable<unknown> {
-    return this.httpClient
-      .post(`${environment.baseUrl}Auth/ResendCode`, data)
       .pipe(catchError(this.handleAuthError));
   }
 
@@ -232,7 +248,6 @@ export class AuthService {
       return null;
     }
   }
-
 
   isAuthenticated(): boolean {
     return !!this.getAccessToken() && !this.isAccessTokenExpired();

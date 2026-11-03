@@ -2,6 +2,7 @@ import {
   Component,
   ChangeDetectionStrategy,
   computed,
+  DestroyRef,
   effect,
   ElementRef,
   inject,
@@ -15,14 +16,20 @@ import { Subject, Subscription, debounceTime } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { toast } from 'ngx-sonner';
 import { Item } from '../../core/models/items-modal';
-import { DropDownServices, DropdownItem, StaticLookups } from '../../core/services/drop-down-services';
+import {
+  DropDownServices,
+  DropdownItem,
+  StaticLookups,
+} from '../../core/services/drop-down-services';
 import { ItemsServices } from '../../core/services/items-services';
 import { BusinessContextService } from '../../core/services/business-context.service';
 import { ItemModalComponent } from './item-modal/item-modal.component';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { toImageUrl } from '../../core/config/image-url';
-import { LazyDropdownComponent, LazyDropdownOption } from '../../shared/ui/lazy-dropdown/lazy-dropdown.component';
-
+import {
+  LazyDropdownComponent,
+  LazyDropdownOption,
+} from '../../shared/ui/lazy-dropdown/lazy-dropdown.component';
 
 interface ItemFilters {
   fromPrice: number | null;
@@ -74,6 +81,7 @@ const emptyFilters = (): ItemFilters => ({
   templateUrl: './items.component.html',
 })
 export class ItemsComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly itemService = inject(ItemsServices);
   private readonly dd = inject(DropDownServices);
   private readonly businessCtx = inject(BusinessContextService);
@@ -81,7 +89,6 @@ export class ItemsComponent implements OnInit {
   readonly businessPageSize = 10;
   readonly searchDebounceMs = 400;
   readonly businessSearchDebounceMs = 300;
-
 
   readonly imageUrl = (path: string | null | undefined) => toImageUrl(path);
 
@@ -92,14 +99,16 @@ export class ItemsComponent implements OnInit {
   private loadSub?: Subscription;
   private businessSub?: Subscription;
   private readonly filterDropdownSubs: Record<string, Subscription> = {};
-  private readonly filterDropdownSearchSubjects: Record<string, Subject<string>> = Object.fromEntries(
-    ['brands', 'models', 'materials', 'groups', 'departments', 'locations']
-      .map((key) => [key, new Subject<string>()]),
-  );
+  private readonly filterDropdownSearchSubjects: Record<string, Subject<string>> =
+    Object.fromEntries(
+      ['brands', 'models', 'materials', 'groups', 'departments', 'locations'].map((key) => [
+        key,
+        new Subject<string>(),
+      ]),
+    );
   private businessCache: { items: DropdownItem[]; hasNext: boolean; page: number } | null = null;
 
   private businessSentinel = viewChild<ElementRef<HTMLElement>>('businessSentinel');
-
 
   businesses = signal<DropdownItem[]>([]);
   selectedBusiness = signal<DropdownItem | null>(null);
@@ -182,7 +191,9 @@ export class ItemsComponent implements OnInit {
     return (Object.keys(e) as (keyof ItemFilters)[]).filter((k) => f[k] !== e[k]).length;
   });
 
-  from = computed(() => (this.totalCount() === 0 ? 0 : (this.pageNumber() - 1) * this.pageSize() + 1));
+  from = computed(() =>
+    this.totalCount() === 0 ? 0 : (this.pageNumber() - 1) * this.pageSize() + 1,
+  );
   to = computed(() => Math.min(this.pageNumber() * this.pageSize(), this.totalCount()));
 
   // ---------- filter dropdowns ----------
@@ -192,6 +203,9 @@ export class ItemsComponent implements OnInit {
   groups = signal<DropdownItem[]>([]);
   departments = signal<DropdownItem[]>([]);
   locations = signal<DropdownItem[]>([]);
+  locationFilterLevels = signal<DropdownItem[][]>([[]]);
+  locationSelectedIds = signal<string[]>([]);
+  locationLevelLoading = signal<Record<number, boolean>>({});
   lookups = signal<StaticLookups>({ countries: [], currencies: [], genders: [] });
   readonly filterDropdownPageSize = 10;
   readonly filterDropdownPages = signal<Record<string, number>>({});
@@ -391,6 +405,9 @@ export class ItemsComponent implements OnInit {
     this.groups.set([]);
     this.departments.set([]);
     this.locations.set([]);
+    this.locationFilterLevels.set([[]]);
+    this.locationSelectedIds.set([]);
+    this.locationLevelLoading.set({});
     this.dd.staticLookups().subscribe({
       next: (lookups) => this.lookups.set(lookups),
       error: () => this.error.set('Could not load filter options.'),
@@ -405,7 +422,12 @@ export class ItemsComponent implements OnInit {
   loadFilterDropdown(key: string, reset = false): void {
     const businessId = this.businessId();
     if (!businessId) return;
-    if (!reset && (this.filterDropdownLoading()[key] || (!this.filterDropdownHasMore()[key] && this.filterDropdownPages()[key]))) return;
+    if (
+      !reset &&
+      (this.filterDropdownLoading()[key] ||
+        (!this.filterDropdownHasMore()[key] && this.filterDropdownPages()[key]))
+    )
+      return;
     if (reset) {
       this.filterDropdownSubs[key]?.unsubscribe();
       this.filterDropdownPages.update((state) => ({ ...state, [key]: 0 }));
@@ -426,18 +448,24 @@ export class ItemsComponent implements OnInit {
       pageSize: this.filterDropdownPageSize,
       search: this.filterDropdownSearch()[key]?.trim() ?? '',
     };
-    const request = key === 'brands' ? this.dd.brands(query)
-      : key === 'models' ? this.dd.itemModels(query)
-      : key === 'materials' ? this.dd.materials(query)
-      : key === 'groups' ? this.dd.groups(query)
-      : key === 'departments' ? this.dd.departments(query)
-      : this.dd.locations(query);
+    const request =
+      key === 'brands'
+        ? this.dd.brands(query)
+        : key === 'models'
+          ? this.dd.itemModels(query)
+          : key === 'materials'
+            ? this.dd.materials(query)
+            : key === 'groups'
+              ? this.dd.groups(query)
+              : key === 'departments'
+                ? this.dd.departments(query)
+                : this.dd.locations(query);
     this.filterDropdownSubs[key]?.unsubscribe();
     this.filterDropdownSubs[key] = request.subscribe({
       next: (response) => {
         const page = response.data;
         const items = page.data;
-        const update = (current: DropdownItem[]) => reset ? items : [...current, ...items];
+        const update = (current: DropdownItem[]) => (reset ? items : [...current, ...items]);
         if (key === 'brands') this.brands.update(update);
         else if (key === 'models') this.models.update(update);
         else if (key === 'materials') this.materials.update(update);
@@ -456,13 +484,76 @@ export class ItemsComponent implements OnInit {
   }
 
   filterOptions(key: string): LazyDropdownOption[] {
-    const options = key === 'brands' ? this.brands()
-      : key === 'models' ? this.models()
-      : key === 'materials' ? this.materials()
-      : key === 'groups' ? this.groups()
-      : key === 'departments' ? this.departments()
-      : this.locations();
+    const options =
+      key === 'brands'
+        ? this.brands()
+        : key === 'models'
+          ? this.models()
+          : key === 'materials'
+            ? this.materials()
+            : key === 'groups'
+              ? this.groups()
+              : key === 'departments'
+                ? this.departments()
+                : this.locations();
     return options.map((option) => ({ id: option.id, name: option.title ?? option.name }));
+  }
+
+  locationLevelOptions(level: number): LazyDropdownOption[] {
+    return (this.locationFilterLevels()[level] ?? []).map((location) => ({
+      id: location.id,
+      name: location.title ?? location.name,
+    }));
+  }
+
+  loadLocationLevel(level: number, parentId: string | null): void {
+    if (!this.businessId() || this.locationLevelLoading()[level]) return;
+    const currentLevels = this.locationFilterLevels();
+    if (currentLevels[level]?.length) return;
+
+    this.locationLevelLoading.update((state) => ({ ...state, [level]: true }));
+    this.dd
+      .locations({
+        businessId: this.businessId(),
+        parentId,
+        pageNumber: 1,
+        pageSize: 1000,
+        search: '',
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          const options = response.data.data;
+          this.locationFilterLevels.update((levels) => {
+            const next = levels.slice(0, level);
+            if (options.length || level === 0) next[level] = options;
+            return next;
+          });
+          this.locationLevelLoading.update((state) => ({ ...state, [level]: false }));
+        },
+        error: () => {
+          this.locationLevelLoading.update((state) => ({ ...state, [level]: false }));
+          this.error.set('Could not load filter options.');
+        },
+      });
+  }
+
+  selectLocationLevel(level: number, location: LazyDropdownOption): void {
+    const id = String(location.id);
+    this.locationSelectedIds.update((selected) => {
+      const next = selected.slice(0, level);
+      next[level] = id;
+      return next;
+    });
+    this.filters.locationId = id;
+    this.locationFilterLevels.update((levels) => levels.slice(0, level + 1));
+    this.loadLocationLevel(level + 1, id);
+  }
+
+  clearLocationLevel(level: number): void {
+    this.locationFilterLevels.update((levels) => (level === 0 ? [[]] : levels.slice(0, level)));
+    this.locationSelectedIds.update((selected) => selected.slice(0, level));
+    this.filters.locationId = this.locationSelectedIds().at(-1) ?? null;
   }
 
   onFilterDropdownSearch(key: string, term: string): void {
@@ -488,6 +579,8 @@ export class ItemsComponent implements OnInit {
 
   resetFilters(): void {
     this.filters = emptyFilters();
+    this.locationSelectedIds.set([]);
+    this.locationFilterLevels.update((levels) => levels.slice(0, 1));
     this.filterDropdownSearch.set({});
     for (const search$ of Object.values(this.filterDropdownSearchSubjects)) search$.next('');
     this.applyFilters();

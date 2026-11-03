@@ -28,7 +28,7 @@ export interface LazyDropdownOption {
         <span class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-fog" aria-hidden="true">⌄</span>
       }
       @if (open()) {
-        <div class="fixed z-[60] overflow-auto overscroll-contain rounded-xl border border-inkText/10 bg-white shadow-[0_18px_50px_-18px_rgba(19,36,32,0.38)] ring-1 ring-black/5"
+        <div class="fixed z-60 overflow-auto overscroll-contain rounded-xl border border-inkText/10 bg-white shadow-[0_18px_50px_-18px_rgba(19,36,32,0.38)] ring-1 ring-black/5"
              [style.top.px]="menuPosition().top" [style.left.px]="menuPosition().left"
              [style.width.px]="menuPosition().width" [style.max-height.px]="menuPosition().maxHeight"
              role="listbox" [attr.aria-label]="label()" (scroll)="onScroll($event)">

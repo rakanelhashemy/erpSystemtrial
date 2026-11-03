@@ -15,24 +15,37 @@
     </button>
     <div class="leading-tight">
       <p class="font-display text-lg text-inkText">{{ pageTitle }}</p>
-      <p class="text-[11px] text-fog sm:block">{{ branding.companyName() }}</p>
+      <p class="hidden sm:block text-[11px] text-fog">{{ branding.companyName() }}</p>
     </div>
   </div>
 
   <div class="flex items-center gap-4">
-    <div class=" md:flex flex-col items-end leading-tight">
-      <span class="text-[11px] text-fog">Front Desk</span>
-      <span class="text-[11px] text-granted font-semibold">● Online</span>
-    </div>
+  <div class="hidden md:flex flex-col items-end leading-tight">
+  <span class="text-[11px] text-fog">{{ role() || '—' }}</span>
+  <span class="text-[11px] font-semibold text-granted"
+     >
+    ● Online
+  </span>
+</div>
 
+
+
+
+
+
+    
     <div class="relative">
       <button
         type="button"
         class="flex items-center cursor-pointer gap-2 pl-1 pr-2.5 py-1 rounded-full border border-inkText/10 hover:border-brass/50 transition-colors"
         (click)="dropdownOpen = !dropdownOpen"
       >
-        <span class="w-8 h-8 rounded-full bg-ink text-brassLt flex items-center justify-center font-display text-sm">A</span>
-        <span class=" sm:block text-sm font-semibold text-inkText">{{ userName }}</span>
+        <span class="w-8 h-8 rounded-full bg-ink text-brassLt flex items-center justify-center font-display text-sm">
+          {{ initial() }}
+        </span>
+        <span class="hidden sm:block text-sm font-semibold text-inkText">
+          {{ user()?.fullName }}
+        </span>
         <svg class="w-3.5 h-3.5 text-fog" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="m6 9 6 6 6-6" />
@@ -42,13 +55,15 @@
       @if (dropdownOpen) {
         <div class="absolute right-0 mt-2 w-60 bg-paper rounded-xl shadow-soft border border-inkText/8 overflow-hidden z-40">
           <div class="px-4 py-3 border-b border-inkText/8">
-            <p class="text-sm font-semibold text-inkText">{{ userName }}</p>
-            <p class="text-xs text-fog">General Manager · {{ branding.companyName() }}</p>
+            <p class="text-sm font-semibold text-inkText">{{ user()?.fullName }}</p>
+            <p class="text-xs text-fog truncate">{{ user()?.email }}</p>
+            <p class="text-xs text-fog">{{ role() }} · {{ branding.companyName() }}</p>
           </div>
+
           <button
             type="button"
             class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-inkText hover:bg-ivory text-left"
-            (click)="editProfile.emit(); dropdownOpen = false"
+            (click)="onEditProfile()"
           >
             <svg class="w-4 h-4 text-fog" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -57,10 +72,11 @@
             </svg>
             Edit Profile
           </button>
+
           <button
             type="button"
             class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-danger hover:bg-dangerBg text-left"
-            (click)="logout.emit()"
+            (click)="onLogout()"
           >
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">

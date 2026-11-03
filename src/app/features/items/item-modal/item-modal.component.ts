@@ -1,15 +1,31 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, computed, DestroyRef, inject, input, OnInit, output, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  OnInit,
+  output,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { debounceTime, map, Observable, startWith, Subject, Subscription } from 'rxjs';
 import { toast } from 'ngx-sonner';
-import { DropDownServices, DropdownItem, ItemFormLookups, StaticLookups } from '../../../core/services/drop-down-services';
+import {
+  DropDownServices,
+  DropdownItem,
+  ItemFormLookups,
+  StaticLookups,
+} from '../../../core/services/drop-down-services';
 import { ItemRequest } from '../../../core/models/items-modal';
 import { ItemsServices } from '../../../core/services/items-services';
 import { toImageUrl } from '../../../core/config/image-url';
-import { LazyDropdownComponent, LazyDropdownOption } from '../../../shared/ui/lazy-dropdown/lazy-dropdown.component';
-
+import {
+  LazyDropdownComponent,
+  LazyDropdownOption,
+} from '../../../shared/ui/lazy-dropdown/lazy-dropdown.component';
 
 type TabId = 'general' | 'specs' | 'financials';
 
@@ -33,12 +49,20 @@ export class ItemModalComponent implements OnInit {
   itemNames = input<DropdownItem[]>([]);
   lookups = input<StaticLookups>({ countries: [], currencies: [], genders: [] });
 
-  private readonly dropdownKeys = ['itemNames', 'brands', 'models', 'materials', 'groups', 'departments', 'locations'];
+  private readonly dropdownKeys = [
+    'itemNames',
+    'brands',
+    'models',
+    'materials',
+    'groups',
+    'departments',
+  ];
   private readonly dropdownSearchSubjects: Record<string, Subject<string>> = Object.fromEntries(
     this.dropdownKeys.map((key) => [key, new Subject<string>()]),
   );
   private readonly dropdownRequests: Record<string, Subscription> = {};
-  private readonly loadedDropdownDetails: Record<string, { id: string | number; name: string }> = {};
+  private readonly loadedDropdownDetails: Record<string, { id: string | number; name: string }> =
+    {};
   private formItemNames: DropdownItem<number>[] = [];
   readonly modalDropdownOptions = signal<Record<string, LazyDropdownOption[]>>({});
   readonly modalDropdownPages = signal<Record<string, number>>({});
@@ -47,6 +71,9 @@ export class ItemModalComponent implements OnInit {
   readonly modalDropdownSearch = signal<Record<string, string>>({});
   readonly newDropdownNames = signal<Record<string, string>>({});
   readonly modalDropdownPageSize = 10;
+  readonly locationLevels = signal<DropdownItem[][]>([[]]);
+  readonly selectedLocationIds = signal<string[]>([]);
+  readonly locationLevelLoading = signal<Record<number, boolean>>({});
 
   closed = output<void>();
   saved = output<void>();
@@ -64,8 +91,26 @@ export class ItemModalComponent implements OnInit {
 
   // which controls live in which tab (used to jump to the tab that has an error)
   private readonly tabControls: Record<TabId, string[]> = {
-    general: ['name', 'price', 'currencyId', 'exchangeRate', 'departmentId', 'quantity', 'description'],
-    specs: ['serialNumber', 'brandId', 'modelId', 'materialId', 'countryId', 'capacity', 'dimensions', 'groupId', 'locationId'],
+    general: [
+      'name',
+      'price',
+      'currencyId',
+      'exchangeRate',
+      'departmentId',
+      'quantity',
+      'description',
+    ],
+    specs: [
+      'serialNumber',
+      'brandId',
+      'modelId',
+      'materialId',
+      'countryId',
+      'capacity',
+      'dimensions',
+      'groupId',
+      'locationId',
+    ],
     financials: ['workingDate', 'depreciationRate', 'depreciationYears', 'depreciationDate'],
   };
 
@@ -105,7 +150,10 @@ export class ItemModalComponent implements OnInit {
     locationId: this.fb.control<string | null>(null),
 
     workingDate: [''],
-    depreciationRate: this.fb.control<number | null>(null, [Validators.min(0), Validators.max(100)]),
+    depreciationRate: this.fb.control<number | null>(null, [
+      Validators.min(0),
+      Validators.max(100),
+    ]),
     depreciationYears: this.fb.control<number | null>(null, Validators.min(1)),
     depreciationDate: [''],
     copyCount: [1, [Validators.required, Validators.min(1), Validators.max(this.maxCopies)]],
@@ -120,7 +168,9 @@ export class ItemModalComponent implements OnInit {
   );
 
   // ---------- currency conversion ----------
-  selectedCurrency = computed(() => this.lookups().currencies.find((c) => c.id === this.values().currencyId) ?? null);
+  selectedCurrency = computed(
+    () => this.lookups().currencies.find((c) => c.id === this.values().currencyId) ?? null,
+  );
   needsConversion = computed(() => {
     const c = this.selectedCurrency();
     return !!c && c.name !== this.baseCurrency;
@@ -134,7 +184,8 @@ export class ItemModalComponent implements OnInit {
   constructor() {
     this.destroyRef.onDestroy(() => this.clearImage());
     for (const [key, search$] of Object.entries(this.dropdownSearchSubjects)) {
-      search$.pipe(debounceTime(250), takeUntilDestroyed(this.destroyRef))
+      search$
+        .pipe(debounceTime(250), takeUntilDestroyed(this.destroyRef))
         .subscribe(() => this.loadModalDropdown(key, true));
     }
   }
@@ -200,8 +251,10 @@ export class ItemModalComponent implements OnInit {
       models: { id: d['modelId'], name: d['modelName'] ?? '' },
       materials: { id: d['materialId'], name: d['materialName'] ?? '' },
       groups: { id: d['groupId'], name: d['groupName'] ?? '' },
-      departments: { id: d['departmentId'], name: d['departmentTitle'] ?? d['departmentName'] ?? '' },
-      locations: { id: d['locationId'], name: d['locationName'] ?? '' },
+      departments: {
+        id: d['departmentId'],
+        name: d['departmentTitle'] ?? d['departmentName'] ?? '',
+      },
     };
     for (const [key, option] of Object.entries(detailOptions)) {
       if (option.id !== null && option.id !== undefined && option.name) {
@@ -227,7 +280,8 @@ export class ItemModalComponent implements OnInit {
       this.modalDropdownLoading.update((state) => ({ ...state, [key]: true }));
     }
 
-    this.dropdownService.itemFormLookups({ businessId, pageSize: this.modalDropdownPageSize })
+    this.dropdownService
+      .itemFormLookups({ businessId, pageSize: this.modalDropdownPageSize })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (lookups) => {
@@ -241,26 +295,74 @@ export class ItemModalComponent implements OnInit {
             // Load groups from the business-scoped dropdown endpoint, which returns the correct IDs.
             groups: [],
             departments: (lookups.departments ?? []).map(({ id, title }) => ({ id, name: title })),
-            locations: (lookups.locations ?? []).map(({ id, name }) => ({ id, name })),
           };
 
           for (const key of this.dropdownKeys) {
             const options = this.withLoadedDropdownOption(key, firstPages[key] ?? []);
             this.modalDropdownOptions.update((all) => ({ ...all, [key]: options }));
             this.modalDropdownPages.update((pages) => ({ ...pages, [key]: 1 }));
-            this.modalDropdownHasMore.update((state) => ({ ...state, [key]: (firstPages[key]?.length ?? 0) >= this.modalDropdownPageSize }));
+            this.modalDropdownHasMore.update((state) => ({
+              ...state,
+              [key]: (firstPages[key]?.length ?? 0) >= this.modalDropdownPageSize,
+            }));
             this.modalDropdownLoading.update((state) => ({ ...state, [key]: false }));
           }
 
-          // The consolidated endpoint currently omits location options; keep this list business scoped.
-          if (!firstPages['locations']?.length) this.loadModalDropdown('locations', true);
+          this.loadLocationLevel(0, null);
           this.loadModalDropdown('groups', true);
         },
         error: () => {
           // Preserve the existing individual endpoints as a fallback if the consolidated lookup fails.
           for (const key of this.dropdownKeys) this.loadModalDropdown(key, true);
+          this.loadLocationLevel(0, null);
         },
       });
+  }
+
+  locationOptions(level: number): LazyDropdownOption[] {
+    return (this.locationLevels()[level] ?? []).map((location) => ({
+      id: location.id,
+      name: location.title ?? location.name,
+    }));
+  }
+
+  loadLocationLevel(level: number, parentId: string | null): void {
+    const businessId = this.business()?.id;
+    if (!businessId || this.locationLevelLoading()[level] || this.locationLevels()[level]?.length)
+      return;
+    this.locationLevelLoading.update((state) => ({ ...state, [level]: true }));
+    this.dropdownService
+      .locations({ businessId, parentId, pageNumber: 1, pageSize: 1000, search: '' })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.locationLevels.update((levels) => {
+            const next = levels.slice(0, level);
+            if (response.data.data.length || level === 0) next[level] = response.data.data;
+            return next;
+          });
+          this.locationLevelLoading.update((state) => ({ ...state, [level]: false }));
+        },
+        error: () => this.locationLevelLoading.update((state) => ({ ...state, [level]: false })),
+      });
+  }
+
+  selectLocation(level: number, location: LazyDropdownOption): void {
+    const id = String(location.id);
+    this.selectedLocationIds.update((selected) => {
+      const next = selected.slice(0, level);
+      next[level] = id;
+      return next;
+    });
+    this.form.controls.locationId.setValue(id);
+    this.locationLevels.update((levels) => levels.slice(0, level + 1));
+    this.loadLocationLevel(level + 1, id);
+  }
+
+  clearLocation(level: number): void {
+    this.selectedLocationIds.update((selected) => selected.slice(0, level));
+    this.locationLevels.update((levels) => (level === 0 ? [[]] : levels.slice(0, level)));
+    this.form.controls.locationId.setValue(this.selectedLocationIds().at(-1) ?? null);
   }
 
   loadModalDropdown(key: string, reset = false): void {
@@ -282,13 +384,20 @@ export class ItemModalComponent implements OnInit {
       pageSize: this.modalDropdownPageSize,
       search: this.modalDropdownSearch()[key]?.trim() ?? '',
     };
-    const request = key === 'itemNames' ? this.dropdownService.itemNames(query)
-      : key === 'brands' ? this.dropdownService.brands(query)
-      : key === 'models' ? this.dropdownService.itemModels(query)
-      : key === 'materials' ? this.dropdownService.materials(query)
-      : key === 'groups' ? this.dropdownService.groups(query)
-      : key === 'departments' ? this.dropdownService.departments(query)
-      : this.dropdownService.locations(query);
+    const request =
+      key === 'itemNames'
+        ? this.dropdownService.itemNames(query)
+        : key === 'brands'
+          ? this.dropdownService.brands(query)
+          : key === 'models'
+            ? this.dropdownService.itemModels(query)
+            : key === 'materials'
+              ? this.dropdownService.materials(query)
+              : key === 'groups'
+                ? this.dropdownService.groups(query)
+                : key === 'departments'
+                  ? this.dropdownService.departments(query)
+                  : this.dropdownService.locations(query);
 
     this.modalDropdownLoading.update((state) => ({ ...state, [key]: true }));
     this.dropdownRequests[key] = request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
@@ -296,7 +405,10 @@ export class ItemModalComponent implements OnInit {
         const page = response.data;
         const loaded = page.data.map((item) => ({ id: item.id, name: item.title ?? item.name }));
         const options = reset ? loaded : [...(this.modalDropdownOptions()[key] ?? []), ...loaded];
-        this.modalDropdownOptions.update((all) => ({ ...all, [key]: this.withLoadedDropdownOption(key, options) }));
+        this.modalDropdownOptions.update((all) => ({
+          ...all,
+          [key]: this.withLoadedDropdownOption(key, options),
+        }));
         if (key === 'itemNames') {
           const names = loaded.map((item) => ({ id: Number(item.id), name: item.name }));
           this.formItemNames = reset ? names : [...this.formItemNames, ...names];
@@ -309,11 +421,19 @@ export class ItemModalComponent implements OnInit {
     });
   }
 
-  private withLoadedDropdownOption(key: string, options: LazyDropdownOption[]): LazyDropdownOption[] {
+  private withLoadedDropdownOption(
+    key: string,
+    options: LazyDropdownOption[],
+  ): LazyDropdownOption[] {
     const selected = this.loadedDropdownDetails[key];
     // The item-name input already keeps its edit value; don't append it to the paged list,
     // otherwise the initial 10 options can become 11.
-    if (key === 'itemNames' || !selected || options.some((option) => String(option.id) === String(selected.id))) return options;
+    if (
+      key === 'itemNames' ||
+      !selected ||
+      options.some((option) => String(option.id) === String(selected.id))
+    )
+      return options;
     return [...options, selected];
   }
 
@@ -327,7 +447,9 @@ export class ItemModalComponent implements OnInit {
 
   searchItemNames(term: string): void {
     this.form.controls.name.setValue(term);
-    const exactMatch = this.modalOptions('itemNames').find((option) => option.name.trim().toLowerCase() === term.trim().toLowerCase());
+    const exactMatch = this.modalOptions('itemNames').find(
+      (option) => option.name.trim().toLowerCase() === term.trim().toLowerCase(),
+    );
     if (exactMatch) {
       this.selectItemName(exactMatch);
     } else if (term.trim().toLowerCase() !== this.loadedItemName.toLowerCase()) {
@@ -341,8 +463,11 @@ export class ItemModalComponent implements OnInit {
 
   onItemNameSuggestionsScroll(event: Event): void {
     const list = event.target as HTMLElement;
-    if (this.modalDropdownHasMore()['itemNames'] && !this.modalDropdownLoading()['itemNames']
-        && list.scrollTop + list.clientHeight >= list.scrollHeight - 24) {
+    if (
+      this.modalDropdownHasMore()['itemNames'] &&
+      !this.modalDropdownLoading()['itemNames'] &&
+      list.scrollTop + list.clientHeight >= list.scrollHeight - 24
+    ) {
       this.loadModalDropdown('itemNames');
     }
   }
@@ -360,8 +485,20 @@ export class ItemModalComponent implements OnInit {
 
   newOptionText(key: string): string {
     const value = this.modalDropdownSearch()[key]?.trim();
-    if (!value || this.modalDropdownLoading()[key] || this.modalOptions(key).some((option) => option.name.trim().toLowerCase() === value.toLowerCase())) return '';
-    const labels: Record<string, string> = { itemNames: 'item name', brands: 'brand', models: 'model', materials: 'material' };
+    if (
+      !value ||
+      this.modalDropdownLoading()[key] ||
+      this.modalOptions(key).some(
+        (option) => option.name.trim().toLowerCase() === value.toLowerCase(),
+      )
+    )
+      return '';
+    const labels: Record<string, string> = {
+      itemNames: 'item name',
+      brands: 'brand',
+      models: 'model',
+      materials: 'material',
+    };
     const label = labels[key];
     return label ? `Add “${value}” as new ${label}` : '';
   }
@@ -396,7 +533,9 @@ export class ItemModalComponent implements OnInit {
 
   onDepreciationRateInput(rawValue: string): void {
     const rate = rawValue.trim() === '' ? null : Number(rawValue);
-    this.form.controls.depreciationRate.setValue(rate !== null && Number.isFinite(rate) ? rate : null);
+    this.form.controls.depreciationRate.setValue(
+      rate !== null && Number.isFinite(rate) ? rate : null,
+    );
     if (rate === null || !Number.isFinite(rate) || rate <= 0 || rate > 100) {
       this.form.controls.depreciationYears.setValue(null);
       this.form.controls.depreciationDate.setValue('');
@@ -408,8 +547,13 @@ export class ItemModalComponent implements OnInit {
 
   onDepreciationYearsInput(rawValue: string): void {
     const parsedYears = rawValue.trim() === '' ? null : Number(rawValue);
-    const years = parsedYears === null || !Number.isFinite(parsedYears) ? null : Math.max(1, Math.round(parsedYears));
-    this.form.controls.depreciationYears.setValue(years !== null && Number.isFinite(years) ? years : null);
+    const years =
+      parsedYears === null || !Number.isFinite(parsedYears)
+        ? null
+        : Math.max(1, Math.round(parsedYears));
+    this.form.controls.depreciationYears.setValue(
+      years !== null && Number.isFinite(years) ? years : null,
+    );
     if (years === null || !Number.isFinite(years) || years <= 0) {
       this.form.controls.depreciationRate.setValue(null);
       this.form.controls.depreciationDate.setValue('');
@@ -491,7 +635,11 @@ export class ItemModalComponent implements OnInit {
 
     const rateMissing = this.needsConversion() && !this.form.controls.exchangeRate.value;
     if (this.form.invalid || rateMissing) {
-      this.status.set(rateMissing ? 'Exchange rate is required for this currency.' : 'Please fix the highlighted fields.');
+      this.status.set(
+        rateMissing
+          ? 'Exchange rate is required for this currency.'
+          : 'Please fix the highlighted fields.',
+      );
       this.jumpToFirstError(rateMissing);
       return;
     }
@@ -507,7 +655,11 @@ export class ItemModalComponent implements OnInit {
       next: () => {
         this.saving.set(false);
         toast.success(
-          id ? 'Item updated successfully' : copies > 1 ? `${copies} items created successfully` : 'Item created successfully',
+          id
+            ? 'Item updated successfully'
+            : copies > 1
+              ? `${copies} items created successfully`
+              : 'Item created successfully',
         );
         this.saved.emit();
       },
@@ -529,7 +681,10 @@ export class ItemModalComponent implements OnInit {
 
     const errors = body.errors;
     if (Array.isArray(errors) && errors.length) {
-      return errors.map((e: any) => (typeof e === 'string' ? e : (e?.message ?? JSON.stringify(e)))).slice(0, 3).join(' | ');
+      return errors
+        .map((e: any) => (typeof e === 'string' ? e : (e?.message ?? JSON.stringify(e))))
+        .slice(0, 3)
+        .join(' | ');
     }
     if (errors && typeof errors === 'object') {
       const msgs = Object.entries(errors).flatMap(([field, v]) =>
@@ -546,9 +701,7 @@ export class ItemModalComponent implements OnInit {
       return;
     }
     for (const tab of this.tabs) {
-      const hasError = this.tabControls[tab.id].some(
-        (name) => this.form.get(name)?.invalid,
-      );
+      const hasError = this.tabControls[tab.id].some((name) => this.form.get(name)?.invalid);
       if (hasError) {
         this.activeTab.set(tab.id);
         return;
@@ -561,7 +714,9 @@ export class ItemModalComponent implements OnInit {
     const newName = this.newDropdownNames()['itemNames'];
     if (newName) return { itemNameId: null, newItemName: newName };
     const key = name.toLowerCase();
-    const match = [...this.itemNames(), ...this.formItemNames].find((n) => n.name.trim().toLowerCase() === key);
+    const match = [...this.itemNames(), ...this.formItemNames].find(
+      (n) => n.name.trim().toLowerCase() === key,
+    );
     if (match) return { itemNameId: Number(match.id), newItemName: null };
 
     if (this.loadedItemNameId !== null && this.loadedItemName.trim().toLowerCase() === key) {
@@ -607,7 +762,8 @@ export class ItemModalComponent implements OnInit {
 
       workingDate: v.workingDate || null,
       depreciationRate: v.depreciationRate,
-      depreciationYears: v.depreciationYears === null ? null : Math.max(1, Math.round(v.depreciationYears)),
+      depreciationYears:
+        v.depreciationYears === null ? null : Math.max(1, Math.round(v.depreciationYears)),
       depreciationDate: v.depreciationDate || null,
       scraping: false,
     };

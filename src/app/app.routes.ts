@@ -8,6 +8,14 @@ export const routes: Routes = [
     canActivate: [guestGuard],
     loadComponent: () => import('./features/login/login.component').then((m) => m.LoginComponent),
   },
+  {
+    path: 'auth/forgot-password',
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import('./features/forgot-password/forgot-password.component').then(
+        (m) => m.ForgotPasswordComponent,
+      ),
+  },
 
   {
     path: 'app',

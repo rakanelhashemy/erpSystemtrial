@@ -1,13 +1,13 @@
 <div class="min-h-screen lg:flex" [class.lg:flex-row-reverse]="language() === 'ar'">
- <app-sidebar
+  <app-sidebar
     [collapsed]="sidebarCollapsed"
     [mobileOpen]="mobileOpen"
     (closeMobile)="closeMobileMenu()"
     (collapseToggled)="toggleCollapse()"
   />
- 
+
   <div class="flex-1 flex flex-col min-w-0">
-    <app-header 
+    <app-header
       [pageTitle]="pageTitle()"
       (toggleMenu)="onHamburger()"
       (editProfile)="openEditProfile()"
@@ -20,23 +20,354 @@
   </div>
 </div>
 
-@if (editProfileOpen) {
+@if (editProfileOpen()) {
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-ink/40" (click)="editProfileOpen = false"></div>
-    <div class="relative bg-paper rounded-2xl shadow-soft border border-inkText/8 w-full max-w-md p-6">
-      <div class="flex items-center justify-between mb-4">
-        <p class="font-display text-xl text-inkText">Edit Profile</p>
-        <button type="button" class="p-1.5 rounded-lg text-fog hover:bg-ink/5" (click)="editProfileOpen = false">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 6 6 18M6 6l12 12" />
+    <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="closeEditProfile()"></div>
+
+    <div
+      class="relative bg-paper w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-soft"
+    >
+      <!-- Header -->
+      <div
+        class="flex items-center justify-between px-6 py-5 border-b border-inkText/8 sticky top-0 bg-paper z-10"
+      >
+        <div>
+          <p class="font-display text-xl text-inkText">Edit Profile</p>
+          <p class="text-xs text-fog mt-0.5">Update your personal details and security settings</p>
+        </div>
+        <button
+          type="button"
+          class="p-2 rounded-lg hover:bg-ink/5 text-fog"
+          (click)="closeEditProfile()"
+        >
+          <svg
+            class="w-5 h-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M18 6 6 18M6 6l12 12"></path>
           </svg>
         </button>
       </div>
-      <p class="text-sm text-fog">
-        Profile editing (name, contact details and permission summary) goes here — wire this
-        up to your user service the same way <code>ItemsService</code> backs the Items view.
-      </p>
+
+      <!-- ============ Form 1: Personal details ============ -->
+      <form class="px-6 pt-6 pb-8 space-y-6" [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        <div class="flex items-center gap-4">
+          <span
+            class="w-16 h-16 rounded-full bg-ink text-brassLt flex items-center justify-center font-display text-2xl"
+          >
+            {{ users.initial() }}
+          </span>
+          <div>
+            <p class="text-sm font-semibold text-inkText">{{ users.currentUser()?.fullName }}</p>
+            @if (users.primaryRole()) {
+              <span class="perm-chip is-granted mt-1">{{ users.primaryRole() }}</span>
+            }
+          </div>
+        </div>
+
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wide text-brassDk mb-3">
+            Personal details
+          </p>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="field">
+              <input type="text" placeholder=" " formControlName="firstName" />
+              <label>First name</label>
+              @if (
+                profileForm.controls.firstName.touched && profileForm.controls.firstName.invalid
+              ) {
+                <p class="text-[11px] text-danger mt-1">First name is required</p>
+              }
+            </div>
+
+            <div class="field">
+              <input type="text" placeholder=" " formControlName="lastName" />
+              <label>Last name</label>
+            </div>
+
+            <div class="field sm:col-span-2">
+              <input
+                type="email"
+                placeholder=" "
+                formControlName="email"
+                readonly
+                class="opacity-70 cursor-not-allowed"
+              />
+              <label>Email address</label>
+            </div>
+
+            <div class="field sm:col-span-2">
+              <input type="tel" placeholder=" " formControlName="phone" />
+              <label>Phone number (optional)</label>
+              @if (profileForm.controls.phone.touched && profileForm.controls.phone.invalid) {
+                <p class="text-[11px] text-danger mt-1">Enter a valid phone number</p>
+              }
+            </div>
+          </div>
+        </div>
+
+        @if (saveError()) {
+          <p
+            class="text-sm text-danger rounded-xl bg-dangerBg/60 border border-danger/15 px-4 py-3"
+          >
+            {{ saveError() }}
+          </p>
+        }
+
+        <div class="flex items-center justify-end gap-3 pt-2 border-t border-inkText/8">
+          <button
+            type="button"
+            class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5"
+            (click)="closeEditProfile()"
+            [disabled]="saving()"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            [disabled]="saving()"
+            class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60"
+          >
+            {{ saving() ? 'Saving…' : 'Save changes' }}
+          </button>
+        </div>
+      </form>
+
+      <!-- ============ Form 2: Change password ============ -->
+      <form
+        class="px-6 pb-8 space-y-4 border-t border-inkText/8 pt-6"
+        [formGroup]="passwordForm"
+        (ngSubmit)="savePassword()"
+      >
+        <p class="text-xs font-bold uppercase tracking-wide text-brassDk">Change password</p>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="field sm:col-span-2">
+            <input
+              [type]="showCurrentPassword() ? 'text' : 'password'"
+              placeholder=" "
+              formControlName="currentPassword"
+              class="pr-12"
+              autocomplete="current-password"
+            />
+            <label>Current password</label>
+            <button
+              type="button"
+              class="absolute right-3 top-6.5 z-10 -translate-y-1/2 text-fog hover:text-inkText"
+              (click)="toggleCurrentPasswordVisibility()"
+              [attr.aria-label]="
+                showCurrentPassword() ? 'Hide current password' : 'Show current password'
+              "
+            >
+              <svg
+                class="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                @if (showCurrentPassword()) {
+                  <path d="M3 3l18 18"></path>
+                  <path d="M10.6 10.6a2 2 0 002.8 2.8"></path>
+                  <path
+                    d="M9.9 5.2A10.8 10.8 0 0112 5c5 0 8.5 4.5 9.5 7-.4 1.1-1.2 2.3-2.3 3.4"
+                  ></path>
+                  <path
+                    d="M6.2 6.2C4.2 7.5 2.9 9.6 2.5 12c.5 1.3 3.8 7 9.5 7 1.2 0 2.3-.2 3.3-.7"
+                  ></path>
+                } @else {
+                  <path d="M2.5 12s3.5-7 9.5-7 9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                }
+              </svg>
+            </button>
+            @if (
+              passwordForm.controls.currentPassword.touched &&
+              passwordForm.controls.currentPassword.invalid
+            ) {
+              <p class="text-[11px] text-danger mt-1">Current password is required</p>
+            }
+          </div>
+
+          <div class="field">
+            <input
+              [type]="showNewPassword() ? 'text' : 'password'"
+              placeholder=" "
+              formControlName="newPassword"
+              class="pr-12"
+              autocomplete="new-password"
+            />
+            <label>New password</label>
+            <button
+              type="button"
+              class="absolute right-3 top-6.5 z-10 -translate-y-1/2 text-fog hover:text-inkText"
+              (click)="toggleNewPasswordVisibility()"
+              [attr.aria-label]="showNewPassword() ? 'Hide new password' : 'Show new password'"
+            >
+              <svg
+                class="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                @if (showNewPassword()) {
+                  <path d="M3 3l18 18"></path>
+                  <path d="M10.6 10.6a2 2 0 002.8 2.8"></path>
+                  <path
+                    d="M9.9 5.2A10.8 10.8 0 0112 5c5 0 8.5 4.5 9.5 7-.4 1.1-1.2 2.3-2.3 3.4"
+                  ></path>
+                  <path
+                    d="M6.2 6.2C4.2 7.5 2.9 9.6 2.5 12c.5 1.3 3.8 7 9.5 7 1.2 0 2.3-.2 3.3-.7"
+                  ></path>
+                } @else {
+                  <path d="M2.5 12s3.5-7 9.5-7 9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                }
+              </svg>
+            </button>
+            @if (
+              passwordForm.controls.newPassword.touched && passwordForm.controls.newPassword.invalid
+            ) {
+              <p class="text-[11px] text-danger mt-1">At least 8 characters</p>
+            }
+          </div>
+
+          <div class="field">
+            <input
+              [type]="showConfirmPassword() ? 'text' : 'password'"
+              placeholder=" "
+              formControlName="confirmPassword"
+              class="pr-12"
+              autocomplete="new-password"
+            />
+            <label>Confirm new password</label>
+            <button
+              type="button"
+              class="absolute right-3 top-6.5 z-10 -translate-y-1/2 text-fog hover:text-inkText"
+              (click)="toggleConfirmPasswordVisibility()"
+              [attr.aria-label]="
+                showConfirmPassword() ? 'Hide password confirmation' : 'Show password confirmation'
+              "
+            >
+              <svg
+                class="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                @if (showConfirmPassword()) {
+                  <path d="M3 3l18 18"></path>
+                  <path d="M10.6 10.6a2 2 0 002.8 2.8"></path>
+                  <path
+                    d="M9.9 5.2A10.8 10.8 0 0112 5c5 0 8.5 4.5 9.5 7-.4 1.1-1.2 2.3-2.3 3.4"
+                  ></path>
+                  <path
+                    d="M6.2 6.2C4.2 7.5 2.9 9.6 2.5 12c.5 1.3 3.8 7 9.5 7 1.2 0 2.3-.2 3.3-.7"
+                  ></path>
+                } @else {
+                  <path d="M2.5 12s3.5-7 9.5-7 9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                }
+              </svg>
+            </button>
+            @if (
+              passwordForm.controls.confirmPassword.touched && passwordForm.hasError('mismatch')
+            ) {
+              <p class="text-[11px] text-danger mt-1">Passwords don't match</p>
+            }
+          </div>
+        </div>
+
+        @if (passwordError()) {
+          <p
+            class="text-sm text-danger rounded-xl bg-dangerBg/60 border border-danger/15 px-4 py-3"
+          >
+            {{ passwordError() }}
+          </p>
+        }
+
+        @if (passwordSuccess()) {
+          <p
+            class="text-sm text-emerald-700 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3"
+          >
+            Password updated successfully.
+          </p>
+        }
+
+        <div class="flex justify-end">
+          <button
+            type="submit"
+            [disabled]="changingPassword()"
+            class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60"
+          >
+            {{ changingPassword() ? 'Updating…' : 'Update password' }}
+          </button>
+        </div>
+      </form>
+
+      <!-- ============ Terminate All Active Sessions ============ -->
+      <div class="px-6 pb-8">
+        <div class="rounded-xl border border-danger/15 bg-dangerBg/60 p-4">
+          <p class="text-sm font-semibold text-danger">Terminate All Active Sessions</p>
+          <p class="mt-1 text-xs text-fog">
+            Sign this user out of all other devices and revoke their active sessions.
+          </p>
+
+          @if (terminateError()) {
+            <p class="mt-3 text-xs text-danger">{{ terminateError() }}</p>
+          }
+
+          @if (terminateSuccess()) {
+            <p class="mt-3 text-xs text-emerald-700">All other sessions were terminated.</p>
+          }
+
+          @if (!confirmTerminate()) {
+            <button
+              type="button"
+              class="mt-3 inline-flex items-center gap-2 rounded-lg bg-dangerBg px-3.5 py-2 text-xs font-bold text-danger hover:bg-danger/10"
+              (click)="confirmTerminate.set(true)"
+            >
+              Terminate All Active Sessions
+            </button>
+          } @else {
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <span class="text-xs font-semibold text-danger">Are you sure?</span>
+              <button
+                type="button"
+                [disabled]="terminating()"
+                class="rounded-lg bg-danger px-3.5 py-2 text-xs font-bold text-white hover:opacity-90 disabled:opacity-60"
+                (click)="terminateSessions()"
+              >
+                {{ terminating() ? 'Terminating…' : 'Yes, terminate' }}
+              </button>
+              <button
+                type="button"
+                [disabled]="terminating()"
+                class="rounded-lg px-3.5 py-2 text-xs font-semibold text-fog hover:bg-ink/5"
+                (click)="confirmTerminate.set(false)"
+              >
+                Cancel
+              </button>
+            </div>
+          }
+        </div>
+      </div>
     </div>
   </div>
 }

@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { toast } from 'ngx-sonner';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../core/auth/auth-service/auth-service';
@@ -9,7 +9,7 @@ import { BrandingService } from '../../core/services/branding.service';
 const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*\d).{6,}$/;
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   styleUrl: './login.component.css',
   templateUrl: './login.component.html',
 })

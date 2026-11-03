@@ -10,7 +10,13 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  NonNullableFormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { debounceTime, map, Observable, startWith, Subject, Subscription } from 'rxjs';
 import { toast } from 'ngx-sonner';
 import {
@@ -129,6 +135,13 @@ export class ItemModalComponent implements OnInit {
   imageFile = signal<File | null>(null);
   imagePreview = signal<string | null>(null);
 
+  private readonly copyCountSerialValidator = (
+    control: AbstractControl,
+  ): ValidationErrors | null => {
+    const serialNumber = String(control.parent?.get('serialNumber')?.value ?? '').trim();
+    return serialNumber && Number(control.value) > 1 ? { serialRequiresSingleCopy: true } : null;
+  };
+
   // ---------- form ----------
   form = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(200)]],
@@ -156,7 +169,15 @@ export class ItemModalComponent implements OnInit {
     ]),
     depreciationYears: this.fb.control<number | null>(null, Validators.min(1)),
     depreciationDate: [''],
-    copyCount: [1, [Validators.required, Validators.min(1), Validators.max(this.maxCopies)]],
+    copyCount: [
+      1,
+      [
+        Validators.required,
+        Validators.min(1),
+        Validators.max(this.maxCopies),
+        this.copyCountSerialValidator,
+      ],
+    ],
   });
 
   private values = toSignal(
@@ -183,6 +204,9 @@ export class ItemModalComponent implements OnInit {
 
   constructor() {
     this.destroyRef.onDestroy(() => this.clearImage());
+    this.form.controls.serialNumber.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.form.controls.copyCount.updateValueAndValidity({ onlySelf: true }));
     for (const [key, search$] of Object.entries(this.dropdownSearchSubjects)) {
       search$
         .pipe(debounceTime(250), takeUntilDestroyed(this.destroyRef))

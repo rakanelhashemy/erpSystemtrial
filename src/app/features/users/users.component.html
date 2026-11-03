@@ -1,17 +1,28 @@
 <div class="bg-paper rounded-2xl border border-inkText/8 shadow-soft overflow-hidden">
-
   <!-- Header -->
-  <div class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div
+    class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+  >
     <div>
       <p class="font-display text-xl text-inkText">Users</p>
       <p class="text-xs text-fog mt-0.5">Manage system users, their roles and status.</p>
     </div>
-    <button *appHasPermission="'Permissions.Users.Add'"
+    <button
+      *appHasPermission="'Permissions.Users.Add'"
       type="button"
       class="flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2.5 rounded-lg bg-ink text-ivory hover:bg-ink2 shadow-soft"
-      (click)="openAdd()">
-      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      (click)="openAdd()"
+    >
+      <svg
+        class="w-3.5 h-3.5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
         <path d="M12 5v14M5 12h14" />
       </svg>
       Add User
@@ -21,8 +32,16 @@
   <!-- Search -->
   <div class="p-4 sm:p-5 border-b border-inkText/8">
     <div class="relative w-full sm:w-64">
-      <svg class="w-4 h-4 text-fog absolute left-3 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg
+        class="w-4 h-4 text-fog absolute left-3 top-1/2 -translate-y-1/2"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
         <circle cx="11" cy="11" r="8" />
         <path d="m21 21-4.35-4.35" />
       </svg>
@@ -33,7 +52,8 @@
         aria-label="Search users"
         class="w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-inkText/15 focus:outline-none focus:ring-2 focus:ring-brass/30"
         [value]="searchTerm()"
-        (input)="searchTerm.set(searchBox.value)" />
+        (input)="searchTerm.set(searchBox.value)"
+      />
     </div>
   </div>
 
@@ -44,7 +64,8 @@
       <select
         #sizeSelect
         class="border border-inkText/15 rounded-lg px-2 py-1.5 text-xs text-inkText focus:outline-none focus:ring-2 focus:ring-brass/30"
-        (change)="pageSize.set(+sizeSelect.value)">
+        (change)="pageSize.set(+sizeSelect.value)"
+      >
         @for (size of pageSizeOptions; track size) {
           <option [value]="size" [selected]="size === pageSize()">{{ size }}</option>
         }
@@ -77,7 +98,9 @@
             <tr class="hover:bg-ivory/60 cursor-pointer" (click)="openDetails(u)">
               <td class="px-5 py-3.5">
                 <div class="flex items-center gap-3">
-                  <span class="w-8 h-8 rounded-full shrink-0 flex items-center justify-center bg-ink text-ivory text-xs font-semibold uppercase">
+                  <span
+                    class="w-8 h-8 rounded-full shrink-0 flex items-center justify-center bg-ink text-ivory text-xs font-semibold uppercase"
+                  >
                     {{ u.fullName.charAt(0) }}
                   </span>
                   <span class="font-semibold text-inkText">{{ u.fullName }}</span>
@@ -88,29 +111,61 @@
               <td class="px-5 py-3.5">
                 <div class="flex flex-wrap gap-1">
                   @for (role of u.roles; track role) {
-                    <span class="inline-block text-xs px-2 py-1 rounded-full bg-ink/5 text-brassDk">{{ role }}</span>
+                    <span
+                      class="inline-block text-xs px-2 py-1 rounded-full bg-ink/5 text-brassDk"
+                      >{{ role }}</span
+                    >
                   } @empty {
                     <span class="text-fog">—</span>
                   }
                 </div>
               </td>
               <td class="px-5 py-3.5">
-                <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full"
-                      [class]="statusClass(u.status)">
+                <span
+                  class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full"
+                  [class]="statusClass(u.status)"
+                >
                   @switch (u.status) {
                     @case (1) {
-                      <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <svg
+                        class="w-3 h-3"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
                         <path d="M20 6 9 17l-5-5" />
                       </svg>
                     }
                     @case (2) {
-                      <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <svg
+                        class="w-3 h-3"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
                         <rect x="2" y="4" width="20" height="16" rx="2" />
                         <path d="m22 7-10 6L2 7" />
                       </svg>
                     }
                     @case (3) {
-                      <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <svg
+                        class="w-3 h-3"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
                         <circle cx="12" cy="12" r="9" />
                         <path d="m5.6 5.6 12.8 12.8" />
                       </svg>
@@ -120,35 +175,68 @@
                 </span>
               </td>
               <td class="px-5 py-3.5 text-right whitespace-nowrap">
-                <button *appHasPermission="'Permissions.Users.View'"
+                <button
+                  *appHasPermission="'Permissions.Users.View'"
                   type="button"
                   class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
                   title="View details"
                   [attr.aria-label]="'View ' + u.fullName"
-                  (click)="$event.stopPropagation(); openDetails(u)">
-                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  (click)="$event.stopPropagation(); openDetails(u)"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
                     <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
                     <circle cx="12" cy="12" r="3" />
                   </svg>
                 </button>
-                <button *appHasPermission="'Permissions.Users.Edit'"
+                <button
+                  *appHasPermission="'Permissions.Users.Edit'"
                   type="button"
                   class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
                   title="Edit user"
                   [attr.aria-label]="'Edit ' + u.fullName"
-                  (click)="$event.stopPropagation(); openEdit(u)">
-                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  (click)="$event.stopPropagation(); openEdit(u)"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
                     <path d="M12 20h9" />
                     <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
                   </svg>
                 </button>
-                <button *appHasPermission="'Permissions.Users.Delete'"
+                <button
+                  *appHasPermission="'Permissions.Users.Delete'"
                   type="button"
                   class="p-1.5 rounded-lg hover:bg-dangerBg text-danger"
                   title="Suspend user"
                   [attr.aria-label]="'Suspend ' + u.fullName"
-                  (click)="suspendUser($event, u)">
-                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  (click)="suspendUser($event, u)"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
                     <circle cx="12" cy="12" r="9" />
                     <path d="M9 9v6M15 9v6" />
                   </svg>
@@ -158,7 +246,13 @@
           } @empty {
             <tr>
               <td colspan="6" class="text-sm text-fog text-center py-8">
-                {{ loading() ? 'Loading users…' : (searchTerm() ? 'No matching users found.' : 'No users yet.') }}
+                {{
+                  loading()
+                    ? 'Loading users…'
+                    : searchTerm()
+                      ? 'No matching users found.'
+                      : 'No users yet.'
+                }}
               </td>
             </tr>
           }
@@ -168,7 +262,9 @@
   </div>
 
   <!-- Pagination -->
-  <div class="p-4 sm:p-5 border-t border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-fog">
+  <div
+    class="p-4 sm:p-5 border-t border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-fog"
+  >
     <p>
       @if (pageRange().total) {
         Showing {{ pageRange().from }}–{{ pageRange().to }} of {{ pageRange().total }} users
@@ -177,19 +273,23 @@
       }
     </p>
     <div class="flex items-center gap-1">
-      <button type="button"
+      <button
+        type="button"
         class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
         [disabled]="currentPage() <= 1 || loading()"
-        (click)="prevPage()">
+        (click)="prevPage()"
+      >
         Previous
       </button>
       <span class="px-3 py-1.5 rounded-lg bg-ink text-ivory font-semibold">
         {{ currentPage() }} / {{ totalPages() }}
       </span>
-      <button type="button"
+      <button
+        type="button"
         class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
         [disabled]="currentPage() >= totalPages() || loading()"
-        (click)="nextPage()">
+        (click)="nextPage()"
+      >
         Next
       </button>
     </div>
@@ -201,14 +301,32 @@
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="closeDetails()"></div>
 
-    <div class="relative bg-paper w-full max-w-xl rounded-2xl shadow-soft max-h-[90vh] overflow-y-auto"
-         role="dialog" aria-modal="true" aria-labelledby="user-details-title">
-
-      <div class="sticky top-0 z-10 bg-paper flex items-center justify-between px-6 py-5 border-b border-inkText/8">
+    <div
+      class="relative bg-paper w-full max-w-xl rounded-2xl shadow-soft max-h-[90vh] overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="user-details-title"
+    >
+      <div
+        class="sticky top-0 z-10 bg-paper flex items-center justify-between px-6 py-5 border-b border-inkText/8"
+      >
         <p id="user-details-title" class="font-display text-xl text-inkText">User Details</p>
-        <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog" aria-label="Close" (click)="closeDetails()">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <button
+          type="button"
+          class="p-2 rounded-lg hover:bg-ink/5 text-fog"
+          aria-label="Close"
+          (click)="closeDetails()"
+        >
+          <svg
+            class="w-5 h-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
             <path d="M18 6 6 18M6 6l12 12" />
           </svg>
         </button>
@@ -218,19 +336,25 @@
         <dl class="space-y-4 text-sm">
           <div class="flex items-start justify-between gap-4">
             <dt class="text-fog">Full name</dt>
-            <dd class="font-semibold text-inkText text-right wrap-break-word">{{ user.fullName }}</dd>
+            <dd class="font-semibold text-inkText text-right wrap-break-word">
+              {{ user.fullName }}
+            </dd>
           </div>
           <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
             <dt class="text-fog">Email</dt>
             <dd class="text-inkText text-right wrap-break-word">
-              <a [href]="'mailto:' + user.email" class="hover:text-brassDk hover:underline">{{ user.email }}</a>
+              <a [href]="'mailto:' + user.email" class="hover:text-brassDk hover:underline">{{
+                user.email
+              }}</a>
             </dd>
           </div>
           <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
             <dt class="text-fog">Phone</dt>
             <dd class="text-inkText text-right" dir="ltr">
               @if (user.phone) {
-                <a [href]="'tel:' + user.phone" class="hover:text-brassDk hover:underline">{{ user.phone }}</a>
+                <a [href]="'tel:' + user.phone" class="hover:text-brassDk hover:underline">{{
+                  user.phone
+                }}</a>
               } @else {
                 —
               }
@@ -239,54 +363,89 @@
           <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
             <dt class="text-fog">Status</dt>
             <dd class="text-right">
-              <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full"
-                    [class]="statusClass(user.status)">
-                  @switch (user.status) {
-                    @case (1) {
-                      <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M20 6 9 17l-5-5" />
-                      </svg>
-                    }
-                    @case (2) {
-                      <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <rect x="2" y="4" width="20" height="16" rx="2" />
-                        <path d="m22 7-10 6L2 7" />
-                      </svg>
-                    }
-                    @case (3) {
-                      <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <circle cx="12" cy="12" r="9" />
-                        <path d="m5.6 5.6 12.8 12.8" />
-                      </svg>
-                    }
+              <span
+                class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full"
+                [class]="statusClass(user.status)"
+              >
+                @switch (user.status) {
+                  @case (1) {
+                    <svg
+                      class="w-3 h-3"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
                   }
+                  @case (2) {
+                    <svg
+                      class="w-3 h-3"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <rect x="2" y="4" width="20" height="16" rx="2" />
+                      <path d="m22 7-10 6L2 7" />
+                    </svg>
+                  }
+                  @case (3) {
+                    <svg
+                      class="w-3 h-3"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="m5.6 5.6 12.8 12.8" />
+                    </svg>
+                  }
+                }
                 {{ user.statusLabel }}
               </span>
             </dd>
           </div>
-          <div *appHasPermission="'Permissions.Users.ChangeStatus'" class="pt-4 border-t border-inkText/8">
+          <div *appHasPermission="'Permissions.Users.Edit'" class="pt-4 border-t border-inkText/8">
             <dt class="text-fog mb-2">Change status</dt>
             <div class="flex flex-wrap gap-2">
               @for (opt of statusOptions; track opt.value) {
-                <button type="button"
+                <button
+                  type="button"
                   class="px-3 py-1.5 rounded-lg border text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
                   [class]="statusPickClass(opt.value, user.status)"
                   [attr.aria-pressed]="opt.value === user.status"
                   [disabled]="opt.value === user.status || statusUpdating()"
-                  (click)="changeStatus(user, opt.value)">
+                  (click)="changeStatus(user, opt.value)"
+                >
                   {{ opt.label }}
                 </button>
               }
             </div>
             @if (statusError()) {
-              <p class="mt-2 text-xs text-danger bg-dangerBg rounded-lg px-3 py-2" role="alert">{{ statusError() }}</p>
+              <p class="mt-2 text-xs text-danger bg-dangerBg rounded-lg px-3 py-2" role="alert">
+                {{ statusError() }}
+              </p>
             }
           </div>
           <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
             <dt class="text-fog">Roles</dt>
             <dd class="flex flex-wrap justify-end gap-1">
               @for (role of user.roles; track role) {
-                <span class="inline-block text-xs px-2 py-1 rounded-full bg-ink/5 text-brassDk">{{ role }}</span>
+                <span class="inline-block text-xs px-2 py-1 rounded-full bg-ink/5 text-brassDk">{{
+                  role
+                }}</span>
               } @empty {
                 <span class="text-inkText">—</span>
               }
@@ -294,9 +453,17 @@
           </div>
 
           @if (detailsResource.error()) {
-            <div class="flex items-center justify-between gap-4 pt-4 border-t border-inkText/8 text-xs text-danger">
+            <div
+              class="flex items-center justify-between gap-4 pt-4 border-t border-inkText/8 text-xs text-danger"
+            >
               <span>Could not load the rest of the details.</span>
-              <button type="button" class="font-semibold underline" (click)="detailsResource.reload()">Retry</button>
+              <button
+                type="button"
+                class="font-semibold underline"
+                (click)="detailsResource.reload()"
+              >
+                Retry
+              </button>
             </div>
           } @else if (detailsResource.isLoading()) {
             <div class="pt-4 border-t border-inkText/8 space-y-3 animate-pulse" aria-hidden="true">
@@ -311,7 +478,9 @@
               <dt class="text-fog">Claims</dt>
               <dd class="flex flex-wrap justify-end gap-1">
                 @for (claim of extra?.claims; track claim) {
-                  <span class="inline-block text-xs px-2 py-1 rounded-full bg-ink/5 text-inkText">{{ claim }}</span>
+                  <span class="inline-block text-xs px-2 py-1 rounded-full bg-ink/5 text-inkText">{{
+                    claim
+                  }}</span>
                 } @empty {
                   <span class="text-inkText">—</span>
                 }
@@ -339,13 +508,421 @@
         </dl>
 
         <div class="flex justify-end pt-5 mt-5 border-t border-inkText/8">
-          <button type="button"
+          <button
+            type="button"
             class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft"
-            (click)="closeDetails()">
+            (click)="closeDetails()"
+          >
             Close
           </button>
         </div>
       </div>
+    </div>
+  </div>
+}
+
+<!-- ========== Invite modal ========== -->
+@if (inviteOpen()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
+    <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="closeInvite()"></div>
+
+    <div
+      class="relative bg-paper w-full max-w-3xl max-h-[92vh] min-h-0 overflow-hidden rounded-2xl shadow-soft flex flex-col"
+      [style.height]="inviteTab() === 'permissions' ? '92dvh' : 'auto'"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="invite-title"
+    >
+      <div
+        class="flex items-start justify-between gap-4 px-6 py-5 border-b border-inkText/8 shrink-0"
+      >
+        <div>
+          <p id="invite-title" class="font-display text-xl text-inkText">Invite User</p>
+          <p class="text-xs text-fog mt-0.5">Send an invitation and assign access rights</p>
+        </div>
+        <button
+          type="button"
+          class="p-2 rounded-lg hover:bg-ink/5 text-fog"
+          aria-label="Close"
+          (click)="closeInvite()"
+        >
+          <svg
+            class="w-5 h-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Tabs -->
+      <nav
+        class="flex overflow-x-auto border-b border-inkText/8 bg-ivory/55 px-3 sm:px-5 shrink-0"
+        role="tablist"
+      >
+        @for (
+          t of [
+            { id: 'account', label: 'Account Details' },
+            { id: 'permissions', label: 'Module Permissions' },
+            { id: 'locations', label: 'Business & Location Access' },
+          ];
+          track t.id
+        ) {
+          <button
+            type="button"
+            role="tab"
+            class="shrink-0 px-3 sm:px-4 py-4 text-xs font-semibold"
+            [class]="
+              inviteTab() === t.id
+                ? 'text-brassDk border-b-2 border-brass'
+                : 'text-fog hover:text-inkText'
+            "
+            [attr.aria-selected]="inviteTab() === t.id"
+            (click)="inviteTab.set($any(t.id))"
+          >
+            {{ t.label }}
+          </button>
+        }
+      </nav>
+
+      <form
+        class="min-h-0 flex flex-col overflow-hidden"
+        [class.flex-1]="inviteTab() !== 'account'"
+        (submit)="$event.preventDefault(); submitInvite()"
+        novalidate
+      >
+        <div
+          #inviteContent
+          class="min-h-0 overflow-y-auto overscroll-contain px-6 py-6"
+          [class.flex-1]="inviteTab() !== 'account'"
+        >
+          <!-- Account -->
+          @if (inviteTab() === 'account') {
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div class="field">
+                <input
+                  id="invite-full-name"
+                  type="text"
+                  placeholder=" "
+                  autocomplete="name"
+                  #n
+                  [value]="fullName()"
+                  (input)="fullName.set(n.value)"
+                />
+                <label for="invite-full-name">Full name</label>
+              </div>
+              <div class="field">
+                <input
+                  id="invite-email"
+                  type="email"
+                  placeholder=" "
+                  autocomplete="email"
+                  #e
+                  [value]="email()"
+                  (input)="email.set(e.value)"
+                />
+                <label for="invite-email">Email address</label>
+              </div>
+              <div class="field">
+                <input
+                  id="invite-phone"
+                  type="tel"
+                  dir="ltr"
+                  placeholder=" "
+                  autocomplete="tel"
+                  #p
+                  [value]="phone()"
+                  (input)="phone.set(p.value)"
+                />
+                <label for="invite-phone">Phone</label>
+              </div>
+              <div class="field">
+                <select id="invite-role" #r (change)="onRoleChange(r.value)">
+                  <option value="" [selected]="!roleId()">Select a role</option>
+                  @for (role of rolesResource.value(); track role.id ?? role.roleId) {
+                    <option
+                      [value]="role.id ?? role.roleId"
+                      [selected]="(role.id ?? role.roleId) === roleId()"
+                    >
+                      {{ role.name ?? role.roleName }}
+                    </option>
+                  }
+                </select>
+                <label for="invite-role">Role</label>
+                <span class="chevron">⌄</span>
+              </div>
+            </div>
+          }
+
+          <!-- Permissions -->
+          @if (inviteTab() === 'permissions') {
+            @if (roleClaimsResource.isLoading()) {
+              <p class="text-xs text-fog mb-3">Loading role permissions…</p>
+            } @else if (roleClaimsResource.error()) {
+              <p class="text-xs text-danger mb-3">
+                Could not load the role permissions.
+                <button type="button" class="underline" (click)="roleClaimsResource.reload()">
+                  Retry
+                </button>
+              </p>
+            } @else if (!roleId()) {
+              <p class="text-xs text-fog mb-3">Select a role first to import its permissions.</p>
+            }
+
+            @if (allPermissionsResource.isLoading()) {
+              <p class="text-xs text-fog py-6 text-center">Loading permissions…</p>
+            } @else if (allPermissionsResource.error()) {
+              <p class="text-xs text-danger py-6 text-center">
+                Could not load permissions.
+                <button type="button" class="underline" (click)="allPermissionsResource.reload()">
+                  Retry
+                </button>
+              </p>
+            } @else {
+              <div
+                class="border border-inkText/10 rounded-xl overflow-x-auto"
+                (wheel)="scrollInviteContent($event, inviteContent)"
+              >
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="bg-ivory text-left text-[11px] uppercase tracking-wide text-fog">
+                      <th class="px-4 py-2.5 font-semibold">Module</th>
+                      <th class="px-3 py-2.5 font-semibold text-center">View</th>
+                      <th class="px-3 py-2.5 font-semibold text-center">Add</th>
+                      <th class="px-3 py-2.5 font-semibold text-center">Edit</th>
+                      <th class="px-3 py-2.5 font-semibold text-center">Delete</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-inkText/6">
+                    @for (row of matrix(); track row.module) {
+                      <tr>
+                        <td class="px-4 py-2.5 font-semibold text-inkText">
+                          <label class="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              #all
+                              [checked]="rowAllChecked(row)"
+                              (change)="toggleRow(row, all.checked)"
+                            />
+                            {{ row.module }}
+                          </label>
+                        </td>
+                        @for (cell of row.cells; track $index) {
+                          <td class="px-3 py-2.5 text-center">
+                            @if (cell) {
+                              <label
+                                class="inline-flex items-center justify-center gap-1.5"
+                                [class.opacity-60]="isLocked(cell.permission)"
+                                [title]="
+                                  cell.label + (isLocked(cell.permission) ? ' (from role)' : '')
+                                "
+                              >
+                                <input
+                                  type="checkbox"
+                                  [attr.aria-label]="cell.label"
+                                  [checked]="isChecked(cell.permission)"
+                                  [disabled]="isLocked(cell.permission)"
+                                  (change)="togglePermission(cell.permission)"
+                                />
+                              </label>
+                            }
+                          </td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              @if (extraSwitches().length) {
+                <p class="text-xs font-bold uppercase tracking-wide text-brassDk mt-8 mb-3">
+                  Additional permissions
+                </p>
+                <div class="flex flex-wrap gap-x-8 gap-y-3">
+                  @for (s of extraSwitches(); track s.permission) {
+                    <label
+                      class="flex items-center gap-2.5 text-sm text-inkText"
+                      [class.opacity-60]="isLocked(s.permission)"
+                    >
+                      <input
+                        type="checkbox"
+                        [checked]="isChecked(s.permission)"
+                        [disabled]="isLocked(s.permission)"
+                        (change)="togglePermission(s.permission)"
+                      />
+                      {{ s.label }}
+                    </label>
+                  }
+                </div>
+              }
+            }
+          }
+
+          <!-- Business & Locations -->
+          @if (inviteTab() === 'locations') {
+            <p class="text-xs font-bold uppercase tracking-wide text-brassDk mb-3">
+              Business access
+            </p>
+            <div class="flex flex-col sm:flex-row sm:items-end gap-3">
+              <div class="flex-1">
+                <app-lazy-dropdown
+                  label="Business"
+                  placeholder="Select a business..."
+                  [options]="businessDropdownOptions()"
+                  [selectedValue]="pickedBusinessId() || null"
+                  [loading]="businessOptions.isLoading()"
+                  [searchable]="true"
+                  [searchTerm]="businessSearch()"
+                  searchPlaceholder="Search businesses…"
+                  [allowClear]="true"
+                  (searchChanged)="businessSearch.set($event)"
+                  (selected)="pickedBusinessId.set('' + $event.id)"
+                  (cleared)="pickedBusinessId.set(''); businessSearch.set('')"
+                />
+              </div>
+              <button
+                type="button"
+                class="px-4 py-3 rounded-lg bg-ink text-ivory text-xs font-bold hover:bg-ink2 shadow-soft"
+                [disabled]="!pickedBusinessId()"
+                (click)="addBusiness()"
+              >
+                + Add Business Access
+              </button>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-2">
+              @for (b of grantedBusinesses(); track b.id) {
+                <span
+                  class="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-ink/5 text-brassDk"
+                >
+                  {{ b.name }}
+                  <button
+                    type="button"
+                    class="hover:text-danger"
+                    [attr.aria-label]="'Remove ' + b.name"
+                    (click)="removeBusiness(b.id)"
+                  >
+                    ×
+                  </button>
+                </span>
+              } @empty {
+                <p class="text-xs text-fog">No business access granted yet.</p>
+              }
+            </div>
+
+            <div class="flex items-center justify-between mt-8 mb-3">
+              <p class="text-xs font-bold uppercase tracking-wide text-brassDk">Location access</p>
+              <span class="text-[11px] text-fog">{{ grantedLocations().length }} selected</span>
+            </div>
+
+            @if (!grantedBusinesses().length) {
+              <p class="text-xs text-fog">Add business access to choose locations.</p>
+            } @else {
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
+                <div class="w-full min-w-0">
+                  <app-lazy-dropdown
+                    label="Business"
+                    placeholder="Choose a business..."
+                    [options]="locationBusinessDropdownOptions()"
+                    [selectedValue]="pickedLocationBusinessId() || null"
+                    [searchable]="true"
+                    [searchTerm]="''"
+                    searchPlaceholder="Search granted businesses…"
+                    [allowClear]="true"
+                    (selected)="selectLocationBusiness('' + $event.id)"
+                    (cleared)="selectLocationBusiness('')"
+                  />
+                </div>
+                @if (pickedLocationBusinessId()) {
+                  @for (locations of accessLocationLevels(); track $index; let level = $index) {
+                    <div class="w-full min-w-0">
+                      <app-lazy-dropdown
+                        [label]="level === 0 ? 'Location' : 'Sub-location ' + level"
+                        [placeholder]="
+                          level === 0 ? 'Select a location...' : 'Select a child location...'
+                        "
+                        [options]="locationDropdownOptions(level)"
+                        [selectedValue]="accessLocationSelectedIds()[level] ?? null"
+                        [loading]="accessLocationLoading()[level] ?? false"
+                        [searchable]="false"
+                        [allowClear]="true"
+                        (opened)="
+                          loadAccessLocationLevel(
+                            level,
+                            level === 0 ? null : (accessLocationSelectedIds()[level - 1] ?? null)
+                          )
+                        "
+                        (selected)="selectAccessLocation(level, $event)"
+                        (cleared)="clearAccessLocation(level)"
+                      />
+                    </div>
+                  }
+                }
+              </div>
+              @if (pickedLocationBusinessId()) {
+                <div class="flex justify-end mt-3">
+                  <button
+                    type="button"
+                    class="px-4 py-3 rounded-lg bg-ink text-ivory text-xs font-bold hover:bg-ink2 shadow-soft"
+                    [disabled]="!pickedLocationId()"
+                    (click)="addLocation()"
+                  >
+                    + Add Access Scope
+                  </button>
+                </div>
+              }
+            }
+            <div class="mt-4 flex flex-wrap gap-2">
+              @for (l of grantedLocations(); track l.id) {
+                <span
+                  class="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-ink/5 text-inkText"
+                >
+                  {{ l.name }}
+                  <button
+                    type="button"
+                    class="hover:text-danger"
+                    [attr.aria-label]="'Remove ' + l.name"
+                    (click)="removeLocation(l.id)"
+                  >
+                    ×
+                  </button>
+                </span>
+              } @empty {
+                <p class="text-xs text-fog">No location scopes granted yet.</p>
+              }
+            </div>
+          }
+
+          @if (inviteError()) {
+            <p class="mt-5 text-xs text-danger bg-dangerBg rounded-lg px-3 py-2" role="alert">
+              {{ inviteError() }}
+            </p>
+          }
+        </div>
+
+        <div
+          class="flex items-center justify-end gap-3 px-6 py-4 border-t border-inkText/8 bg-ivory/45 shrink-0"
+        >
+          <button
+            type="button"
+            class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5"
+            (click)="closeInvite()"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-40 disabled:cursor-not-allowed"
+            [disabled]="inviteSubmitting()"
+          >
+            {{ inviteSubmitting() ? 'Sending…' : 'Send Invitation' }}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 }

@@ -16,45 +16,21 @@ import { toast } from 'ngx-sonner';
 import { Claim, RolesService } from '../../../../core/services/roles-service';
 
 interface PermissionModule {
-  key: string;       // Permissions.<key>.<action>
-  label: string;     // display name
-  actions: string[]; // actions available for the module
+  moduleName: string;
+  label: string;
+  permissions: string[];
+  crudPermissions: Partial<Record<(typeof CRUD_ACTIONS)[number], string>>;
 }
 
-const CRUD_ACTIONS = ['View', 'Add', 'Edit', 'Delete'];
+const CRUD_ACTIONS = ['View', 'Add', 'Edit', 'Delete'] as const;
+const MODULE_LABELS: Record<string, string> = {
+  LocationTypes: 'Location Types',
+  MaintenanceCompanies: 'Maintenance Companies',
+  CheckLists: 'Check Lists',
+};
 
-const MODULES: PermissionModule[] = [
-  { key: 'Roles', label: 'Roles', actions: CRUD_ACTIONS },
-  { key: 'Users', label: 'Users', actions: CRUD_ACTIONS },
-  { key: 'Businesses', label: 'Businesses', actions: CRUD_ACTIONS },
-  { key: 'Locations', label: 'Locations', actions: CRUD_ACTIONS },
-  { key: 'LocationTypes', label: 'Location Types', actions: CRUD_ACTIONS },
-  { key: 'Groups', label: 'Groups', actions: CRUD_ACTIONS },
-  { key: 'Items', label: 'Items', actions: CRUD_ACTIONS },
-  { key: 'Departments', label: 'Departments', actions: CRUD_ACTIONS },
-  { key: 'Suppliers', label: 'Suppliers', actions: CRUD_ACTIONS },
-  { key: 'MaintenanceCompanies', label: 'Maintenance Companies', actions: CRUD_ACTIONS },
-  { key: 'Employees', label: 'Employees', actions: CRUD_ACTIONS },
-  { key: 'CheckLists', label: 'Check Lists', actions: CRUD_ACTIONS },
-  { key: 'Transactions', label: 'Transactions', actions: CRUD_ACTIONS },
-  { key: 'Printing', label: 'Printing', actions: ['View'] },
-  { key: 'Reports', label: 'Reports', actions: ['View'] },
-  { key: 'Security', label: 'Security', actions: ['RevokeSessions'] },
-];
-
-const permissionName = (moduleKey: string, action: string) => `Permissions.${moduleKey}.${action}`;
-
-// Computed once instead of on every change detection
-const MODULE_PERMISSIONS = new Map(
-  MODULES.map((m) => [m.key, m.actions.map((a) => permissionName(m.key, a))] as const),
-);
-const COLUMN_PERMISSIONS = new Map(
-  CRUD_ACTIONS.map((a) => [
-    a,
-    MODULES.filter((m) => m.actions.includes(a)).map((m) => permissionName(m.key, a)),
-  ] as const),
-);
-const ALL_PERMISSIONS = [...MODULE_PERMISSIONS.values()].flat();
+const displayName = (value: string): string =>
+  value.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (letter) => letter.toUpperCase());
 
 @Component({
   selector: 'app-rolemodal',
@@ -73,8 +49,6 @@ export class RolemodalComponent implements OnInit {
   readonly isEdit = computed(() => !!this.roleId());
 
   readonly crudActions = CRUD_ACTIONS;
-  readonly modules = MODULES;
-  readonly allPermissions = ALL_PERMISSIONS;
 
   readonly roleName = new FormControl('', {
     nonNullable: true,
@@ -82,27 +56,51 @@ export class RolemodalComponent implements OnInit {
   });
 
   readonly loading = signal(false);
+  readonly permissionsLoading = signal(false);
+  readonly permissionsError = signal('');
   readonly saving = signal(false);
   readonly errorMsg = signal('');
 
+  private readonly permissionGroups = signal<PermissionModule[]>([]);
   private readonly selected = signal<ReadonlySet<string>>(new Set());
   readonly selectedCount = computed(() => this.selected().size);
+  readonly modules = computed(() =>
+    this.permissionGroups().filter((module) =>
+      CRUD_ACTIONS.some((action) => module.crudPermissions[action]),
+    ),
+  );
+  readonly extraPermissions = computed(() =>
+    this.permissionGroups().flatMap((module) =>
+      module.permissions
+        .filter((permission) => !CRUD_ACTIONS.some((action) => permission.endsWith(`.${action}`)))
+        .map((permission) => {
+          const action = permission.split('.').at(-1) ?? permission;
+          return { permission, label: `${module.label} ${displayName(action)}` };
+        }),
+    ),
+  );
+  readonly allPermissions = computed(() =>
+    this.permissionGroups().flatMap((module) => module.permissions),
+  );
 
   ngOnInit(): void {
+    this.loadPermissions();
     const id = this.roleId();
     if (id) this.getRoleInfo(id);
   }
 
-  permissionName(moduleKey: string, action: string): string {
-    return permissionName(moduleKey, action);
+  rowPermissions(module: PermissionModule): string[] {
+    return module.permissions;
   }
 
-  rowPermissions(m: PermissionModule): string[] {
-    return MODULE_PERMISSIONS.get(m.key) ?? [];
+  columnPermissions(action: (typeof CRUD_ACTIONS)[number]): string[] {
+    return this.modules()
+      .map((module) => module.crudPermissions[action])
+      .filter((permission): permission is string => !!permission);
   }
 
-  columnPermissions(action: string): string[] {
-    return COLUMN_PERMISSIONS.get(action) ?? [];
+  permissionFor(module: PermissionModule, action: (typeof CRUD_ACTIONS)[number]): string | null {
+    return module.crudPermissions[action] ?? null;
   }
 
   /** Are all of these permissions checked? */
@@ -111,16 +109,26 @@ export class RolemodalComponent implements OnInit {
     return perms.length > 0 && perms.every((p) => selected.has(p));
   }
 
- 
   isPartiallySelected(perms: string[]): boolean {
     const selected = this.selected();
     const count = perms.filter((p) => selected.has(p)).length;
     return count > 0 && count < perms.length;
   }
 
+  rowAllSelected(module: PermissionModule): boolean {
+    return this.isAllSelected(module.permissions);
+  }
+
+  rowPartiallySelected(module: PermissionModule): boolean {
+    return this.isPartiallySelected(module.permissions);
+  }
+
   /** Check / uncheck a group of permissions at once */
-  onToggleMany(perms: string[], event: Event): void {
-    const checked = (event.target as HTMLInputElement).checked;
+  onToggleMany(perms: string[], checkedOrEvent: boolean | Event): void {
+    const checked =
+      typeof checkedOrEvent === 'boolean'
+        ? checkedOrEvent
+        : (checkedOrEvent.target as HTMLInputElement).checked;
     this.selected.update((prev) => {
       const next = new Set(prev);
       for (const p of perms) {
@@ -129,10 +137,6 @@ export class RolemodalComponent implements OnInit {
       }
       return next;
     });
-  }
-
-  hasAction(m: PermissionModule, action: string): boolean {
-    return m.actions.includes(action);
   }
 
   isSelected(permission: string): boolean {
@@ -151,16 +155,49 @@ export class RolemodalComponent implements OnInit {
 
   private buildClaims(): Claim[] {
     const selected = this.selected();
-    return this.modules.flatMap((m) =>
-      m.actions.map((a) => {
-        const name = this.permissionName(m.key, a);
-        return { permissionName: name, hasPermission: selected.has(name) };
-      }),
-    );
+    return this.allPermissions().map((permissionName) => ({
+      permissionName,
+      hasPermission: selected.has(permissionName),
+    }));
+  }
+
+  loadPermissions(): void {
+    this.permissionsLoading.set(true);
+    this.permissionsError.set('');
+    this.rolesService
+      .getAllPermissions()
+      .pipe(
+        finalize(() => this.permissionsLoading.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (response) => {
+          const permissions = Array.isArray(response?.data) ? response.data : [];
+          this.permissionGroups.set(
+            permissions.map((module) => ({
+              moduleName: module.moduleName,
+              label: MODULE_LABELS[module.moduleName] ?? displayName(module.moduleName),
+              permissions: module.permissions ?? [],
+              crudPermissions: Object.fromEntries(
+                CRUD_ACTIONS.flatMap((action) => {
+                  const permission = module.permissions?.find((name) =>
+                    name.endsWith(`.${action}`),
+                  );
+                  return permission ? [[action, permission]] : [];
+                }),
+              ),
+            })),
+          );
+        },
+        error: (error) => {
+          this.permissionsError.set(error?.error?.message ?? 'Failed to load permissions.');
+        },
+      });
   }
 
   save(): void {
-    if (this.saving() || this.loading()) return;
+    if (this.saving() || this.loading() || this.permissionsLoading() || this.permissionsError())
+      return;
 
     if (this.roleName.invalid) {
       this.roleName.markAsTouched();
@@ -215,11 +252,13 @@ export class RolemodalComponent implements OnInit {
   }
 
   private update(roleId: string, roleName: string) {
-    return this.rolesService.editRole({ roleId, roleName }).pipe(
-      switchMap(() =>
-        this.rolesService.updateRoleClaims({ roleId, roleClaims: this.buildClaims() }),
-      ),
-    );
+    return this.rolesService
+      .editRole({ roleId, roleName })
+      .pipe(
+        switchMap(() =>
+          this.rolesService.updateRoleClaims({ roleId, roleClaims: this.buildClaims() }),
+        ),
+      );
   }
 
   private getRoleInfo(roleId: string): void {
@@ -236,7 +275,6 @@ export class RolemodalComponent implements OnInit {
       )
       .subscribe({
         next: ({ role, claims }) => {
-
           const roleData = role.data;
           if (!roleData) {
             this.errorMsg.set('Role not found.');

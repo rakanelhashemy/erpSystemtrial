@@ -56,3 +56,13 @@ export interface UpdateProfileRequest {
   phone: string | null;
 }
 
+export interface InviteUserRequest {
+  fullName: string;
+  email: string;
+  phone: string;
+  roleIds: string[];
+  userClaims: string[];
+  businessIds: string[];
+  locationIds: string[];
+  frontendRegisterUrl: string;
+}

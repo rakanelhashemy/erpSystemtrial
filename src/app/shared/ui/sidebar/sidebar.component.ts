@@ -41,6 +41,17 @@ export class SidebarComponent implements OnInit {
     this.openMenus[key] = !this.openMenus[key];
   }
 
+  isMenuActive(key: string): boolean {
+    const path = this.router.url.split(/[?#]/, 1)[0];
+    const routes: Record<string, string[]> = {
+      locations: ['/app/locations', '/app/location-types'],
+      items: ['/app/items', '/app/bulk-import', '/app/depreciation-reports'],
+      checklist: ['/app/check-item', '/app/check-lists'],
+      users: ['/app/users', '/app/roles'],
+    };
+    return routes[key]?.some((route) => path === route || path.startsWith(`${route}/`)) ?? false;
+  }
+
   onNavigate(): void {
     if (window.matchMedia('(max-width: 1023px)').matches) {
       this.closeMobile.emit();

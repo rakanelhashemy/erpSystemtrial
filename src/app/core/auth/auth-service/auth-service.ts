@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, finalize, shareReplay, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { InviteUserRequest } from '../../models/user-modal';
 
 export interface SignInRequest {
   email: string;
@@ -202,7 +203,7 @@ export class AuthService {
       .pipe(catchError(this.handleAuthError));
   }
 
-  invite(data: { email: string }): Observable<unknown> {
+  invite(data: InviteUserRequest): Observable<unknown> {
     return this.httpClient
       .post(`${environment.baseUrl}Auth/Invite`, data)
       .pipe(catchError(this.handleAuthError));

@@ -8,6 +8,11 @@ export interface Claim {
   hasPermission: boolean;
 }
 
+export interface AllPermissionsModule {
+  moduleName: string;
+  permissions: string[];
+}
+
 export interface RoleEdit {
   roleId: string;
   roleName: string;
@@ -106,9 +111,9 @@ export class RolesService {
 
   // ---------- User Status ----------
 
-  getAllPermissions(): Observable<any> {
+  getAllPermissions(): Observable<{ data: AllPermissionsModule[] }> {
     return this.httpClient
-      .get(`${this.baseUrl}User-Status/GetAllPermissions`)
+      .get<{ data: AllPermissionsModule[] }>(`${this.baseUrl}User-Status/GetAllPermissions`)
       .pipe(catchError(this.handleError));
   }
 }

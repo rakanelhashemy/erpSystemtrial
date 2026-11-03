@@ -124,6 +124,7 @@
               [selectedValue]="filters.brandId" [loading]="filterDropdownLoading()['brands'] ?? false"
               [hasMore]="filterDropdownHasMore()['brands'] ?? false" [searchable]="true"
               [searchTerm]="filterDropdownSearch()['brands'] ?? ''" searchPlaceholder="Search brands…"
+              (opened)="ensureFilterDropdownLoaded('brands')"
               (searchChanged)="onFilterDropdownSearch('brands', $event)" (loadMore)="loadFilterDropdown('brands')"
               (selected)="filters.brandId = +$event.id" />
           </div>
@@ -133,6 +134,7 @@
               [selectedValue]="filters.modelId" [loading]="filterDropdownLoading()['models'] ?? false"
               [hasMore]="filterDropdownHasMore()['models'] ?? false" [searchable]="true"
               [searchTerm]="filterDropdownSearch()['models'] ?? ''" searchPlaceholder="Search models…"
+              (opened)="ensureFilterDropdownLoaded('models')"
               (searchChanged)="onFilterDropdownSearch('models', $event)" (loadMore)="loadFilterDropdown('models')"
               (selected)="filters.modelId = +$event.id" />
           </div>
@@ -142,6 +144,7 @@
               [selectedValue]="filters.materialId" [loading]="filterDropdownLoading()['materials'] ?? false"
               [hasMore]="filterDropdownHasMore()['materials'] ?? false" [searchable]="true"
               [searchTerm]="filterDropdownSearch()['materials'] ?? ''" searchPlaceholder="Search materials…"
+              (opened)="ensureFilterDropdownLoaded('materials')"
               (searchChanged)="onFilterDropdownSearch('materials', $event)" (loadMore)="loadFilterDropdown('materials')"
               (selected)="filters.materialId = +$event.id" />
           </div>
@@ -159,6 +162,7 @@
               [selectedValue]="filters.departmentId" [loading]="filterDropdownLoading()['departments'] ?? false"
               [hasMore]="filterDropdownHasMore()['departments'] ?? false" [searchable]="true"
               [searchTerm]="filterDropdownSearch()['departments'] ?? ''" searchPlaceholder="Search departments…"
+              (opened)="ensureFilterDropdownLoaded('departments')"
               (searchChanged)="onFilterDropdownSearch('departments', $event)" (loadMore)="loadFilterDropdown('departments')"
               (selected)="filters.departmentId = '' + $event.id" />
           </div>
@@ -168,6 +172,7 @@
               [selectedValue]="filters.groupId" [loading]="filterDropdownLoading()['groups'] ?? false"
               [hasMore]="filterDropdownHasMore()['groups'] ?? false" [searchable]="true"
               [searchTerm]="filterDropdownSearch()['groups'] ?? ''" searchPlaceholder="Search groups…"
+              (opened)="ensureFilterDropdownLoaded('groups')"
               (searchChanged)="onFilterDropdownSearch('groups', $event)" (loadMore)="loadFilterDropdown('groups')"
               (selected)="filters.groupId = '' + $event.id" />
           </div>
@@ -177,6 +182,7 @@
               [selectedValue]="filters.locationId" [loading]="filterDropdownLoading()['locations'] ?? false"
               [hasMore]="filterDropdownHasMore()['locations'] ?? false" [searchable]="true"
               [searchTerm]="filterDropdownSearch()['locations'] ?? ''" searchPlaceholder="Search locations…"
+              (opened)="ensureFilterDropdownLoaded('locations')"
               (searchChanged)="onFilterDropdownSearch('locations', $event)" (loadMore)="loadFilterDropdown('locations')"
               (selected)="filters.locationId = '' + $event.id" />
           </div>

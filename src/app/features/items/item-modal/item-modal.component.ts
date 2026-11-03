@@ -311,7 +311,9 @@ export class ItemModalComponent implements OnInit {
 
   private withLoadedDropdownOption(key: string, options: LazyDropdownOption[]): LazyDropdownOption[] {
     const selected = this.loadedDropdownDetails[key];
-    if (!selected || options.some((option) => String(option.id) === String(selected.id))) return options;
+    // The item-name input already keeps its edit value; don't append it to the paged list,
+    // otherwise the initial 10 options can become 11.
+    if (key === 'itemNames' || !selected || options.some((option) => String(option.id) === String(selected.id))) return options;
     return [...options, selected];
   }
 

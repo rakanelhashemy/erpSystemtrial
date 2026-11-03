@@ -1,4 +1,4 @@
-import { Component, computed, effect, ElementRef, DestroyRef, HostListener, inject, OnInit, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, DestroyRef, HostListener, inject, OnInit, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject, Subscription, tap, switchMap, catchError, EMPTY, debounceTime, filter } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +14,7 @@ import { HasPermissionDirective } from '../../shared/directives/has-permission.d
 
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, LocationModalComponent, HasPermissionDirective],
   selector: 'app-location',
   styleUrl: './location.component.css',

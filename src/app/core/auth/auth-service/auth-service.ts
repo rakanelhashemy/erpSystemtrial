@@ -47,13 +47,13 @@ export class AuthService {
   private refreshRequest$?: Observable<ApiResponse<AuthResponseData>>;
   private permissionsRequest$?: Observable<PermissionsResponse>;
 
-  signIn(data: SignInRequest): Observable<ApiResponse<AuthResponseData>> {
+  signIn(data: SignInRequest, rememberMe = true): Observable<ApiResponse<AuthResponseData>> {
     return this.httpClient
       .post<ApiResponse<AuthResponseData>>(`${environment.baseUrl}Auth/SignIn`, data, {
         headers: { 'X-Client-Type': 'web' },
       })
       .pipe(
-        tap((res) => this.saveAuthData(res?.data)),
+        tap((res) => this.saveAuthData(res?.data, rememberMe)),
         catchError(this.handleAuthError),
       );
   }
@@ -123,7 +123,7 @@ export class AuthService {
         },
       )
       .pipe(
-        tap((res) => this.saveAuthData(res?.data)),
+        tap((res) => this.saveAuthData(res?.data, localStorage.getItem(this.tokenKey) !== null)),
         catchError((err) => {
           this.clearAuthDataAndRedirect();
           return throwError(() => err);
@@ -205,7 +205,7 @@ export class AuthService {
   }
 
   getAccessToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
+    return sessionStorage.getItem(this.tokenKey) ?? localStorage.getItem(this.tokenKey);
   }
 
   isAccessTokenExpired(): boolean {
@@ -213,7 +213,8 @@ export class AuthService {
     const payload = this.getTokenPayload();
     if (!payload) return true;
     const exp = payload['exp'];
-    return typeof exp === 'number' ? Date.now() >= exp * 1000 - 10_000 : false;
+    if (typeof exp !== 'number' || !Number.isFinite(exp)) return true;
+    return Date.now() >= exp * 1000 - 10_000;
   }
 
   getTokenPayload(): Record<string, unknown> | null {
@@ -237,14 +238,18 @@ export class AuthService {
     return !!this.getAccessToken() && !this.isAccessTokenExpired();
   }
 
-  saveAuthData(data: AuthResponseData | undefined | null): void {
+  saveAuthData(data: AuthResponseData | undefined | null, rememberMe = true): void {
     if (!data) return;
     const accessToken = data.accessToken ?? data.token ?? data.jwtToken;
-    if (accessToken) localStorage.setItem(this.tokenKey, accessToken);
+    if (!accessToken) return;
+    localStorage.removeItem(this.tokenKey);
+    sessionStorage.removeItem(this.tokenKey);
+    (rememberMe ? localStorage : sessionStorage).setItem(this.tokenKey, accessToken);
   }
 
   clearAuthData(): void {
     localStorage.removeItem(this.tokenKey);
+    sessionStorage.removeItem(this.tokenKey);
     this.permissionSet.set(new Set());
     this.permissionsLoaded.set(false);
   }

@@ -380,10 +380,6 @@ export class ItemsComponent implements OnInit {
   }
 
   private loadDropdowns(): void {
-    const businessId = this.businessId();
-    if (!businessId) return;
-    const q = { businessId };
-
     Object.values(this.filterDropdownSubs).forEach((subscription) => subscription.unsubscribe());
     this.filterDropdownPages.set({});
     this.filterDropdownHasMore.set({});
@@ -395,13 +391,15 @@ export class ItemsComponent implements OnInit {
     this.groups.set([]);
     this.departments.set([]);
     this.locations.set([]);
-    for (const key of ['brands', 'models', 'materials', 'groups', 'departments', 'locations']) {
-      this.loadFilterDropdown(key, true);
-    }
     this.dd.staticLookups().subscribe({
       next: (lookups) => this.lookups.set(lookups),
       error: () => this.error.set('Could not load filter options.'),
     });
+  }
+
+  ensureFilterDropdownLoaded(key: string): void {
+    if ((this.filterDropdownPages()[key] ?? 0) > 0 || this.filterDropdownLoading()[key]) return;
+    this.loadFilterDropdown(key, true);
   }
 
   loadFilterDropdown(key: string, reset = false): void {

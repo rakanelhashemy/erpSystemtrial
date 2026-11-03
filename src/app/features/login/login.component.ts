@@ -24,6 +24,7 @@ export class LoginComponent {
   protected readonly loginForm = inject(FormBuilder).nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.pattern(PASSWORD_PATTERN)]],
+    rememberMe: [true],
   });
 
   protected onSubmit(): void {
@@ -34,8 +35,9 @@ export class LoginComponent {
 
     this.submitting.set(true);
 
+    const { rememberMe, ...credentials } = this.loginForm.getRawValue();
     this.authService
-      .signIn(this.loginForm.getRawValue())
+      .signIn(credentials, rememberMe)
       .pipe(
         finalize(() => this.submitting.set(false)),
         takeUntilDestroyed(this.destroyRef),

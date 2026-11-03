@@ -21,7 +21,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     withCredentials: isTrustedApi,
     setHeaders: {
       ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      'Accept-Language': auth.language(),
+      ...(isTrustedApi ? { 'Accept-Language': auth.language() } : {}),
     },
   });
 

@@ -81,6 +81,7 @@ export class LazyDropdownComponent implements OnDestroy {
   readonly hasMore = input(false);
   readonly allowClear = input(false);
   readonly selected = output<LazyDropdownOption>();
+  readonly opened = output<void>();
   readonly customSelected = output<string>();
   readonly cleared = output<void>();
   readonly searchChanged = output<string>();
@@ -104,6 +105,7 @@ export class LazyDropdownComponent implements OnDestroy {
   openDropdown(): void {
     if (this.open()) return;
     this.open.set(true);
+    this.opened.emit();
     this.updateMenuPosition();
     this.removeOpenListeners = [
       this.renderer.listen('window', 'resize', () => this.updateMenuPosition()),

@@ -16,6 +16,11 @@ export const routes: Routes = [
         (m) => m.ForgotPasswordComponent,
       ),
   },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./features/register/register.component').then((m) => m.RegisterComponent),
+  },
 
   {
     path: 'app',
@@ -36,7 +41,11 @@ export const routes: Routes = [
         path: 'businesses',
         loadComponent: () =>
           import('./features/businesses/businesses.component').then((m) => m.BusinessesComponent),
-        data: { title: 'Businesses', moduleId: 'm-bus', requiredPermission: 'Permissions.Businesses.View' },
+        data: {
+          title: 'Businesses',
+          moduleId: 'm-bus',
+          requiredPermission: 'Permissions.Businesses.View',
+        },
       },
 
       // Locations
@@ -62,7 +71,6 @@ export const routes: Routes = [
           requiredPermission: 'Permissions.LocationTypes.View',
         },
       },
-
       {
         path: 'groups',
         loadComponent: () =>
@@ -75,7 +83,11 @@ export const routes: Routes = [
         path: 'items',
         loadComponent: () =>
           import('./features/items/items.component').then((m) => m.ItemsComponent),
-        data: { title: 'Asset Inventory', moduleId: 'm-itm', requiredPermission: 'Permissions.Items.View' },
+        data: {
+          title: 'Asset Inventory',
+          moduleId: 'm-itm',
+          requiredPermission: 'Permissions.Items.View',
+        },
       },
       {
         path: 'bulk-import',
@@ -118,7 +130,11 @@ export const routes: Routes = [
         path: 'suppliers',
         loadComponent: () =>
           import('./features/suppliers/suppliers.component').then((m) => m.SuppliersComponent),
-        data: { title: 'Suppliers', moduleId: 'm-sup', requiredPermission: 'Permissions.Suppliers.View' },
+        data: {
+          title: 'Suppliers',
+          moduleId: 'm-sup',
+          requiredPermission: 'Permissions.Suppliers.View',
+        },
       },
       {
         path: 'maintenance-companies',
@@ -136,7 +152,11 @@ export const routes: Routes = [
         path: 'employees',
         loadComponent: () =>
           import('./features/employees/employees.component').then((m) => m.EmployeesComponent),
-        data: { title: 'Employees', moduleId: 'm-emp', requiredPermission: 'Permissions.Employees.View' },
+        data: {
+          title: 'Employees',
+          moduleId: 'm-emp',
+          requiredPermission: 'Permissions.Employees.View',
+        },
       },
 
       // Check List
@@ -144,7 +164,11 @@ export const routes: Routes = [
         path: 'check-item',
         loadComponent: () =>
           import('./features/check-item/check-item.component').then((m) => m.CheckItemComponent),
-        data: { title: 'Check Item', moduleId: 'm-chk', requiredPermission: 'Permissions.CheckLists.View' },
+        data: {
+          title: 'Check Item',
+          moduleId: 'm-chk',
+          requiredPermission: 'Permissions.CheckLists.View',
+        },
       },
       {
         path: 'check-lists',
@@ -161,7 +185,11 @@ export const routes: Routes = [
         path: 'printing',
         loadComponent: () =>
           import('./features/printing/printing.component').then((m) => m.PrintingComponent),
-        data: { title: 'Printing', moduleId: 'm-prt', requiredPermission: 'Permissions.Printing.View' },
+        data: {
+          title: 'Printing',
+          moduleId: 'm-prt',
+          requiredPermission: 'Permissions.Printing.View',
+        },
       },
       {
         path: 'transactions',
@@ -213,7 +241,11 @@ export const routes: Routes = [
         path: 'reports',
         loadComponent: () =>
           import('./features/reports/reports.component').then((m) => m.ReportsComponent),
-        data: { title: 'Reports', moduleId: 'm-rpt', requiredPermission: 'Permissions.Reports.View' },
+        data: {
+          title: 'Reports',
+          moduleId: 'm-rpt',
+          requiredPermission: 'Permissions.Reports.View',
+        },
       },
 
       // أي مسار غلط جوه /app يرجع للداشبورد

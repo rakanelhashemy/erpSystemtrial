@@ -1,7 +1,11 @@
 import { TestBed } from '@angular/core/testing';
+import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { User, UserStatus } from '../../core/models/user-modal';
+import { AuthService } from '../../core/auth/auth-service/auth-service';
+import { DropDownServices } from '../../core/services/drop-down-services';
+import { RolesService } from '../../core/services/roles-service';
 import { Userservices } from '../../core/services/userservices';
 import { UsersComponent } from './users.component';
 
@@ -10,6 +14,10 @@ describe('UsersComponent', () => {
     list: vi.fn(() => of({ data: [], currentPage: 1, totalPages: 1, totalCount: 0 })),
     getById: vi.fn(() => of({ succeeded: true, data: {} })),
     updateStatus: vi.fn(() => of({ succeeded: true, data: 'Updated' })),
+  };
+  const auth = {
+    reinvite: vi.fn(() => of({ succeeded: true })),
+    revokeAllSessions: vi.fn(() => of({ succeeded: true })),
   };
   const user: User = {
     id: 'user-1',
@@ -28,9 +36,21 @@ describe('UsersComponent', () => {
     usersApi.list.mockReturnValue(of({ data: [], currentPage: 1, totalPages: 1, totalCount: 0 }));
     usersApi.getById.mockReturnValue(of({ succeeded: true, data: {} }));
     usersApi.updateStatus.mockReturnValue(of({ succeeded: true, data: 'Updated' }));
+    auth.reinvite.mockReturnValue(of({ succeeded: true }));
+    auth.revokeAllSessions.mockReturnValue(of({ succeeded: true }));
     await TestBed.configureTestingModule({
       imports: [UsersComponent],
-      providers: [{ provide: Userservices, useValue: usersApi }],
+      providers: [
+        { provide: Userservices, useValue: usersApi },
+        { provide: AuthService, useValue: auth },
+        { provide: RolesService, useValue: { getRoles: vi.fn(() => of({ data: [] })) } },
+        { provide: DropDownServices, useValue: { businesses: vi.fn(() => of({ data: { data: [] } })) } },
+        {
+          provide: ActivatedRoute,
+          useValue: { queryParamMap: of(convertToParamMap({})) },
+        },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+      ],
     }).compileComponents();
   });
 
@@ -78,5 +98,17 @@ describe('UsersComponent', () => {
     component.changeStatus(user, UserStatus.Active);
     expect(component.statusError()).toBe('Not allowed');
     expect(component.statusUpdating()).toBe(false);
+  });
+
+  it('ends all sessions for the selected user from the row action', () => {
+    const component = TestBed.createComponent(UsersComponent).componentInstance;
+    const event = new MouseEvent('click', { bubbles: true });
+    const stopPropagation = vi.spyOn(event, 'stopPropagation');
+
+    component.revokeUserSessions(event, user);
+
+    expect(auth.revokeAllSessions).toHaveBeenCalledWith('user-1');
+    expect(stopPropagation).toHaveBeenCalledOnce();
+    expect(component.revokingSessionIds().has('user-1')).toBe(false);
   });
 });

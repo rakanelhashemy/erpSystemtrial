@@ -16,12 +16,15 @@ import {
   catchError,
   EMPTY,
   finalize,
+  forkJoin,
+  of,
   tap,
   Subscription,
 } from 'rxjs';
 import {
   InviteUserRequest,
   User,
+  UpdateUserRequest,
   USER_STATUS_OPTIONS,
   UserStatus,
 } from '../../core/models/user-modal';
@@ -80,11 +83,17 @@ export class UsersComponent {
   private inviteOpenedFromUrl = false;
 
   readonly inviteOpen = signal(false);
+  readonly editingUserId = signal<string | null>(null);
+  readonly editingUser = signal<User | null>(null);
+  readonly editLoading = signal(false);
+  readonly reinviteSubmitting = signal(false);
+  readonly revokingSessionIds = signal<ReadonlySet<string>>(new Set());
   readonly inviteTab = signal<'account' | 'permissions' | 'locations'>('account');
   readonly fullName = signal('');
   readonly email = signal('');
   readonly phone = signal('');
   readonly roleId = signal('');
+  private readonly originalRoleIds = signal<string[]>([]);
   readonly inviteSubmitting = signal(false);
   readonly inviteError = signal<string | null>(null);
   readonly pickedBusinessId = signal('');
@@ -240,6 +249,10 @@ export class UsersComponent {
 
   // ---------- Details modal ----------
   readonly detailsUser = signal<User | null>(null);
+  readonly showAllBusinessNames = signal(false);
+  readonly showAllLocationNames = signal(false);
+  readonly showAllEditBusinesses = signal(false);
+  readonly showAllEditLocations = signal(false);
   readonly detailsResource = rxResource({
     params: () => this.detailsUser()?.id,
     stream: ({ params }) => this.api.getById(params).pipe(map((res) => res.data)),
@@ -260,6 +273,7 @@ export class UsersComponent {
 
   // ---------- Status ----------
   readonly statusOptions = USER_STATUS_OPTIONS;
+  readonly invitedStatus = UserStatus.Invited;
   readonly statusUpdating = signal(false);
   readonly statusError = signal<string | null>(null);
 
@@ -309,6 +323,11 @@ export class UsersComponent {
               current ? { ...current, status: newStatus, statusLabel: label } : current,
             );
           }
+          if (this.editingUser()?.id === user.id) {
+            this.editingUser.update((current) =>
+              current ? { ...current, status: newStatus, statusLabel: label } : current,
+            );
+          }
           this.reload();
         }),
         catchError((err) => {
@@ -325,14 +344,22 @@ export class UsersComponent {
 
   // ---------- Invite ----------
   openAdd(): void {
+    this.editingUserId.set(null);
+    this.editingUser.set(null);
+    this.showAllEditBusinesses.set(false);
+    this.showAllEditLocations.set(false);
+    this.editLoading.set(false);
     this.inviteError.set(null);
     this.inviteTab.set('account');
     this.inviteOpen.set(true);
   }
 
   closeInvite(force = false): void {
-    if (this.inviteSubmitting() && !force) return;
+    if ((this.inviteSubmitting() || this.reinviteSubmitting()) && !force) return;
     this.inviteOpen.set(false);
+    this.editingUserId.set(null);
+    this.editingUser.set(null);
+    this.editLoading.set(false);
     if (this.route.snapshot.queryParamMap.has('add')) {
       this.inviteOpenedFromUrl = false;
       void this.router.navigate([], {
@@ -346,6 +373,7 @@ export class UsersComponent {
     this.email.set('');
     this.phone.set('');
     this.roleId.set('');
+    this.originalRoleIds.set([]);
     this.inheritedRoleClaims.set([]);
     this.pickedBusinessId.set('');
     this.pickedLocationBusinessId.set('');
@@ -359,6 +387,27 @@ export class UsersComponent {
     this.locationAccess.set([]);
     this.selectedPermissions.set(new Set());
     this.inviteError.set(null);
+  }
+
+  reinvite(): void {
+    const user = this.editingUser();
+    const email = this.email().trim();
+    if (!user || user.status !== UserStatus.Invited || !email || this.reinviteSubmitting()) return;
+
+    this.reinviteSubmitting.set(true);
+    this.inviteError.set(null);
+    this.auth
+      .reinvite({ email, frontendRegisterUrl: `${window.location.origin}/register` })
+      .pipe(
+        tap(() => toast.success('Invitation email sent successfully')),
+        catchError((error) => {
+          this.inviteError.set(error?.error?.message ?? 'Could not resend the invitation. Please try again.');
+          return EMPTY;
+        }),
+        finalize(() => this.reinviteSubmitting.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe();
   }
 
   scrollInviteContent(event: WheelEvent, content: HTMLElement): void {
@@ -493,7 +542,7 @@ export class UsersComponent {
   }
 
   submitInvite(): void {
-    if (this.inviteSubmitting()) return;
+    if (this.inviteSubmitting() || this.editLoading()) return;
     const fullName = this.fullName().trim();
     const email = this.email().trim();
     if (!fullName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !this.roleId()) {
@@ -520,6 +569,44 @@ export class UsersComponent {
       frontendRegisterUrl: `${window.location.origin}/register`,
     };
 
+    const editingUserId = this.editingUserId();
+    if (editingUserId) {
+      const originalRoleIds = this.originalRoleIds();
+      const roleIds = originalRoleIds[0] === this.roleId() ? originalRoleIds : [this.roleId()];
+      const updatePayload: UpdateUserRequest = {
+        fullName: payload.fullName,
+        email: payload.email,
+        phone: payload.phone,
+        roleIds,
+        permissions: payload.userClaims,
+        businessIds: payload.businessIds,
+        locationIds: payload.locationIds,
+        frontendRegisterUrl: payload.frontendRegisterUrl,
+      };
+
+      this.inviteSubmitting.set(true);
+      this.inviteError.set(null);
+      this.api
+        .updateUser(editingUserId, updatePayload)
+        .pipe(
+          tap(() => {
+            toast.success('User updated successfully');
+            this.closeInvite(true);
+            this.reload();
+          }),
+          catchError((error) => {
+            this.inviteError.set(
+              error?.error?.message ?? 'Could not update the user. Please try again.',
+            );
+            return EMPTY;
+          }),
+          finalize(() => this.inviteSubmitting.set(false)),
+          takeUntilDestroyed(this.destroyRef),
+        )
+        .subscribe();
+      return;
+    }
+
     this.inviteSubmitting.set(true);
     this.inviteError.set(null);
     this.auth
@@ -542,8 +629,119 @@ export class UsersComponent {
       .subscribe();
   }
 
-  openEdit(_user: User): void {
-    // TODO: open the edit-user modal
+  openEdit(user: User): void {
+    this.editingUserId.set(user.id);
+    this.editingUser.set(user);
+    this.showAllEditBusinesses.set(false);
+    this.showAllEditLocations.set(false);
+    this.editLoading.set(true);
+    this.inviteOpen.set(true);
+    this.inviteTab.set('account');
+    this.inviteError.set(null);
+    this.fullName.set(user.fullName);
+    this.email.set(user.email);
+    this.phone.set(user.phone ?? '');
+    this.roleId.set('');
+    this.originalRoleIds.set([]);
+    this.selectedPermissions.set(new Set());
+    this.inheritedRoleClaims.set([]);
+    this.businessAccess.set([]);
+    this.locationAccess.set([]);
+
+    forkJoin({
+      detail: this.api.getById(user.id),
+      roles: this.rolesApi.getUserRoles(user.id),
+      claims: this.rolesApi.getUserClaims(user.id),
+      roleOptions: this.rolesApi.getRoles().pipe(catchError(() => of({ data: [] }))),
+      businesses: this.dropdowns
+        .businesses({ pageNumber: 1, pageSize: 1000, search: '' })
+        .pipe(catchError(() => of({ data: { data: [] } }))),
+    })
+      .pipe(
+        finalize(() => this.editLoading.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: ({ detail, roles, claims, roleOptions, businesses }) => {
+          const details = detail?.data;
+          if (!details) {
+            this.inviteError.set('Could not load this user. Please try again.');
+            return;
+          }
+
+          this.fullName.set(details.fullName ?? user.fullName);
+          this.email.set(details.email ?? user.email);
+          this.phone.set(details.phone ?? user.phone ?? '');
+
+          const roleList = Array.isArray(roleOptions?.data) ? roleOptions.data : [];
+          const assignedRoleData = roles?.data?.roleIds ?? roles?.data?.roles ?? roles?.data ?? [];
+          let roleIds = this.normalizeIds(assignedRoleData);
+          if (!roleIds.length) {
+            const assignedNames = details.roles ?? user.roles;
+            roleIds = roleList
+              .filter((option: any) => assignedNames.includes(option.name ?? option.roleName))
+              .map((option: any) => String(option.id ?? option.roleId));
+          }
+          this.originalRoleIds.set(roleIds);
+          this.roleId.set(roleIds[0] ?? '');
+
+          const claimData =
+            claims?.data?.userClaims ??
+            claims?.data?.permissions ??
+            claims?.data?.claims ??
+            claims?.data ??
+            details.claims ??
+            [];
+          this.selectedPermissions.set(new Set(this.normalizePermissionNames(claimData)));
+
+          const businessList = businesses?.data?.data ?? [];
+          const businessIds = (details.businessIds ?? []).map(String);
+          const businessNames = details.businessNames ?? [];
+          const locationNames = details.locationNames ?? [];
+          this.businessAccess.set(
+            businessIds.map((id, index) => ({
+              id,
+              name:
+                businessNames[index] ??
+                businessList.find((item: DropdownItem) => String(item.id) === id)?.name ??
+                id,
+            })),
+          );
+          this.locationAccess.set(
+            (details.locationIds ?? []).map((id, index) => ({
+              id: String(id),
+              name: locationNames[index] ?? String(id),
+            })),
+          );
+          const firstBusinessId = businessIds[0] ?? '';
+          this.pickedLocationBusinessId.set(firstBusinessId);
+        },
+        error: (error) => {
+          this.inviteError.set(
+            error?.error?.message ?? 'Could not load this user. Please try again.',
+          );
+        },
+      });
+  }
+
+  private normalizeIds(value: unknown): string[] {
+    if (!Array.isArray(value)) return [];
+    return value
+      .map((item) =>
+        typeof item === 'string' || typeof item === 'number'
+          ? String(item)
+          : String(item?.id ?? item?.roleId ?? ''),
+      )
+      .filter(Boolean);
+  }
+
+  private normalizePermissionNames(value: unknown): string[] {
+    if (!Array.isArray(value)) return [];
+    return value
+      .map((claim) =>
+        typeof claim === 'string' ? claim : (claim?.permissionName ?? claim?.name ?? ''),
+      )
+      .filter((name) => typeof name === 'string' && !!name);
   }
 
   suspendUser(event: MouseEvent, user: User): void {
@@ -551,9 +749,36 @@ export class UsersComponent {
     this.changeStatus(user, UserStatus.Suspended);
   }
 
+  revokeUserSessions(event: MouseEvent, user: User): void {
+    event.stopPropagation();
+    if (this.revokingSessionIds().has(user.id)) return;
+
+    this.revokingSessionIds.update((ids) => new Set(ids).add(user.id));
+    this.auth
+      .revokeAllSessions(user.id)
+      .pipe(
+        tap(() => toast.success(`Sessions ended for ${user.fullName}`)),
+        catchError((error) => {
+          toast.error(error?.error?.message ?? 'Could not end this user’s sessions. Please try again.');
+          return EMPTY;
+        }),
+        finalize(() =>
+          this.revokingSessionIds.update((ids) => {
+            const next = new Set(ids);
+            next.delete(user.id);
+            return next;
+          }),
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe();
+  }
+
   // ---------- Details ----------
   openDetails(user: User): void {
     this.statusError.set(null);
+    this.showAllBusinessNames.set(false);
+    this.showAllLocationNames.set(false);
     this.detailsUser.set(user);
   }
 

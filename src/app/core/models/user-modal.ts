@@ -23,6 +23,8 @@ export interface UserDetail {
   claims: string[]; // empty in the sample response; adjust once you share a populated one
   businessIds: string[];
   locationIds: string[];
+  businessNames: string[];
+  locationNames: string[];
 }
 
 export interface UserFilterQuery {
@@ -43,7 +45,6 @@ export const USER_STATUS_OPTIONS: { value: UserStatus; label: string }[] = [
   { value: UserStatus.Suspended, label: 'Suspended' },
 ];
 
-
 export interface CurrentUser {
   id: string;
   fullName: string;
@@ -62,6 +63,17 @@ export interface InviteUserRequest {
   phone: string;
   roleIds: string[];
   userClaims: string[];
+  businessIds: string[];
+  locationIds: string[];
+  frontendRegisterUrl: string;
+}
+
+export interface UpdateUserRequest {
+  fullName: string;
+  email: string;
+  phone: string;
+  roleIds: string[];
+  permissions: string[];
   businessIds: string[];
   locationIds: string[];
   frontendRegisterUrl: string;

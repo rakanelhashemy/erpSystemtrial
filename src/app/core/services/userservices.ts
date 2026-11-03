@@ -9,7 +9,8 @@ import {
   UserDetail,
   UserStatus,
   CurrentUser,
-  UpdateProfileRequest, 
+  UpdateProfileRequest,
+  UpdateUserRequest,
 } from '../models/user-modal';
 
 @Service()
@@ -17,30 +18,25 @@ export class Userservices {
   private readonly http = inject(HttpClient);
   private readonly url = `${environment.baseUrl}User`;
 
-
   readonly currentUser = signal<CurrentUser | null>(null);
 
-  readonly initial = computed(() =>
-    this.currentUser()?.fullName?.trim().charAt(0).toUpperCase() ?? '?'
+  readonly initial = computed(
+    () => this.currentUser()?.fullName?.trim().charAt(0).toUpperCase() ?? '?',
   );
 
   readonly primaryRole = computed(() => this.currentUser()?.roles?.[0] ?? '');
 
- 
   loadMe(): Observable<CurrentUser> {
     return this.http.get<ApiResponse<CurrentUser>>(`${this.url}/Me`).pipe(
       map((res) => res.data),
-      tap((user) => this.currentUser.set(user))
+      tap((user) => this.currentUser.set(user)),
     );
   }
 
- 
   updateProfile(payload: UpdateProfileRequest): Observable<ApiResponse<string>> {
-    return this.http.put<ApiResponse<string>>(`${this.url}/Profile`, payload).pipe(
-      tap(() =>
-        this.currentUser.update((u) => (u ? { ...u, ...payload } : u))
-      )
-    );
+    return this.http
+      .put<ApiResponse<string>>(`${this.url}/Profile`, payload)
+      .pipe(tap(() => this.currentUser.update((u) => (u ? { ...u, ...payload } : u))));
   }
 
   clear() {
@@ -61,6 +57,10 @@ export class Userservices {
 
   getById(id: string): Observable<ApiResponse<UserDetail>> {
     return this.http.get<ApiResponse<UserDetail>>(`${this.url}/${id}`);
+  }
+
+  updateUser(id: string, payload: UpdateUserRequest): Observable<ApiResponse<string>> {
+    return this.http.put<ApiResponse<string>>(`${this.url}/Update/${id}`, payload);
   }
 
   updateStatus(id: string, newStatus: UserStatus): Observable<ApiResponse<string>> {

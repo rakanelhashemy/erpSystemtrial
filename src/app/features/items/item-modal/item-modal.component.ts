@@ -248,7 +248,7 @@ export class ItemModalComponent implements OnInit {
       name: d['itemName'] ?? d['name'] ?? '',
       price: d['price'] ?? null,
       currencyId: d['currencyId'] ?? null,
-      exchangeRate: d['exchangeRate'] ?? null,
+      exchangeRate: this.isEdit() ? 1 : (d['exchangeRate'] ?? null),
       departmentId: d['departmentId'] ?? null,
       quantity: 1,
       description: d['description'] ?? '',
@@ -768,7 +768,12 @@ export class ItemModalComponent implements OnInit {
 
       price: v.price,
       currencyId: v.currencyId,
-      exchangeRate: this.needsConversion() ? v.exchangeRate : null,
+      exchangeRate:
+        this.isEdit() || (!!this.selectedCurrency() && !this.needsConversion())
+          ? 1
+          : this.needsConversion()
+            ? v.exchangeRate
+            : null,
 
       brandId: this.newDropdownNames()['brands'] ? null : v.brandId,
       newBrandName: this.newDropdownNames()['brands'] || null,

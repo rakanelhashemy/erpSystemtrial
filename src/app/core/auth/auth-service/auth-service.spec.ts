@@ -120,4 +120,17 @@ describe('AuthService', () => {
     expect(request.request.body).toEqual({ userId: 'user-123' });
     request.flush({ succeeded: true });
   });
+
+  it('sends the invitation details to the reinvite endpoint', () => {
+    const payload = {
+      email: 'ada@example.com',
+      frontendRegisterUrl: 'http://localhost:4200/register',
+    };
+
+    service.reinvite(payload).subscribe();
+    const request = http.expectOne(`${environment.baseUrl}Auth/Reinvite`);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(payload);
+    request.flush({ succeeded: true });
+  });
 });

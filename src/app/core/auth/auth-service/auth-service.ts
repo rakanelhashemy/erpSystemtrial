@@ -32,6 +32,17 @@ export interface ResetPasswordRequest extends VerifyResetCodeRequest {
   confirmPassword: string;
 }
 
+export interface VerifyInviteRequest {
+  email: string;
+  invitationToken: string;
+}
+
+export interface CompleteRegistrationRequest extends VerifyInviteRequest {
+  password: string;
+  confirmPassword: string;
+  phone: string | null;
+}
+
 export interface AuthResponseData {
   accessToken?: string;
   token?: string;
@@ -209,15 +220,21 @@ export class AuthService {
       .pipe(catchError(this.handleAuthError));
   }
 
-  verifyInvite(data: { token: string }): Observable<unknown> {
+  reinvite(data: { email: string; frontendRegisterUrl: string }): Observable<unknown> {
     return this.httpClient
-      .post(`${environment.baseUrl}Auth/verify-invite`, data)
+      .post(`${environment.baseUrl}Auth/Reinvite`, data)
       .pipe(catchError(this.handleAuthError));
   }
 
-  completeRegistration(data: object): Observable<unknown> {
+  verifyInvite(data: VerifyInviteRequest): Observable<ApiResponse<unknown>> {
     return this.httpClient
-      .post(`${environment.baseUrl}Auth/CompleteRegistration`, data)
+      .post<ApiResponse<unknown>>(`${environment.baseUrl}Auth/verify-invite`, data)
+      .pipe(catchError(this.handleAuthError));
+  }
+
+  completeRegistration(data: CompleteRegistrationRequest): Observable<ApiResponse<unknown>> {
+    return this.httpClient
+      .post<ApiResponse<unknown>>(`${environment.baseUrl}Auth/CompleteRegistration`, data)
       .pipe(catchError(this.handleAuthError));
   }
 

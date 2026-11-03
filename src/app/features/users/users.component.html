@@ -241,6 +241,30 @@
                     <path d="M9 9v6M15 9v6" />
                   </svg>
                 </button>
+                <button
+                  *appHasPermission="'Permissions.Security.RevokeSessions'"
+                  type="button"
+                  class="p-1.5 rounded-lg hover:bg-dangerBg text-danger disabled:opacity-40"
+                  title="End user sessions"
+                  [attr.aria-label]="'End sessions for ' + u.fullName"
+                  [disabled]="revokingSessionIds().has(u.id)"
+                  (click)="revokeUserSessions($event, u)"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M10 17l5-5-5-5" />
+                    <path d="M15 12H3" />
+                    <path d="M12 3h6a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3h-6" />
+                  </svg>
+                </button>
               </td>
             </tr>
           } @empty {
@@ -417,28 +441,6 @@
               </span>
             </dd>
           </div>
-          <div *appHasPermission="'Permissions.Users.Edit'" class="pt-4 border-t border-inkText/8">
-            <dt class="text-fog mb-2">Change status</dt>
-            <div class="flex flex-wrap gap-2">
-              @for (opt of statusOptions; track opt.value) {
-                <button
-                  type="button"
-                  class="px-3 py-1.5 rounded-lg border text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
-                  [class]="statusPickClass(opt.value, user.status)"
-                  [attr.aria-pressed]="opt.value === user.status"
-                  [disabled]="opt.value === user.status || statusUpdating()"
-                  (click)="changeStatus(user, opt.value)"
-                >
-                  {{ opt.label }}
-                </button>
-              }
-            </div>
-            @if (statusError()) {
-              <p class="mt-2 text-xs text-danger bg-dangerBg rounded-lg px-3 py-2" role="alert">
-                {{ statusError() }}
-              </p>
-            }
-          </div>
           <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
             <dt class="text-fog">Roles</dt>
             <dd class="flex flex-wrap justify-end gap-1">
@@ -474,25 +476,35 @@
           } @else {
             @let extra = detailsResource.value();
 
-            <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-              <dt class="text-fog">Claims</dt>
-              <dd class="flex flex-wrap justify-end gap-1">
-                @for (claim of extra?.claims; track claim) {
-                  <span class="inline-block text-xs px-2 py-1 rounded-full bg-ink/5 text-inkText">{{
-                    claim
-                  }}</span>
+            <div class="pt-4 border-t border-inkText/8">
+              <dt class="text-fog">Businesses</dt>
+              <dd class="flex flex-wrap gap-1.5 mt-2">
+                @for (name of (showAllBusinessNames() ? (extra?.businessNames ?? []) : (extra?.businessNames ?? []).slice(0, 5)); track $index) {
+                  <span class="inline-flex text-xs px-2.5 py-1 rounded-full bg-ink/5 text-inkText">{{ name }}</span>
                 } @empty {
                   <span class="text-inkText">—</span>
                 }
               </dd>
+              @if ((extra?.businessNames?.length ?? 0) > 5) {
+                <button type="button" class="mt-2 text-xs font-semibold text-brassDk hover:underline" (click)="showAllBusinessNames.update((value) => !value)">
+                  {{ showAllBusinessNames() ? 'Show less' : 'Show more' }}
+                </button>
+              }
             </div>
-            <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-              <dt class="text-fog">Businesses</dt>
-              <dd class="text-inkText text-right">{{ extra?.businessIds?.length ?? 0 }}</dd>
-            </div>
-            <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
+            <div class="pt-4 border-t border-inkText/8">
               <dt class="text-fog">Locations</dt>
-              <dd class="text-inkText text-right">{{ extra?.locationIds?.length ?? 0 }}</dd>
+              <dd class="flex flex-wrap gap-1.5 mt-2">
+                @for (name of (showAllLocationNames() ? (extra?.locationNames ?? []) : (extra?.locationNames ?? []).slice(0, 5)); track $index) {
+                  <span class="inline-flex text-xs px-2.5 py-1 rounded-full bg-ink/5 text-inkText">{{ name }}</span>
+                } @empty {
+                  <span class="text-inkText">—</span>
+                }
+              </dd>
+              @if ((extra?.locationNames?.length ?? 0) > 5) {
+                <button type="button" class="mt-2 text-xs font-semibold text-brassDk hover:underline" (click)="showAllLocationNames.update((value) => !value)">
+                  {{ showAllLocationNames() ? 'Show less' : 'Show more' }}
+                </button>
+              }
             </div>
 
             <!-- Audit -->
@@ -537,8 +549,16 @@
         class="flex items-start justify-between gap-4 px-6 py-5 border-b border-inkText/8 shrink-0"
       >
         <div>
-          <p id="invite-title" class="font-display text-xl text-inkText">Invite User</p>
-          <p class="text-xs text-fog mt-0.5">Send an invitation and assign access rights</p>
+          <p id="invite-title" class="font-display text-xl text-inkText">
+            {{ editingUserId() ? 'Edit User' : 'Invite User' }}
+          </p>
+          <p class="text-xs text-fog mt-0.5">
+            {{
+              editingUserId()
+                ? 'Update user details and access rights'
+                : 'Send an invitation and assign access rights'
+            }}
+          </p>
         </div>
         <button
           type="button"
@@ -603,6 +623,9 @@
         >
           <!-- Account -->
           @if (inviteTab() === 'account') {
+            @if (editLoading()) {
+              <p class="mb-4 text-xs text-fog" role="status">Loading user details…</p>
+            }
             <div class="grid sm:grid-cols-2 gap-4">
               <div class="field">
                 <input
@@ -657,6 +680,40 @@
                 <span class="chevron">⌄</span>
               </div>
             </div>
+            @if (editingUser(); as user) {
+              <div *appHasPermission="'Permissions.Users.Edit'" class="mt-5 pt-4 border-t border-inkText/8">
+                <p class="text-sm font-semibold text-inkText mb-3">Change status</p>
+                <div class="flex flex-wrap gap-2">
+                  @for (opt of statusOptions; track opt.value) {
+                    <button
+                      type="button"
+                      class="px-3 py-1.5 rounded-lg border text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+                      [class]="statusPickClass(opt.value, user.status)"
+                      [attr.aria-pressed]="opt.value === user.status"
+                      [disabled]="opt.value === user.status || statusUpdating()"
+                      (click)="changeStatus(user, opt.value)"
+                    >
+                      {{ opt.label }}
+                    </button>
+                  }
+                </div>
+                @if (statusError()) {
+                  <p class="mt-2 text-xs text-danger bg-dangerBg rounded-lg px-3 py-2" role="alert">
+                    {{ statusError() }}
+                  </p>
+                }
+                @if (user.status === invitedStatus) {
+                  <button
+                    type="button"
+                    class="mt-4 px-3 py-2 rounded-lg border border-inkText/15 text-sm font-semibold text-inkText hover:bg-ink/5 disabled:opacity-50"
+                    [disabled]="reinviteSubmitting() || !email().trim()"
+                    (click)="reinvite()"
+                  >
+                    {{ reinviteSubmitting() ? 'Sending…' : 'Reinvite' }}
+                  </button>
+                }
+              </div>
+            }
           }
 
           <!-- Permissions -->
@@ -700,7 +757,7 @@
                   </thead>
                   <tbody class="divide-y divide-inkText/6">
                     @for (row of matrix(); track row.module) {
-                      <tr>
+                      <tr [class.bg-blue-50]="row.module === 'Check Lists' && rowAllChecked(row)">
                         <td class="px-4 py-2.5 font-semibold text-inkText">
                           <label class="flex items-center gap-2 cursor-pointer">
                             <input
@@ -795,7 +852,7 @@
               </button>
             </div>
             <div class="mt-3 flex flex-wrap gap-2">
-              @for (b of grantedBusinesses(); track b.id) {
+              @for (b of (showAllEditBusinesses() ? grantedBusinesses() : grantedBusinesses().slice(0, 5)); track b.id) {
                 <span
                   class="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-ink/5 text-brassDk"
                 >
@@ -813,6 +870,11 @@
                 <p class="text-xs text-fog">No business access granted yet.</p>
               }
             </div>
+            @if (grantedBusinesses().length > 5) {
+              <button type="button" class="mt-2 text-xs font-semibold text-brassDk hover:underline" (click)="showAllEditBusinesses.update((value) => !value)">
+                {{ showAllEditBusinesses() ? 'Show less' : 'Show more' }}
+              </button>
+            }
 
             <div class="flex items-center justify-between mt-8 mb-3">
               <p class="text-xs font-bold uppercase tracking-wide text-brassDk">Location access</p>
@@ -877,7 +939,7 @@
               }
             }
             <div class="mt-4 flex flex-wrap gap-2">
-              @for (l of grantedLocations(); track l.id) {
+              @for (l of (showAllEditLocations() ? grantedLocations() : grantedLocations().slice(0, 5)); track l.id) {
                 <span
                   class="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-ink/5 text-inkText"
                 >
@@ -895,6 +957,11 @@
                 <p class="text-xs text-fog">No location scopes granted yet.</p>
               }
             </div>
+            @if (grantedLocations().length > 5) {
+              <button type="button" class="mt-2 text-xs font-semibold text-brassDk hover:underline" (click)="showAllEditLocations.update((value) => !value)">
+                {{ showAllEditLocations() ? 'Show less' : 'Show more' }}
+              </button>
+            }
           }
 
           @if (inviteError()) {
@@ -917,9 +984,17 @@
           <button
             type="submit"
             class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-40 disabled:cursor-not-allowed"
-            [disabled]="inviteSubmitting()"
+            [disabled]="inviteSubmitting() || editLoading()"
           >
-            {{ inviteSubmitting() ? 'Sending…' : 'Send Invitation' }}
+            {{
+              inviteSubmitting()
+                ? editingUserId()
+                  ? 'Saving…'
+                  : 'Sending…'
+                : editingUserId()
+                  ? 'Save Changes'
+                  : 'Send Invitation'
+            }}
           </button>
         </div>
       </form>

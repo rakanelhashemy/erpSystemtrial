@@ -73,6 +73,40 @@ describe('Userservices', () => {
     emptySearchRequest.flush({ succeeded: true, data: { data: [], currentPage: 1 } });
   });
 
+  it('loads user detail with business and location display names', () => {
+    const detail = {
+      id: 'user-1',
+      businessIds: ['business-1'],
+      locationIds: ['location-1'],
+      businessNames: ['Main business'],
+      locationNames: ['Main location'],
+    };
+
+    service.getById('user-1').subscribe((response) => expect(response.data).toEqual(detail));
+    const request = http.expectOne(`${baseUrl}/user-1`);
+    expect(request.request.method).toBe('GET');
+    request.flush({ succeeded: true, data: detail });
+  });
+
+  it('updates the selected user with the edit payload', () => {
+    const payload = {
+      fullName: 'Ada Byron',
+      email: 'ada@example.com',
+      phone: '',
+      roleIds: ['role-1'],
+      permissions: ['Permissions.Users.View'],
+      businessIds: ['business-1'],
+      locationIds: ['location-1'],
+      frontendRegisterUrl: 'http://localhost:4200/register',
+    };
+
+    service.updateUser('user-1', payload).subscribe();
+    const request = http.expectOne(`${baseUrl}/Update/user-1`);
+    expect(request.request.method).toBe('PUT');
+    expect(request.request.body).toEqual(payload);
+    request.flush({ succeeded: true, data: 'Updated' });
+  });
+
   it('clears current-user state', () => {
     service.currentUser.set({
       id: 'user-1',

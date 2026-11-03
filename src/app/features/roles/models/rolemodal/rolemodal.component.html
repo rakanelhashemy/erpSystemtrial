@@ -79,7 +79,7 @@
                 </thead>
                 <tbody class="divide-y divide-inkText/6">
                   @for (module of modules(); track module.moduleName) {
-                    <tr>
+                    <tr [class.bg-blue-50]="module.label === 'Check Lists' && rowAllSelected(module)">
                       <td class="px-4 py-2.5 font-semibold text-inkText whitespace-nowrap">
                         <label class="flex items-center gap-2 cursor-pointer">
                           <input

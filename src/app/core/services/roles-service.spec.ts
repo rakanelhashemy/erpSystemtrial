@@ -33,7 +33,7 @@ describe('RolesService', () => {
     expect(createRequest.request.body).toEqual({ roleName: 'Manager' });
     createRequest.flush({ succeeded: true });
 
-    const edit = { roleId: 'role-1', roleName: 'Administrator' };
+    const edit = { id: 'role-1', roleName: 'Administrator' };
     service.editRole(edit).subscribe();
     const editRequest = http.expectOne(`${baseUrl}Role/Edit`);
     expect(editRequest.request.method).toBe('PUT');

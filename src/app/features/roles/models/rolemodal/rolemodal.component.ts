@@ -63,6 +63,7 @@ export class RolemodalComponent implements OnInit {
 
   private readonly permissionGroups = signal<PermissionModule[]>([]);
   private readonly selected = signal<ReadonlySet<string>>(new Set());
+  private readonly loadedRoleName = signal('');
   readonly selectedCount = computed(() => this.selected().size);
   readonly modules = computed(() =>
     this.permissionGroups().filter((module) =>
@@ -224,8 +225,8 @@ export class RolemodalComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          this.errorMsg.set('Something went wrong while saving the role.');
-          toast.error(id ? 'Could not update role' : 'Could not create role');
+          this.errorMsg.set(this.formatSaveError(err));
+          toast.error(this.errorMsg());
         },
       });
   }
@@ -252,13 +253,40 @@ export class RolemodalComponent implements OnInit {
   }
 
   private update(roleId: string, roleName: string) {
-    return this.rolesService
-      .editRole({ roleId, roleName })
-      .pipe(
-        switchMap(() =>
-          this.rolesService.updateRoleClaims({ roleId, roleClaims: this.buildClaims() }),
+    const updateClaims = () =>
+      this.rolesService.updateRoleClaims({ roleId, roleClaims: this.buildClaims() }).pipe(
+        catchError((err) =>
+          throwError(() => ({ ...err, operation: 'Updating role permissions failed' })),
         ),
       );
+
+    // Role/Edit may reject an unchanged name as a duplicate. For permission-only edits,
+    // send the claims update directly instead of blocking it on a no-op name update.
+    if (roleName === this.loadedRoleName()) return updateClaims();
+
+    return this.rolesService.editRole({ id: roleId, roleName }).pipe(
+      catchError((err) => throwError(() => ({ ...err, operation: 'Updating role name failed' }))),
+      switchMap(updateClaims),
+    );
+  }
+
+  private formatSaveError(err: any): string {
+    const body = err?.error;
+    const validationErrors = body?.errors;
+    const details = Array.isArray(validationErrors)
+      ? validationErrors.join(' ')
+      : validationErrors && typeof validationErrors === 'object'
+        ? Object.entries(validationErrors)
+            .flatMap(([field, messages]) =>
+              (Array.isArray(messages) ? messages : [messages]).map((message) => `${field}: ${message}`),
+            )
+            .join(' ')
+        : typeof validationErrors === 'string'
+          ? validationErrors
+          : '';
+    const reason = body?.message ?? body?.title ?? details ?? err?.message;
+    const operation = err?.operation ? `${err.operation}: ` : '';
+    return `${operation}${reason || 'Something went wrong while saving the role.'}`;
   }
 
   private getRoleInfo(roleId: string): void {
@@ -281,7 +309,9 @@ export class RolemodalComponent implements OnInit {
             return;
           }
 
-          this.roleName.setValue(roleData.name);
+          const currentName = roleData.name ?? roleData.roleName ?? '';
+          this.loadedRoleName.set(currentName.trim());
+          this.roleName.setValue(currentName);
 
           const list = (claims.data?.roleClaims ?? claims.data ?? []) as Claim[];
           this.selected.set(

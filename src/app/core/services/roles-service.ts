@@ -14,7 +14,7 @@ export interface AllPermissionsModule {
 }
 
 export interface RoleEdit {
-  roleId: string;
+  id: string;
   roleName: string;
 }
 

@@ -38,6 +38,27 @@
           />
           <label for="r-asOf">As of date</label>
         </div>
+
+        <div class="flex items-center gap-2">
+          <select
+            aria-label="Export file format"
+            [ngModel]="exportFormatId()"
+            (ngModelChange)="exportFormatId.set($event === null ? null : +$event)"
+            class="min-h-12 rounded-xl border border-inkText/15 bg-white px-3 text-sm text-inkText focus:outline-none focus:ring-2 focus:ring-brass/30"
+          >
+            @for (format of lookups().exportFormats ?? []; track format.id) {
+              <option [ngValue]="format.id">{{ format.name }}</option>
+            }
+          </select>
+          <button
+            type="button"
+            (click)="exportReport()"
+            [disabled]="!businessId() || exportFormatId() === null || exporting()"
+            class="min-h-12 rounded-xl bg-ink px-4 text-sm font-semibold text-ivory shadow-soft transition hover:bg-ink2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {{ exporting() ? 'Exporting…' : 'Export' }}
+          </button>
+        </div>
       </div>
     </div>
 

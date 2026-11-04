@@ -187,7 +187,14 @@ export class DepreciationReportsComponent {
   locationLevelLoading = signal<Record<number, boolean>>({});
   locationLevelPages = signal<Record<number, number>>({});
   locationLevelHasMore = signal<Record<number, boolean>>({});
-  lookups = signal<StaticLookups>({ countries: [], currencies: [], genders: [] });
+  lookups = signal<StaticLookups>({
+    countries: [],
+    currencies: [],
+    genders: [],
+    exportFormats: [],
+  });
+  exportFormatId = signal<number | null>(null);
+  exporting = signal(false);
   private readonly mappedDdOptions = computed<Record<string, LazyDropdownOption[]>>(() => {
     const lists = this.ddOptions();
     const selectedBusiness = this.selectedBusiness();
@@ -289,9 +296,62 @@ export class DepreciationReportsComponent {
       .staticLookups()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (lookups) => this.lookups.set(lookups),
+        next: (lookups) => {
+          this.lookups.set(lookups);
+          this.exportFormatId.set(lookups.exportFormats?.[0]?.id ?? null);
+        },
         error: () => this.error.set('Could not load filter options.'),
       });
+  }
+
+  exportReport(): void {
+    const businessId = this.businessId();
+    const formatId = this.exportFormatId();
+    if (!businessId || formatId === null || this.exporting()) return;
+
+    const filters = this.applied();
+    const query: DepreciationReportQuery = {
+      ...filters,
+      businessId,
+      asOfDate: this.asOfDate(),
+      search: this.search().trim(),
+      pageNumber: 1,
+      pageSize: this.totalCount() || this.pageSize(),
+      scraping: filters.scraping ? true : null,
+      includeChildGroups: filters.includeChildGroups ? true : null,
+    };
+    this.exporting.set(true);
+
+    const request =
+      this.view() === 'items'
+        ? this.report.exportItems(query, formatId)
+        : this.report.exportGroups(query, formatId);
+
+    request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (blob) => {
+        const format = this.lookups().exportFormats?.find((item) => item.id === formatId);
+        const extension = this.exportExtension(format?.name ?? '');
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `depreciation-${this.view()}-${this.asOfDate() || 'report'}.${extension}`;
+        anchor.click();
+        URL.revokeObjectURL(url);
+        this.exporting.set(false);
+      },
+      error: (error) => {
+        this.exporting.set(false);
+        this.error.set(this.getApiError(error) ?? 'Could not export the depreciation report.');
+      },
+    });
+  }
+
+  private exportExtension(formatName: string): string {
+    const name = formatName.trim().toLowerCase();
+    if (name === 'excel') return 'xlsx';
+    if (name === 'csv') return 'csv';
+    if (name === 'pdf') return 'pdf';
+    return name.replace(/[^a-z0-9]+/g, '') || 'file';
   }
 
   // ---------- report data ----------

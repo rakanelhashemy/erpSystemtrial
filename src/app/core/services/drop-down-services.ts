@@ -22,6 +22,7 @@ export interface StaticLookups {
   countries: DropdownItem<number>[];
   currencies: DropdownItem<number>[];
   genders: DropdownItem<number>[];
+  exportFormats?: DropdownItem<number>[];
 }
 
 export interface ItemFormLookups {
@@ -71,20 +72,48 @@ export class DropDownServices {
     });
   }
 
-  users(query?: DropdownQuery, lang?: Lang)                { return this.get('DropDownusers', query, lang); }
-  businesses(query?: DropdownQuery, lang?: Lang)           { return this.get('DropDown/Businesses', query, lang); }
-  locationTypes(query?: DropdownQuery, lang?: Lang)        { return this.get('DropDown/LocationTypes', query, lang); }
-  locations(query?: DropdownQuery, lang?: Lang)            { return this.get('DropDown/Locations', query, lang); }
-  groups(query?: DropdownQuery, lang?: Lang)               { return this.get('DropDown/Groups', query, lang); }
-  departments(query?: DropdownQuery, lang?: Lang)          { return this.get('DropDown/Departments', query, lang); }
-  suppliers(query?: DropdownQuery, lang?: Lang)            { return this.get('DropDown/Suppliers', query, lang); }
-  maintenanceCompanies(query?: DropdownQuery, lang?: Lang) { return this.get('DropDown/MaintenanceCompanies', query, lang); }
-  employees(query?: DropdownQuery, lang?: Lang)            { return this.get('DropDown/Employees', query, lang); }
-  materials(query?: DropdownQuery, lang?: Lang)            { return this.get('DropDown/Materials', query, lang); }
-  itemNames(query?: DropdownQuery, lang?: Lang)            { return this.get('DropDown/ItemNames', query, lang); }
-  itemModels(query?: DropdownQuery, lang?: Lang)           { return this.get('DropDown/ItemModels', query, lang); }
-  items(query?: DropdownQuery, lang?: Lang)                { return this.get('DropDown/Items', query, lang); }   // كان ناقص
-  brands(query?: DropdownQuery, lang?: Lang)               { return this.get('DropDown/Brands', query, lang); }
+  users(query?: DropdownQuery, lang?: Lang) {
+    return this.get('DropDownusers', query, lang);
+  }
+  businesses(query?: DropdownQuery, lang?: Lang) {
+    return this.get('DropDown/Businesses', query, lang);
+  }
+  locationTypes(query?: DropdownQuery, lang?: Lang) {
+    return this.get('DropDown/LocationTypes', query, lang);
+  }
+  locations(query?: DropdownQuery, lang?: Lang) {
+    return this.get('DropDown/Locations', query, lang);
+  }
+  groups(query?: DropdownQuery, lang?: Lang) {
+    return this.get('DropDown/Groups', query, lang);
+  }
+  departments(query?: DropdownQuery, lang?: Lang) {
+    return this.get('DropDown/Departments', query, lang);
+  }
+  suppliers(query?: DropdownQuery, lang?: Lang) {
+    return this.get('DropDown/Suppliers', query, lang);
+  }
+  maintenanceCompanies(query?: DropdownQuery, lang?: Lang) {
+    return this.get('DropDown/MaintenanceCompanies', query, lang);
+  }
+  employees(query?: DropdownQuery, lang?: Lang) {
+    return this.get('DropDown/Employees', query, lang);
+  }
+  materials(query?: DropdownQuery, lang?: Lang) {
+    return this.get('DropDown/Materials', query, lang);
+  }
+  itemNames(query?: DropdownQuery, lang?: Lang) {
+    return this.get('DropDown/ItemNames', query, lang);
+  }
+  itemModels(query?: DropdownQuery, lang?: Lang) {
+    return this.get('DropDown/ItemModels', query, lang);
+  }
+  items(query?: DropdownQuery, lang?: Lang) {
+    return this.get('DropDown/Items', query, lang);
+  } // كان ناقص
+  brands(query?: DropdownQuery, lang?: Lang) {
+    return this.get('DropDown/Brands', query, lang);
+  }
 
   supplierCategories(query?: DropdownQuery, lang?: Lang) {
     return this.get<number>('DropDown/SupplierCategories', query, lang);
@@ -94,7 +123,6 @@ export class DropDownServices {
     return this.get<number>('DropDown/MaintenanceCompanySpecialties', query, lang);
   }
 
- 
   itemFormLookups(query?: ItemFormLookupsQuery, lang?: Lang): Observable<ItemFormLookups> {
     return this.http
       .get<ApiResponse<ItemFormLookups>>(`${this.url}DropDown/item-form-lookups`, {

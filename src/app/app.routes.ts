@@ -174,6 +174,20 @@ export const routes: Routes = [
         path: 'check-lists',
         loadComponent: () =>
           import('./features/check-lists/check-lists.component').then((m) => m.CheckListsComponent),
+        children: [
+          {
+            path: ':id/audit',
+            loadComponent: () =>
+              import('./features/check-lists/run-audit/run-audit.component').then(
+                (m) => m.RunAuditComponent,
+              ),
+            data: {
+              title: 'Run Audit',
+              moduleId: 'm-chk',
+              requiredPermission: 'Permissions.CheckLists.View',
+            },
+          },
+        ],
         data: {
           title: 'Check Lists',
           moduleId: 'm-chk',

@@ -1,0 +1,593 @@
+<section class="bg-paper rounded-2xl border border-inkText/8 shadow-soft overflow-hidden">
+  <header
+    class="relative overflow-hidden border-b border-inkText/8 bg-gradient-to-br from-ivory/70 via-paper to-paper p-4 sm:p-6"
+  >
+    <div class="pointer-events-none absolute -right-10 -top-16 h-48 w-48 rounded-full bg-brass/5 blur-2xl" aria-hidden="true"></div>
+    <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="min-w-0">
+      <button
+        type="button"
+        (click)="back()"
+        class="mb-3 inline-flex items-center gap-2 rounded-full border border-inkText/8 bg-white/80 px-3 py-1.5 text-xs font-semibold text-fog shadow-sm transition hover:border-brass/40 hover:text-inkText"
+        aria-label="Back to check lists"
+      >
+        <svg
+          class="w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <path d="m15 18-6-6 6-6M9 12h12" />
+        </svg>
+        Check Lists
+      </button>
+      <div class="flex items-start gap-3">
+        <span class="hidden h-11 w-11 shrink-0 place-items-center rounded-2xl bg-ink text-brassLt shadow-soft sm:grid" aria-hidden="true">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 5H6a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3" />
+            <rect x="9" y="3" width="6" height="4" rx="1" />
+            <path d="m8 13 2 2 5-5" />
+          </svg>
+        </span>
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 class="truncate font-display text-xl text-inkText sm:text-2xl">
+              {{ detail()?.title ?? 'Run Audit' }}
+            </h1>
+            @if (isReadOnly()) {
+              <span class="perm-chip is-granted">Completed</span>
+            } @else {
+              <span class="inline-flex items-center gap-1.5 rounded-full border border-brass/25 bg-brass/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-brassDk">
+                <span class="h-1.5 w-1.5 rounded-full bg-brass" aria-hidden="true"></span>
+                In progress
+              </span>
+            }
+          </div>
+          <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-fog">
+            <span class="inline-flex items-center gap-1.5">
+              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" />
+              </svg>
+              {{ detail()?.locationName || 'Audit checklist' }}
+            </span>
+            @if (detail()?.groupName) {
+              <span class="h-1 w-1 rounded-full bg-inkText/20" aria-hidden="true"></span>
+              <span>{{ detail()?.groupName }}</span>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+    <button
+      type="button"
+      (click)="askComplete()"
+      [disabled]="!canComplete()"
+      [attr.title]="canComplete() ? null : 'Review every item before completing the audit'"
+      class="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-ink px-5 py-2.5 text-sm font-semibold text-ivory shadow-soft transition hover:-translate-y-0.5 hover:bg-ink2 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
+    >
+      <svg
+        class="w-4 h-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        aria-hidden="true"
+      >
+        <path d="m5 12 4 4L19 6" />
+      </svg>
+      Complete Audit
+    </button>
+    </div>
+  </header>
+
+  @if (headerLoading() && !detail()) {
+    <div class="px-4 sm:px-6 py-3 text-xs text-fog bg-ivory/60" role="status" aria-live="polite">
+      Loading checklist details…
+    </div>
+  }
+
+  <!-- Progress summary -->
+  <section class="border-b border-inkText/8 bg-white px-4 py-5 sm:px-6" aria-label="Audit progress">
+    <div class="mb-3 flex items-end justify-between gap-3">
+      <div>
+        <p class="text-sm font-semibold text-inkText">Audit progress</p>
+        <span class="mt-1 block text-xs text-fog"
+        >{{ counts().checked + counts().missing }} of {{ counts().total }} items reviewed</span
+      >
+      </div>
+      <span class="rounded-lg bg-ink px-2.5 py-1.5 text-xs font-bold tabular-nums text-ivory">{{ progress() }}%</span>
+    </div>
+    <div
+      class="h-2 rounded-full bg-ink/10 overflow-hidden"
+      role="progressbar"
+      [attr.aria-valuenow]="progress()"
+      [attr.aria-valuetext]="progress() + '% reviewed'"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-label="Audit completion"
+    >
+      <div
+        class="h-full rounded-full bg-brass transition-[width] duration-300"
+        [style.width.%]="progress()"
+      ></div>
+    </div>
+    <div class="mt-4 grid grid-cols-3 gap-2.5 sm:gap-3 text-left">
+      <div class="flex items-center gap-3 rounded-xl border border-inkText/8 bg-ivory/45 px-3 py-3 sm:px-4">
+        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-fog shadow-sm"><span class="h-2 w-2 rounded-full bg-fog/60"></span></span>
+        <div><p class="font-display text-lg leading-5 text-inkText tabular-nums">{{ counts().pending }}</p><p class="mt-1 text-[11px] text-fog">Pending</p></div>
+      </div>
+      <div class="flex items-center gap-3 rounded-xl border border-emerald-900/10 bg-emerald-50/60 px-3 py-3 sm:px-4">
+        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-emerald-700 shadow-sm"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg></span>
+        <div><p class="font-display text-lg leading-5 text-inkText tabular-nums">{{ counts().checked }}</p><p class="mt-1 text-[11px] text-fog">Checked</p></div>
+      </div>
+      <div class="flex items-center gap-3 rounded-xl border border-danger/15 bg-dangerBg/70 px-3 py-3 sm:px-4">
+        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-danger shadow-sm"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg></span>
+        <div><p class="font-display text-lg leading-5 text-danger tabular-nums">{{ counts().missing }}</p><p class="mt-1 text-[11px] text-fog">Missing</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scan and filters -->
+  <section class="space-y-4 border-b border-inkText/8 bg-ivory/20 p-4 sm:p-6" aria-label="Audit tools">
+    @if (!isReadOnly()) {
+      <div class="rounded-2xl border border-inkText/8 bg-white p-3 shadow-sm sm:p-4">
+        <div class="mb-3 flex items-center gap-2.5">
+          <span class="grid h-8 w-8 place-items-center rounded-xl bg-brass/10 text-brassDk" aria-hidden="true">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3" />
+              <path d="M7 12h10M12 7v10" />
+            </svg>
+          </span>
+          <div><p class="text-xs font-semibold text-inkText">Quick item scan</p><p class="mt-0.5 text-[11px] text-fog">Scan a barcode or type an item code to find it in this audit.</p></div>
+        </div>
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+          <div class="field" [class.opacity-60]="scanning() || !detail()">
+            <input
+              id="audit-scan"
+              name="scanCode"
+              type="text"
+              placeholder=" "
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              maxlength="128"
+              [disabled]="scanning() || !detail()"
+              [(ngModel)]="scanCode"
+              (keydown.enter)="onScan()"
+              aria-describedby="audit-scan-hint"
+            />
+            <label for="audit-scan">Scan barcode or enter item code</label>
+          </div>
+          <button
+            type="button"
+            (click)="onScan()"
+            [disabled]="scanning() || !detail() || !scanCode.trim()"
+            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-ink px-5 text-sm font-semibold text-ivory shadow-soft transition hover:bg-ink2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <svg
+              class="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3" />
+              <path d="M7 12h10M12 7v10" />
+            </svg>
+            {{ scanning() ? 'Scanning…' : 'Scan item' }}
+          </button>
+        </div>
+        <p id="audit-scan-hint" class="mt-2 text-[11px] text-fog">
+          Click <span class="font-semibold text-inkText">Scan item</span> or press
+          <kbd class="rounded border border-inkText/10 bg-ivory px-1.5 py-0.5 font-sans text-[10px]">Enter</kbd>.
+          Up to 128 characters.
+        </p>
+      </div>
+    }
+
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div class="inline-flex w-fit max-w-full flex-wrap gap-1 rounded-xl border border-inkText/8 bg-white p-1 shadow-sm" role="group" aria-label="Filter items by audit status">
+        @for (pill of pills; track pill.label) {
+          <button
+            type="button"
+            [attr.aria-pressed]="status() === pill.value"
+            (click)="setStatus(pill.value)"
+            class="rounded-lg border px-3 py-2 text-xs font-semibold transition-all"
+            [class.bg-ink]="status() === pill.value"
+            [class.text-ivory]="status() === pill.value"
+            [class.border-ink]="status() === pill.value"
+            [class.border-inkText/12]="status() !== pill.value"
+            [class.hover:border-brass]="status() !== pill.value"
+            [class.hover:bg-ivory/60]="status() !== pill.value"
+          >
+            {{ pill.label }}
+          </button>
+        }
+      </div>
+      <div class="field w-full lg:w-80">
+        <input
+          id="audit-search"
+          name="auditSearch"
+          type="search"
+          placeholder=" "
+          maxlength="100"
+          autocomplete="off"
+          [ngModel]="search()"
+          (ngModelChange)="onSearch($event)"
+          aria-label="Search audit items"
+        />
+        <label for="audit-search">Search items</label>
+      </div>
+    </div>
+
+    <div class="flex justify-end">
+      <button
+        type="button"
+        class="inline-flex items-center gap-2 rounded-lg border border-inkText/12 px-3 py-2 text-xs font-semibold text-inkText transition hover:border-brass hover:bg-ivory"
+        [attr.aria-expanded]="filtersExpanded()"
+        aria-controls="audit-advanced-filters"
+        (click)="toggleFilters()"
+      >
+        <svg
+          class="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
+          <path d="M4 6h16M7 12h10m-7 6h4" />
+        </svg>
+        {{ filtersExpanded() ? 'Hide filters' : 'More filters' }}
+      </button>
+    </div>
+
+    @if (filtersExpanded()) {
+      <div
+        id="audit-advanced-filters"
+        class="rounded-xl border border-inkText/8 bg-ivory/40 p-3 sm:p-4 space-y-4"
+      >
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+          <div class="field">
+            <input
+              id="audit-filter-item-id"
+              name="auditItemId"
+              type="text"
+              placeholder=" "
+              maxlength="36"
+              autocomplete="off"
+              [ngModel]="itemIdFilter()"
+              (ngModelChange)="itemIdFilter.set($event)"
+            />
+            <label for="audit-filter-item-id">Item ID</label>
+          </div>
+          <div class="field">
+            <input
+              id="audit-filter-code"
+              name="auditCode"
+              type="text"
+              placeholder=" "
+              maxlength="64"
+              autocomplete="off"
+              [ngModel]="codeFilter()"
+              (ngModelChange)="codeFilter.set($event)"
+            />
+            <label for="audit-filter-code">Item code</label>
+          </div>
+          <div class="field">
+            <app-lazy-dropdown
+              label="Brand"
+              placeholder="All brands"
+              [options]="filterDropdownOptions('brands')"
+              [selectedValue]="brandIdFilter()"
+              [loading]="filterLoading().brands"
+              [hasMore]="filterHasMore().brands"
+              [searchable]="true"
+              [searchTerm]="filterSearch().brands"
+              searchPlaceholder="Search brands…"
+              [allowClear]="true"
+              (opened)="loadFilterOptions('brands')"
+              (searchChanged)="onFilterSearch('brands', $event)"
+              (loadMore)="loadFilterOptions('brands')"
+              (selected)="selectNumericFilter('brand', $event)"
+              (cleared)="clearNumericFilter('brand')"
+            />
+          </div>
+          <div class="field">
+            <app-lazy-dropdown
+              label="Model"
+              placeholder="All models"
+              [options]="filterDropdownOptions('models')"
+              [selectedValue]="modelIdFilter()"
+              [loading]="filterLoading().models"
+              [hasMore]="filterHasMore().models"
+              [searchable]="true"
+              [searchTerm]="filterSearch().models"
+              searchPlaceholder="Search models…"
+              [allowClear]="true"
+              [disabled]="!brandIdFilter()"
+              (opened)="loadFilterOptions('models')"
+              (searchChanged)="onFilterSearch('models', $event)"
+              (loadMore)="loadFilterOptions('models')"
+              (selected)="selectNumericFilter('model', $event)"
+              (cleared)="clearNumericFilter('model')"
+            />
+          </div>
+          <div class="field">
+            <app-lazy-dropdown
+              label="Material"
+              placeholder="All materials"
+              [options]="filterDropdownOptions('materials')"
+              [selectedValue]="materialIdFilter()"
+              [loading]="filterLoading().materials"
+              [hasMore]="filterHasMore().materials"
+              [searchable]="true"
+              [searchTerm]="filterSearch().materials"
+              searchPlaceholder="Search materials…"
+              [allowClear]="true"
+              (opened)="loadFilterOptions('materials')"
+              (searchChanged)="onFilterSearch('materials', $event)"
+              (loadMore)="loadFilterOptions('materials')"
+              (selected)="selectNumericFilter('material', $event)"
+              (cleared)="clearNumericFilter('material')"
+            />
+          </div>
+          <div class="field">
+            <app-lazy-dropdown
+              label="Country"
+              placeholder="All countries"
+              [options]="countryDropdownOptions()"
+              [selectedValue]="countryIdFilter()"
+              [loading]="countryLoading()"
+              [allowClear]="true"
+              (opened)="loadCountries()"
+              (selected)="selectNumericFilter('country', $event)"
+              (cleared)="clearNumericFilter('country')"
+            />
+          </div>
+          <div class="field">
+            <app-lazy-dropdown
+              label="Department"
+              placeholder="All departments"
+              [options]="filterDropdownOptions('departments')"
+              [selectedValue]="departmentIdFilter()"
+              [loading]="filterLoading().departments"
+              [hasMore]="filterHasMore().departments"
+              [searchable]="true"
+              [searchTerm]="filterSearch().departments"
+              searchPlaceholder="Search departments…"
+              [allowClear]="true"
+              (opened)="loadFilterOptions('departments')"
+              (searchChanged)="onFilterSearch('departments', $event)"
+              (loadMore)="loadFilterOptions('departments')"
+              (selected)="onDepartmentSelected($event)"
+              (cleared)="clearDepartmentFilter()"
+            />
+          </div>
+          <div class="field">
+            <input
+              id="audit-filter-capacity"
+              name="auditCapacity"
+              type="text"
+              placeholder=" "
+              maxlength="64"
+              autocomplete="off"
+              [ngModel]="capacityFilter()"
+              (ngModelChange)="capacityFilter.set($event)"
+            />
+            <label for="audit-filter-capacity">Capacity</label>
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-2 border-t border-inkText/8 pt-3">
+          <button
+            type="button"
+            class="rounded-lg px-3 py-2 text-xs font-semibold text-fog hover:bg-white"
+            (click)="resetFilters()"
+          >
+            Reset
+          </button>
+          <button
+            type="button"
+            class="rounded-lg bg-ink px-4 py-2 text-xs font-semibold text-ivory shadow-soft transition hover:bg-ink2"
+            (click)="applyFilters()"
+          >
+            Apply filters
+          </button>
+        </div>
+      </div>
+    }
+  </section>
+
+  @if (error()) {
+    <div
+      class="px-4 sm:px-6 py-3 text-xs text-danger bg-dangerBg border-b border-inkText/8"
+      role="alert"
+    >
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Results table -->
+  <div class="overflow-x-auto" [attr.aria-busy]="loading()">
+    <table class="w-full min-w-[760px] text-sm">
+      <caption class="sr-only">
+        Checklist audit items and their review status
+      </caption>
+      <thead>
+        <tr class="border-y border-inkText/6 bg-ivory/75 text-left text-[10px] uppercase tracking-[0.08em] text-fog">
+          <th scope="col" class="px-5 py-3 font-semibold">Item</th>
+          <th scope="col" class="px-5 py-3 font-semibold">Group / Location</th>
+          <th scope="col" class="px-5 py-3 font-semibold">Status</th>
+          <th scope="col" class="px-5 py-3 font-semibold text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-inkText/6">
+        @if (loading()) {
+          <tr>
+            <td colspan="4" class="px-5 py-12 text-center text-sm text-fog" role="status">
+              Loading audit items…
+            </td>
+          </tr>
+        } @else {
+          @for (item of items(); track item.id) {
+            <tr class="transition-colors hover:bg-ivory/50">
+              <td class="px-5 py-4">
+                <div class="flex min-w-0 items-center gap-3">
+                  <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-inkText/8 bg-white text-brassDk shadow-sm" aria-hidden="true">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z" /><path d="m4.5 7.8 7.5 4.4 7.5-4.4M12 12.2V21" />
+                    </svg>
+                  </span>
+                  <span class="min-w-0">
+                    <span class="block truncate font-semibold text-inkText">{{ item.itemName }}</span>
+                    <span class="mt-1 block truncate text-xs text-fog">
+                      {{ item.code || 'No item code' }}
+                      @if (item.serialNumber) { <span aria-hidden="true"> · </span>SN {{ item.serialNumber }} }
+                    </span>
+                  </span>
+                </div>
+              </td>
+              <td class="px-5 py-4">
+                <span class="block text-inkText">{{ item.groupName || '—' }}</span>
+                <span class="block text-xs text-fog mt-1">{{ item.locationName || '—' }}</span>
+              </td>
+              <td class="px-5 py-4">
+                <span
+                  class="perm-chip"
+                  [class.is-granted]="item.status === 'Checked'"
+                  [class.is-denied]="item.status === 'Missing'"
+                >
+                  {{ item.status }}
+                </span>
+              </td>
+              <td class="px-5 py-4">
+                <div class="flex items-center justify-end gap-1.5">
+                  @if (!isReadOnly()) {
+                    @if (item.status !== 'Checked') {
+                      <button
+                        type="button"
+                        [disabled]="busyItemId() === item.id || !detail()"
+                        (click)="setResult(item, 'Checked')"
+                        class="rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-ivory shadow-sm transition hover:bg-ink2 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Found
+                      </button>
+                    }
+                    @if (item.status !== 'Missing') {
+                      <button
+                        type="button"
+                        [disabled]="busyItemId() === item.id || !detail()"
+                        (click)="setResult(item, 'Missing')"
+                        class="rounded-lg border border-danger/15 px-3 py-2 text-xs font-semibold text-danger transition hover:bg-dangerBg disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Missing
+                      </button>
+                    }
+                    @if (item.status !== 'Pending') {
+                      <button
+                        type="button"
+                        [disabled]="busyItemId() === item.id || !detail()"
+                        (click)="setResult(item, 'Pending')"
+                        class="px-3 py-2 rounded-lg text-fog hover:bg-ink/5 text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Reset
+                      </button>
+                    }
+                  }
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" class="px-5 py-12 text-center text-sm text-fog">
+                No audit items match these filters.
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <footer
+    class="p-4 sm:px-6 sm:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-fog"
+  >
+    <p>{{ totalCount() }} {{ totalCount() === 1 ? 'item' : 'items' }}</p>
+    <nav class="flex items-center justify-end gap-1" aria-label="Audit item pages">
+      <button
+        type="button"
+        (click)="prev()"
+        [disabled]="loading() || pageNumber() <= 1"
+        class="px-3 py-2 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        Previous
+      </button>
+      <span
+        class="px-3 py-2 rounded-lg bg-ink text-ivory font-semibold tabular-nums"
+        aria-current="page"
+      >
+        {{ pageNumber() }} / {{ totalPages() }}
+      </span>
+      <button
+        type="button"
+        (click)="next()"
+        [disabled]="loading() || pageNumber() >= totalPages()"
+        class="px-3 py-2 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        Next
+      </button>
+    </nav>
+  </footer>
+</section>
+
+@if (confirmComplete()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="presentation">
+    <button
+      type="button"
+      class="absolute inset-0 bg-ink/55 backdrop-blur-sm cursor-default"
+      aria-label="Close confirmation"
+      [disabled]="completing()"
+      (click)="cancelComplete()"
+    ></button>
+    <section
+      class="relative bg-paper w-full max-w-md rounded-2xl shadow-soft border border-inkText/8"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="complete-title"
+      aria-describedby="complete-desc"
+    >
+      <div class="px-6 py-5 border-b border-inkText/8">
+        <h2 id="complete-title" class="font-display text-xl text-inkText">Complete Audit</h2>
+      </div>
+      <div class="px-6 py-5 space-y-5">
+        <p id="complete-desc" class="text-sm text-inkText leading-relaxed">
+          Complete <span class="font-semibold">{{ detail()?.title }}</span
+          >? The audit will become read-only.
+        </p>
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-inkText/8">
+          <button
+            type="button"
+            class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5 disabled:opacity-40"
+            [disabled]="completing()"
+            (click)="cancelComplete()"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed"
+            [disabled]="completing() || !canComplete()"
+            (click)="complete()"
+          >
+            {{ completing() ? 'Completing…' : 'Complete Audit' }}
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+}

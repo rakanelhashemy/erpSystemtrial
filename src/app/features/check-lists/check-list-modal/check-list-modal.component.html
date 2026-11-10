@@ -1,0 +1,255 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="close()"></div>
+
+  <div
+    class="relative bg-paper w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl shadow-soft"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="check-list-modal-title"
+  >
+    <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8 shrink-0">
+      <p id="check-list-modal-title" class="font-display text-xl text-inkText">
+        {{ isEdit ? 'Edit Check List' : 'New Check List' }}
+      </p>
+      <button
+        type="button"
+        class="p-2 rounded-lg hover:bg-ink/5 text-fog"
+        aria-label="Close check list modal"
+        [disabled]="saving()"
+        (click)="close()"
+      >
+        <svg
+          class="w-5 h-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    @if (loading()) {
+      <p class="text-sm text-fog text-center py-12" role="status">Loading…</p>
+    } @else {
+      <form class="flex min-h-0 flex-col overflow-hidden" (ngSubmit)="save()" novalidate>
+        <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6">
+          @if (hasResults()) {
+            <p class="text-xs text-brassDk bg-brass/10 rounded-lg px-3 py-2">
+              This audit already has results. Changing its business or location may change which items are included.
+            </p>
+          }
+
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="field">
+              <input
+                id="check-list-title"
+                name="title"
+                type="text"
+                placeholder=" "
+                required
+                autocomplete="off"
+                maxlength="150"
+                [(ngModel)]="title"
+              />
+              <label for="check-list-title">Title</label>
+            </div>
+
+            <div class="space-y-1">
+              <div class="field" [class.has-error]="auditDateTouched() && !!auditDateError()">
+                <input
+                  id="checklist-audit-date"
+                  name="auditDate"
+                  type="date"
+                  placeholder=" "
+                  required
+                  [ngModel]="auditDate"
+                  (ngModelChange)="onAuditDateChange($event)"
+                  (blur)="touchAuditDate()"
+                  [attr.aria-invalid]="auditDateTouched() && !!auditDateError()"
+                  [attr.aria-describedby]="
+                    auditDateTouched() && auditDateError() ? 'checklist-audit-date-error' : null
+                  "
+                />
+                <label for="checklist-audit-date">Audit Date</label>
+              </div>
+              @if (auditDateTouched() && auditDateError()) {
+                <p id="checklist-audit-date-error" class="text-xs text-danger" role="alert">
+                  {{ auditDateError() }}
+                </p>
+              }
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="field">
+              <app-lazy-dropdown
+                label="Business *"
+                placeholder="Select a business..."
+                [options]="businessOptions()"
+                [selectedValue]="businessId"
+                [loading]="businessLoading()"
+                [hasMore]="businessHasMore()"
+                [searchable]="true"
+                [searchTerm]="searchTerms().businesses"
+                [searchPlaceholder]="'Search businesses…'"
+                [allowClear]="true"
+                (opened)="loadBusinesses()"
+                (searchChanged)="onOptionSearch('businesses', $event)"
+                (loadMore)="loadBusinesses()"
+                (selected)="onBusinessSelected($event)"
+                (cleared)="onBusinessChange(null)"
+              />
+            </div>
+            <div class="field">
+              <app-lazy-dropdown
+                label="Target Group"
+                placeholder="All groups"
+                [options]="groupOptions()"
+                [selectedValue]="groupId"
+                [loading]="groupLoading()"
+                [hasMore]="groupHasMore()"
+                [searchable]="true"
+                [searchTerm]="searchTerms().groups"
+                searchPlaceholder="Search groups…"
+                [allowClear]="true"
+                (opened)="loadBusinessOptions('groups')"
+                (searchChanged)="onOptionSearch('groups', $event)"
+                (loadMore)="loadBusinessOptions('groups')"
+                (selected)="groupId = '' + $event.id"
+                (cleared)="groupId = null"
+              />
+            </div>
+          </div>
+
+          <!-- Target location: one select per hierarchy level -->
+          <div>
+            <p class="mb-1 text-xs font-bold uppercase tracking-wide text-brassDk">Target Location *</p>
+            <p class="mb-3 text-xs text-fog">Select a location, then choose a child location if needed.</p>
+            @if (currentLocationName()) {
+              <p class="mb-3 text-xs text-fog">
+                Current: <span class="font-semibold text-inkText">{{ currentLocationName() }}</span>
+              </p>
+            }
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              @for (options of locationLevels(); track $index; let level = $index) {
+                <div class="field">
+                  <app-lazy-dropdown
+                    [label]="level === 0 ? 'Location *' : 'Sub-location ' + level"
+                    [placeholder]="level === 0 ? 'Select a location' : 'Select a child location'"
+                    [options]="locationOptions()[$index] ?? []"
+                    [selectedValue]="locationSelectedIds()[level] ?? null"
+                    [loading]="locationLevelLoading(level)"
+                    [hasMore]="locationHasMore()[level] ?? false"
+                    [allowClear]="true"
+                    [disabled]="!businessId"
+                    (opened)="
+                      level === 0 && !locationPages()[level]
+                        ? loadLocationLevel(level, null)
+                        : null
+                    "
+                    (loadMore)="
+                      loadLocationLevel(
+                        level,
+                        level === 0 ? null : (locationSelectedIds()[level - 1] ?? null)
+                      )
+                    "
+                    (selected)="onLocationChange(level, '' + $event.id)"
+                    (cleared)="onLocationChange(level, null)"
+                  />
+                </div>
+              }
+            </div>
+            @if (!businessId) {
+              <p class="mt-2 text-xs text-fog">Select a business first to load its locations.</p>
+            }
+          </div>
+
+          <!-- Assignees -->
+          <div class="pt-2 border-t border-inkText/8">
+            <p class="text-xs font-bold uppercase tracking-wide text-brassDk mb-3">Assignees</p>
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <div class="field flex-1">
+                <app-lazy-dropdown
+                  label="User"
+                  placeholder="Select a user..."
+                  [options]="userOptions()"
+                  [selectedValue]="assigneeToAdd"
+                  [loading]="userLoading()"
+                  [hasMore]="userHasMore()"
+                  [searchable]="true"
+                  [searchTerm]="searchTerms().users"
+                  [searchPlaceholder]="'Search users…'"
+                  [disabled]="!businessId"
+                  (opened)="loadBusinessOptions('users')"
+                  (searchChanged)="onOptionSearch('users', $event)"
+                  (loadMore)="loadBusinessOptions('users')"
+                  (selected)="assigneeToAdd = '' + $event.id"
+                  (cleared)="assigneeToAdd = null"
+                />
+              </div>
+              <button
+                type="button"
+                (click)="addAssignee()"
+                [disabled]="!assigneeToAdd"
+                class="px-4 py-3 rounded-lg bg-ink text-ivory text-xs font-semibold shadow-soft transition hover:bg-ink2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                + Add Assignee
+              </button>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-3">
+              @for (a of assignees(); track a.id) {
+                <span
+                  class="inline-flex items-center gap-1.5 rounded-full bg-ivory border border-inkText/10 pl-2.5 pr-1 py-1 text-xs text-inkText"
+                >
+                  {{ a.fullName }}
+                  <button
+                    type="button"
+                    class="w-4 h-4 rounded-full hover:bg-ink/10 text-fog leading-none"
+                    [attr.aria-label]="'Remove ' + a.fullName"
+                    (click)="removeAssignee(a.id)"
+                  >
+                    ×
+                  </button>
+                </span>
+              } @empty {
+                <span class="text-xs text-fog">No assignees added yet.</span>
+              }
+            </div>
+          </div>
+
+          @if (error()) {
+            <p class="text-xs text-danger bg-dangerBg rounded-lg px-3 py-2" role="alert">
+              {{ error() }}
+            </p>
+          }
+        </div>
+        <div
+          class="flex shrink-0 items-center justify-end gap-3 border-t border-inkText/8 px-6 py-4"
+        >
+          <button
+            type="button"
+            class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5 disabled:opacity-40"
+            [disabled]="saving()"
+            (click)="close()"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed"
+            [disabled]="saving()"
+          >
+            {{ saving() ? 'Saving…' : 'Save Check List' }}
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>
+

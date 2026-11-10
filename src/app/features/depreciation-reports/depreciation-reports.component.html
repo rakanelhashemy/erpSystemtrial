@@ -3,16 +3,16 @@
   <div class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col gap-4">
     <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
       <div>
-        <p class="font-display text-xl text-inkText">Depreciation Report</p>
+        <p class="font-display text-xl text-inkText">{{ language() === 'ar' ? "تقرير الإهلاك" : "Depreciation Report" }}</p>
         <p class="text-xs text-fog mt-0.5">
-          Original value, accumulated depreciation and book value as of a chosen date.
+          {{ language() === 'ar' ? "القيمة الأصلية والإهلاك المتراكم والقيمة الدفترية في تاريخ محدد." : "Original value, accumulated depreciation and book value as of a chosen date." }}
         </p>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
         <div class="field min-w-55">
           <app-lazy-dropdown
-            label="Business"
+            [label]="language() === 'ar' ? 'الشركة' : 'Business'"
             placeholder="Select a business"
             [options]="ddOptionsFor('businesses')"
             [selectedValue]="selectedBusiness()?.id ?? null"
@@ -20,7 +20,7 @@
             [hasMore]="ddHasMore()['businesses'] ?? false"
             [searchable]="true"
             [searchTerm]="ddSearch()['businesses'] ?? ''"
-            searchPlaceholder="Search businesses…"
+            [searchPlaceholder]="language() === 'ar' ? 'ابحث عن الشركات…' : 'Search businesses…'"
             (opened)="ensureDropdownLoaded('businesses')"
             (searchChanged)="onDropdownSearch('businesses', $event)"
             (loadMore)="loadDropdown('businesses')"
@@ -36,12 +36,12 @@
             [ngModel]="asOfDate()"
             (ngModelChange)="onAsOfDateChange($event)"
           />
-          <label for="r-asOf">As of date</label>
+          <label for="r-asOf">{{ language() === 'ar' ? "كما في تاريخ" : "As of date" }}</label>
         </div>
 
         <div class="flex items-center gap-2">
           <select
-            aria-label="Export file format"
+            [attr.aria-label]="language() === 'ar' ? 'تنسيق ملف التصدير' : 'Export file format'"
             [ngModel]="exportFormatId()"
             (ngModelChange)="exportFormatId.set($event === null ? null : +$event)"
             class="min-h-12 rounded-xl border border-inkText/15 bg-white px-3 text-sm text-inkText focus:outline-none focus:ring-2 focus:ring-brass/30"
@@ -56,7 +56,7 @@
             [disabled]="!businessId() || exportFormatId() === null || exporting()"
             class="min-h-12 rounded-xl bg-ink px-4 text-sm font-semibold text-ivory shadow-soft transition hover:bg-ink2 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {{ exporting() ? 'Exporting…' : 'Export' }}
+            {{ exporting() ? (language() === 'ar' ? "جارٍ التصدير…" : "Exporting…") : (language() === 'ar' ? "تصدير" : "Export") }}
           </button>
         </div>
       </div>
@@ -78,7 +78,7 @@
           [class.text-ivory]="view() === 'items'"
           [class.text-fog]="view() !== 'items'"
         >
-          By item
+          {{ language() === 'ar' ? "حسب الصنف" : "By item" }}
         </button>
         <button
           type="button"
@@ -90,7 +90,7 @@
           [class.text-ivory]="view() === 'groups'"
           [class.text-fog]="view() !== 'groups'"
         >
-          By group
+          {{ language() === 'ar' ? "حسب المجموعة" : "By group" }}
         </button>
       </div>
 
@@ -109,7 +109,7 @@
         </svg>
         <input
           type="search"
-          placeholder="Search by item name or serial number…"
+          [attr.placeholder]="language() === 'ar' ? 'ابحث باسم الصنف أو الرقم التسلسلي…' : 'Search by item name or serial number…'"
           [ngModel]="search()"
           (ngModelChange)="onSearch($event)"
           class="w-full pl-9 pr-4 py-3 text-sm rounded-xl border border-inkText/15 bg-ivory/40 focus:outline-none focus:ring-2 focus:ring-brass/30 focus:border-brass"
@@ -133,7 +133,7 @@
         >
           <path d="M4 6h16M7 12h10M10 18h4"></path>
         </svg>
-        <span>Advanced Filters</span>
+        <span>{{ language() === 'ar' ? "فلاتر متقدمة" : "Advanced Filters" }}</span>
         @if (activeFiltersCount() > 0) {
           <span class="min-w-5 h-5 px-1.5 rounded-full bg-brass text-white text-[10px] leading-5">{{
             activeFiltersCount()
@@ -157,25 +157,25 @@
   @if (summary(); as s) {
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4 sm:p-5 border-b border-inkText/8">
       <div class="rounded-xl border border-inkText/8 bg-ivory/50 px-4 py-3">
-        <p class="text-[11px] uppercase tracking-wide text-fog">Items</p>
+        <p class="text-[11px] uppercase tracking-wide text-fog">{{ language() === 'ar' ? "الأصناف" : "Items" }}</p>
         <p class="mt-1 text-lg font-semibold text-inkText">{{ s.totalItems | number }}</p>
       </div>
       <div class="rounded-xl border border-inkText/8 bg-ivory/50 px-4 py-3">
-        <p class="text-[11px] uppercase tracking-wide text-fog">Original value</p>
+        <p class="text-[11px] uppercase tracking-wide text-fog">{{ language() === 'ar' ? "القيمة الأصلية" : "Original value" }}</p>
         <p class="mt-1 text-lg font-semibold text-inkText">
           {{ s.totalOriginalValue | number: '1.2-2' }}
           <span class="text-xs font-normal text-fog">{{ defaultCurrency() }}</span>
         </p>
       </div>
       <div class="rounded-xl border border-inkText/8 bg-ivory/50 px-4 py-3">
-        <p class="text-[11px] uppercase tracking-wide text-fog">Accumulated depreciation</p>
+        <p class="text-[11px] uppercase tracking-wide text-fog">{{ language() === 'ar' ? "الإهلاك المتراكم" : "Accumulated depreciation" }}</p>
         <p class="mt-1 text-lg font-semibold text-inkText">
           {{ s.totalAccumulatedDepreciation | number: '1.2-2' }}
           <span class="text-xs font-normal text-fog">{{ defaultCurrency() }}</span>
         </p>
       </div>
       <div class="rounded-xl border border-brass/40 bg-brass/10 px-4 py-3">
-        <p class="text-[11px] uppercase tracking-wide text-brassDk">Book value</p>
+        <p class="text-[11px] uppercase tracking-wide text-brassDk">{{ language() === 'ar' ? "القيمة الدفترية" : "Book value" }}</p>
         <p class="mt-1 text-lg font-semibold text-inkText">
           {{ s.totalBookValue | number: '1.2-2' }}
           <span class="text-xs font-normal text-fog">{{ defaultCurrency() }}</span>
@@ -190,16 +190,16 @@
       <div class="p-4 sm:p-5 lg:p-6">
         <div class="flex items-start justify-between gap-3 mb-5">
           <div>
-            <p class="text-xs font-bold uppercase tracking-wide text-brassDk">Advanced filters</p>
+            <p class="text-xs font-bold uppercase tracking-wide text-brassDk">{{ language() === 'ar' ? "فلاتر متقدمة" : "Advanced filters" }}</p>
             <p class="text-xs text-fog mt-1">
-              Narrow the report by price, classification, location or depreciation dates.
+              {{ language() === 'ar' ? "حدّد التقرير حسب السعر أو التصنيف أو الموقع أو تواريخ الإهلاك." : "Narrow the report by price, classification, location or depreciation dates." }}
             </p>
           </div>
           <button
             type="button"
             (click)="toggleFilters()"
             class="p-1.5 rounded-lg text-fog hover:bg-ink/5"
-            aria-label="Close advanced filters"
+            [attr.aria-label]="language() === 'ar' ? 'إغلاق الفلاتر المتقدمة' : 'Close advanced filters'"
           >
             <svg
               class="w-4 h-4"
@@ -224,7 +224,7 @@
               placeholder=" "
               [(ngModel)]="filters.fromPrice"
             />
-            <label for="f-fromPrice">Price from</label>
+            <label for="f-fromPrice">{{ language() === 'ar' ? "السعر من" : "Price from" }}</label>
           </div>
           <div class="field">
             <input
@@ -234,34 +234,34 @@
               placeholder=" "
               [(ngModel)]="filters.toPrice"
             />
-            <label for="f-toPrice">Price to</label>
+            <label for="f-toPrice">{{ language() === 'ar' ? "السعر إلى" : "Price to" }}</label>
           </div>
 
           <div class="field">
             <select id="f-currency" [(ngModel)]="filters.currencyId">
-              <option [ngValue]="null">All currencies</option>
+              <option [ngValue]="null">{{ language() === 'ar' ? "كل العملات" : "All currencies" }}</option>
               @for (c of lookups().currencies; track c.id) {
                 <option [ngValue]="c.id">{{ c.name }}</option>
               }
             </select>
-            <label for="f-currency">Currency</label><span class="chevron">⌄</span>
+            <label for="f-currency">{{ language() === 'ar' ? "العملة" : "Currency" }}</label><span class="chevron">⌄</span>
           </div>
 
           <div class="field">
             <select id="f-country" [(ngModel)]="filters.countryId">
-              <option [ngValue]="null">All countries</option>
+              <option [ngValue]="null">{{ language() === 'ar' ? "كل الدول" : "All countries" }}</option>
               @for (c of lookups().countries; track c.id) {
                 <option [ngValue]="c.id">{{ c.name }}</option>
               }
             </select>
-            <label for="f-country">Country</label><span class="chevron">⌄</span>
+            <label for="f-country">{{ language() === 'ar' ? "الدولة" : "Country" }}</label><span class="chevron">⌄</span>
           </div>
 
           @for (f of ddFilters; track f.key) {
             <div class="field">
               <app-lazy-dropdown
-                [label]="f.label"
-                [placeholder]="f.placeholder"
+                [label]="language() === 'ar' ? (f.key === 'brands' ? 'الماركة / العلامة التجارية' : f.key === 'models' ? 'الموديل' : f.key === 'materials' ? 'الخامة' : f.key === 'departments' ? 'القسم' : 'المجموعة') : f.label"
+                [placeholder]="language() === 'ar' ? (f.key === 'brands' ? 'كل الماركات' : f.key === 'models' ? 'كل الموديلات' : f.key === 'materials' ? 'كل الخامات' : f.key === 'departments' ? 'كل الأقسام' : 'كل المجموعات') : f.placeholder"
                 [options]="ddOptionsFor(f.key)"
                 [selectedValue]="filters[f.field]"
                 [loading]="ddLoading()[f.key] ?? false"
@@ -269,7 +269,7 @@
                 [searchable]="true"
                 [allowClear]="true"
                 [searchTerm]="ddSearch()[f.key] ?? ''"
-                [searchPlaceholder]="'Search ' + f.label.toLowerCase() + '…'"
+                [searchPlaceholder]="language() === 'ar' ? (f.key === 'brands' ? 'ابحث عن الماركات…' : f.key === 'models' ? 'ابحث عن الموديلات…' : f.key === 'materials' ? 'ابحث عن الخامات…' : f.key === 'departments' ? 'ابحث عن الأقسام…' : 'ابحث عن المجموعات…') : 'Search ' + f.label.toLowerCase() + '…'"
                 (opened)="ensureDropdownLoaded(f.key)"
                 (searchChanged)="onDropdownSearch(f.key, $event)"
                 (loadMore)="loadDropdown(f.key)"
@@ -282,8 +282,8 @@
           @for (options of locationFilterLevels(); track $index; let level = $index) {
             <div class="field">
               <app-lazy-dropdown
-                [label]="level === 0 ? 'Location' : 'Sub-location ' + level"
-                [placeholder]="level === 0 ? 'All locations' : 'Select a child location'"
+                [label]="language() === 'ar' ? (level === 0 ? 'الموقع' : 'موقع فرعي ' + level) : (level === 0 ? 'Location' : 'Sub-location ' + level)"
+                [placeholder]="language() === 'ar' ? (level === 0 ? 'كل المواقع' : 'اختر موقعًا فرعيًا') : (level === 0 ? 'All locations' : 'Select a child location')"
                 [options]="locationLevelOptions(level)"
                 [selectedValue]="locationSelectedIds()[level] ?? null"
                 [loading]="locationLevelLoading()[level] ?? false"
@@ -312,7 +312,7 @@
 
           <div class="field">
             <input id="f-capacity" type="text" placeholder=" " [(ngModel)]="filters.capacity" />
-            <label for="f-capacity">Capacity</label>
+            <label for="f-capacity">{{ language() === 'ar' ? "السعة" : "Capacity" }}</label>
           </div>
           <div class="field">
             <input
@@ -322,7 +322,7 @@
               placeholder=" "
               [(ngModel)]="filters.depreciationYears"
             />
-            <label for="f-depYears">Depreciation years</label>
+            <label for="f-depYears">{{ language() === 'ar' ? "سنوات الإهلاك" : "Depreciation years" }}</label>
           </div>
           <div class="field">
             <input
@@ -332,7 +332,7 @@
               placeholder=" "
               [(ngModel)]="filters.depreciationRate"
             />
-            <label for="f-depRate">Depreciation rate</label>
+            <label for="f-depRate">{{ language() === 'ar' ? "معدل الإهلاك" : "Depreciation rate" }}</label>
           </div>
 
           <div class="field">
@@ -342,7 +342,7 @@
               placeholder=" "
               [(ngModel)]="filters.fromWorkingDate"
             />
-            <label for="f-fromWorking">Working date from</label>
+            <label for="f-fromWorking">{{ language() === 'ar' ? "تاريخ بدء التشغيل من" : "Working date from" }}</label>
           </div>
           <div class="field">
             <input
@@ -351,7 +351,7 @@
               placeholder=" "
               [(ngModel)]="filters.toWorkingDate"
             />
-            <label for="f-toWorking">Working date to</label>
+            <label for="f-toWorking">{{ language() === 'ar' ? "تاريخ بدء التشغيل إلى" : "Working date to" }}</label>
           </div>
           <div class="field">
             <input
@@ -360,7 +360,7 @@
               placeholder=" "
               [(ngModel)]="filters.fromDepreciationDate"
             />
-            <label for="f-fromDep">Depreciation from</label>
+            <label for="f-fromDep">{{ language() === 'ar' ? "الإهلاك من" : "Depreciation from" }}</label>
           </div>
           <div class="field">
             <input
@@ -369,7 +369,7 @@
               placeholder=" "
               [(ngModel)]="filters.toDepreciationDate"
             />
-            <label for="f-toDep">Depreciation to</label>
+            <label for="f-toDep">{{ language() === 'ar' ? "الإهلاك إلى" : "Depreciation to" }}</label>
           </div>
         </div>
 
@@ -380,14 +380,14 @@
                 <input type="checkbox" [(ngModel)]="filters.scraping" />
                 <span class="track"></span>
               </span>
-              Show scraping / discarded items only
+              {{ language() === 'ar' ? "عرض الأصناف المستبعدة فقط" : "Show scraping / discarded items only" }}
             </label>
             <label class="flex items-center gap-2.5 text-sm text-inkText cursor-pointer">
               <span class="switch">
                 <input type="checkbox" [(ngModel)]="filters.includeChildGroups" />
                 <span class="track"></span>
               </span>
-              Include child groups
+              {{ language() === 'ar' ? "تضمين المجموعات الفرعية" : "Include child groups" }}
             </label>
           </div>
 
@@ -397,14 +397,14 @@
               (click)="resetFilters()"
               class="px-4 py-2.5 rounded-lg text-sm font-semibold text-fog hover:bg-ink/5"
             >
-              Reset
+              {{ language() === 'ar' ? "إعادة تعيين" : "Reset" }}
             </button>
             <button
               type="button"
               (click)="applyFilters()"
               class="px-4 py-2.5 rounded-lg text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft"
             >
-              Apply Filters
+              {{ language() === 'ar' ? "تطبيق الفلاتر" : "Apply Filters" }}
             </button>
           </div>
         </div>
@@ -415,7 +415,7 @@
   <!-- Page size + summary -->
   <div class="px-4 sm:px-5 py-3 border-b border-inkText/8 flex items-center justify-between gap-3">
     <label class="flex items-center gap-2 text-xs text-fog">
-      Show
+      {{ language() === 'ar' ? "عرض" : "Show" }}
       <select
         [ngModel]="pageSize()"
         (ngModelChange)="onPageSizeChange($event)"
@@ -426,10 +426,10 @@
         <option [ngValue]="25">25</option>
         <option [ngValue]="50">50</option>
       </select>
-      entries
+      {{ language() === 'ar' ? "قيود" : "entries" }}
     </label>
     <p class="text-xs text-fog">
-      {{ totalCount() }} {{ view() === 'items' ? 'items' : 'groups' }} total
+      {{ totalCount() }} {{ view() === 'items' ? (language() === 'ar' ? "أصناف" : "items") : (language() === 'ar' ? "مجموعات" : "groups") }} {{ language() === 'ar' ? 'إجمالًا' : 'total' }}
     </p>
   </div>
 
@@ -439,30 +439,28 @@
       <table class="w-full text-sm">
         <thead>
           <tr class="bg-ivory text-left text-[11px] uppercase tracking-wide text-fog">
-            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold min-w-57.5">
-              Item details
-            </th>
-            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold">Group / Location</th>
+            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold min-w-57.5">{{ language() === 'ar' ? 'بيانات الصنف' : 'Item details' }}</th>
+            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold">{{ language() === 'ar' ? 'المجموعة / الموقع' : 'Group / Location' }}</th>
             <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold text-right">
-              Original value
+              {{ language() === 'ar' ? "القيمة الأصلية" : "Original value" }}
             </th>
-            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold">Working date</th>
-            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold">Rate / Years</th>
-            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold">End date</th>
+            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold">{{ language() === 'ar' ? 'تاريخ بدء التشغيل' : 'Working date' }}</th>
+            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold">{{ language() === 'ar' ? 'المعدل / السنوات' : 'Rate / Years' }}</th>
+            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold">{{ language() === 'ar' ? 'تاريخ الانتهاء' : 'End date' }}</th>
             <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold text-right min-w-40">
-              Accumulated
+              {{ language() === 'ar' ? "المتراكم" : "Accumulated" }}
             </th>
             <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold text-right">
-              Book value
+              {{ language() === 'ar' ? "القيمة الدفترية" : "Book value" }}
             </th>
-            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold">Status</th>
+            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold">{{ language() === 'ar' ? 'الحالة' : 'Status' }}</th>
           </tr>
         </thead>
 
         <tbody class="divide-y divide-inkText/6">
           @if (loading()) {
             <tr>
-              <td colspan="9" class="px-5 py-10 text-center text-sm text-fog">Loading…</td>
+              <td colspan="9" class="px-5 py-10 text-center text-sm text-fog">{{ language() === 'ar' ? "جارٍ التحميل…" : "Loading…" }}</td>
             </tr>
           } @else {
             @for (row of itemRows(); track row.id) {
@@ -486,7 +484,7 @@
                 <td class="px-5 py-3.5 text-inkText whitespace-nowrap">{{ row.workingDate }}</td>
                 <td class="px-5 py-3.5 text-inkText whitespace-nowrap">
                   {{ row.depreciationRate | number: '1.0-2' }}
-                  <span class="text-xs text-fog">% / {{ row.depreciationYears }} yrs</span>
+                  <span class="text-xs text-fog">% / {{ row.depreciationYears }} {{ language() === 'ar' ? 'سنة' : 'yrs' }}</span>
                 </td>
                 <td class="px-5 py-3.5 text-inkText whitespace-nowrap">
                   {{ row.depreciationEndDate }}
@@ -511,14 +509,14 @@
                     [class.is-granted]="!fullyDepreciated"
                     [class.is-denied]="fullyDepreciated"
                   >
-                    {{ fullyDepreciated ? 'Fully depreciated' : 'Depreciating' }}
+                    {{ fullyDepreciated ? (language() === 'ar' ? "مستهلك بالكامل" : "Fully depreciated") : (language() === 'ar' ? "قيد الإهلاك" : "Depreciating") }}
                   </span>
                 </td>
               </tr>
             } @empty {
               <tr>
                 <td colspan="9" class="px-5 py-10 text-center text-sm text-fog">
-                  {{ businessId() ? 'No items found.' : 'Select a business to view its report.' }}
+                  {{ businessId() ? (language() === 'ar' ? "لم يتم العثور على أصناف." : "No items found.") : (language() === 'ar' ? "اختر شركة لعرض تقريرها." : "Select a business to view its report.") }}
                 </td>
               </tr>
             }
@@ -529,25 +527,25 @@
       <table class="w-full text-sm">
         <thead>
           <tr class="bg-ivory text-left text-[11px] uppercase tracking-wide text-fog">
-            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold min-w-57.5">Group</th>
-            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold text-right">Items</th>
+            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold min-w-57.5">{{ language() === 'ar' ? 'المجموعة' : 'Group' }}</th>
+            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold text-right">{{ language() === 'ar' ? 'الأصناف' : 'Items' }}</th>
             <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold text-right">
-              Original value
+              {{ language() === 'ar' ? "القيمة الأصلية" : "Original value" }}
             </th>
             <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold text-right min-w-40">
-              Accumulated
+              {{ language() === 'ar' ? "المتراكم" : "Accumulated" }}
             </th>
             <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold text-right">
-              Book value
+              {{ language() === 'ar' ? "القيمة الدفترية" : "Book value" }}
             </th>
-            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold text-right">Actions</th>
+            <th class="sticky top-0 z-10 bg-ivory px-5 py-3 font-semibold text-right">{{ language() === 'ar' ? 'الإجراءات' : 'Actions' }}</th>
           </tr>
         </thead>
 
         <tbody class="divide-y divide-inkText/6">
           @if (loading()) {
             <tr>
-              <td colspan="6" class="px-5 py-10 text-center text-sm text-fog">Loading…</td>
+              <td colspan="6" class="px-5 py-10 text-center text-sm text-fog">{{ language() === 'ar' ? "جارٍ التحميل…" : "Loading…" }}</td>
             </tr>
           } @else {
             @for (row of groupRows(); track row.groupId ?? 'ungrouped') {
@@ -578,7 +576,7 @@
                       (click)="viewGroupItems(row)"
                       class="px-3 py-1.5 rounded-lg border border-inkText/12 text-xs font-semibold text-inkText hover:border-brass"
                     >
-                      View items
+                      {{ language() === 'ar' ? "عرض الأصناف" : "View items" }}
                     </button>
                   }
                 </td>
@@ -586,7 +584,7 @@
             } @empty {
               <tr>
                 <td colspan="6" class="px-5 py-10 text-center text-sm text-fog">
-                  {{ businessId() ? 'No groups found.' : 'Select a business to view its report.' }}
+                  {{ businessId() ? (language() === 'ar' ? "لم يتم العثور على مجموعات." : "No groups found.") : (language() === 'ar' ? "اختر شركة لعرض تقريرها." : "Select a business to view its report.") }}
                 </td>
               </tr>
             }
@@ -601,8 +599,8 @@
     class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-fog"
   >
     <p>
-      Showing {{ from() }} to {{ to() }} of {{ totalCount() }}
-      {{ view() === 'items' ? 'items' : 'groups' }}
+      {{ language() === 'ar' ? 'عرض' : 'Showing' }} {{ from() }} {{ language() === 'ar' ? 'إلى' : 'to' }} {{ to() }} {{ language() === 'ar' ? 'من أصل' : 'of' }} {{ totalCount() }}
+      {{ view() === 'items' ? (language() === 'ar' ? "أصناف" : "items") : (language() === 'ar' ? "مجموعات" : "groups") }}
     </p>
     <div class="flex items-center gap-1">
       <button
@@ -611,7 +609,7 @@
         [disabled]="pageNumber() <= 1"
         class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        Previous
+        {{ language() === 'ar' ? "السابق" : "Previous" }}
       </button>
       <span class="px-3 py-1.5 rounded-lg bg-ink text-ivory font-semibold"
         >{{ pageNumber() }} / {{ totalPages() }}</span
@@ -622,7 +620,7 @@
         [disabled]="pageNumber() >= totalPages()"
         class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        Next
+        {{ language() === 'ar' ? "التالي" : "Next" }}
       </button>
     </div>
   </div>

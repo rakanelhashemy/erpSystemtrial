@@ -9,12 +9,12 @@
   >
     <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
       <p id="group-modal-title" class="font-display text-xl text-inkText">
-        {{ isEdit() ? 'Edit Group' : 'Add Group' }}
+        {{ isEdit() ? (language() === 'ar' ? 'تعديل مجموعة' : 'Edit Group') : (language() === 'ar' ? 'إضافة مجموعة' : 'Add Group') }}
       </p>
       <button
         type="button"
         class="p-2 rounded-lg hover:bg-ink/5 text-fog disabled:opacity-40"
-        aria-label="Close"
+        [attr.aria-label]="language() === 'ar' ? 'إغلاق' : 'Close'"
         [disabled]="saving()"
         (click)="cancel()"
       >
@@ -39,11 +39,11 @@
           (ngModelChange)="name.set($event); nameError.set(false)"
           [attr.aria-invalid]="nameError()"
         />
-        <label for="group-name">Group name</label>
+        <label for="group-name">{{ language() === 'ar' ? "اسم المجموعة" : "Group name" }}</label>
       </div>
 
       @if (nameError()) {
-        <p class="text-xs text-danger -mt-3" role="alert">Group name is required.</p>
+        <p class="text-xs text-danger -mt-3" role="alert">{{ language() === 'ar' ? "اسم المجموعة مطلوب." : "Group name is required." }}</p>
       }
 
       @if (errorMessage()) {
@@ -59,14 +59,14 @@
           [disabled]="saving()"
           (click)="cancel()"
         >
-          Cancel
+          {{ language() === 'ar' ? "إلغاء" : "Cancel" }}
         </button>
         <button
           type="submit"
           class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed"
           [disabled]="saving()"
         >
-          {{ saving() ? 'Saving…' : 'Save group' }}
+          {{ saving() ? (language() === 'ar' ? "جارٍ الحفظ…" : "Saving…") : (language() === 'ar' ? "حفظ المجموعة" : "Save group") }}
         </button>
       </div>
     </form>

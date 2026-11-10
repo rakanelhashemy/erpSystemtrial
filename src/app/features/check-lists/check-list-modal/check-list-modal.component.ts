@@ -20,6 +20,7 @@ import {
 } from '../../../shared/ui/lazy-dropdown/lazy-dropdown.component';
 import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 
+import { AuthService } from '../../../core/auth/auth-service/auth-service';
 @Component({
   imports: [FormsModule, LazyDropdownComponent],
   selector: 'app-check-list-modal',
@@ -27,6 +28,7 @@ import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs'
   templateUrl: './check-list-modal.component.html',
 })
 export class CheckListModalComponent {
+  readonly language = inject(AuthService).language;
   private readonly destroyRef = inject(DestroyRef);
   private readonly service = inject(ChecklistServices);
   private readonly dd = inject(DropDownServices);

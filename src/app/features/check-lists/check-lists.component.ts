@@ -9,6 +9,7 @@ import { HasPermissionDirective } from '../../shared/directives/has-permission.d
 import { FormsModule } from '@angular/forms';
 import { CheckListModalComponent } from './check-list-modal/check-list-modal.component';
 
+import { AuthService } from '../../core/auth/auth-service/auth-service';
 type StatusTab = { label: string; value: CheckListStatus | null };
 
 @Component({
@@ -18,6 +19,7 @@ type StatusTab = { label: string; value: CheckListStatus | null };
   templateUrl: './check-lists.component.html',
 })
 export class CheckListsComponent {
+  readonly language = inject(AuthService).language;
   private readonly destroyRef = inject(DestroyRef);
   private readonly service = inject(ChecklistServices);
   private readonly route = inject(ActivatedRoute);

@@ -7,6 +7,7 @@ import { BusinessService } from '../../../core/services/bussiness-service';
 import { toast } from 'ngx-sonner';
 
 
+import { AuthService } from '../../../core/auth/auth-service/auth-service';
 @Component({
   imports: [FormsModule],
   selector: 'app-business-modal',
@@ -16,6 +17,7 @@ import { toast } from 'ngx-sonner';
   host: { '(document:keydown.escape)': 'cancel()' },
 })
 export class BusinessModalComponent {
+  readonly language = inject(AuthService).language;
   private service = inject(BusinessService);
 
   // inputs / outputs

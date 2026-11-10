@@ -1,12 +1,12 @@
 <!-- location-types.component.html -->
-<section id="view-location-types">
+<section id="view-location-types" [attr.dir]="language() === 'ar' ? 'rtl' : 'ltr'">
   <div class="bg-paper rounded-2xl border border-inkText/8 shadow-soft overflow-hidden">
 
     <!-- Header -->
     <div class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        <p class="font-display text-lg text-inkText">Location Types</p>
-        <p class="text-xs text-fog mt-0.5">Manage location types for each business.</p>
+        <p class="font-display text-lg text-inkText">{{ language() === 'ar' ? 'أنواع المواقع' : 'Location Types' }}</p>
+        <p class="text-xs text-fog mt-0.5">{{ language() === 'ar' ? 'إدارة أنواع المواقع لكل شركة.' : 'Manage location types for each business.' }}</p>
       </div>
       <div class="flex items-center gap-2">
 
@@ -19,7 +19,7 @@
                  (focus)="openBusinessDropdown()"
                  (input)="onBusinessSearch($any($event.target).value)"
                  (keydown.escape)="closeBusinessDropdown()" />
-          <label for="location-type-business-filter">Business</label>
+          <label for="location-type-business-filter">{{ language() === 'ar' ? 'الشركة' : 'Business' }}</label>
           <span class="chevron">⌄</span>
 
           @if (dropdownOpen()) {
@@ -36,9 +36,9 @@
                 <li #businessSentinel class="h-px" aria-hidden="true"></li>
               }
               @if (businessLoading()) {
-                <li class="px-3 py-2 text-xs text-fog text-center">Loading…</li>
+                <li class="px-3 py-2 text-xs text-fog text-center">{{ language() === 'ar' ? 'جارٍ التحميل…' : (language() === 'ar' ? "جارٍ التحميل…" : "Loading…") }}</li>
               } @else if (businesses().length === 0) {
-                <li class="px-3 py-2 text-xs text-fog">No businesses found.</li>
+                <li class="px-3 py-2 text-xs text-fog">{{ language() === 'ar' ? 'لم يتم العثور على شركات.' : 'No businesses found.' }}</li>
               }
             </ul>
           }
@@ -49,14 +49,14 @@
           <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 5v14M5 12h14"></path>
           </svg>
-          Add Type
+          {{ language() === 'ar' ? 'إضافة نوع' : 'Add Type' }}
         </button>
       </div>
     </div>
 
 
     <div class="p-4 sm:p-5 border-b border-inkText/8 flex justify-end">
-      <input type="search" placeholder="Search location types..." maxlength="100" aria-label="Search location types"
+      <input type="search" [attr.placeholder]="language() === 'ar' ? 'ابحث عن أنواع المواقع...' : 'Search location types...'" maxlength="100" [attr.aria-label]="language() === 'ar' ? 'ابحث عن أنواع المواقع' : 'Search location types'"
              class="w-full sm:w-64 pl-3 pr-3 py-2.5 text-sm rounded-lg border border-inkText/15 focus:outline-none focus:ring-2 focus:ring-brass/30"
              [value]="search()" (input)="onSearch($any($event.target).value)" />
     </div>
@@ -69,15 +69,15 @@
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
         <thead>
-          <tr class="bg-ivory text-left text-[11px] uppercase tracking-wide text-fog">
-            <th class="px-5 py-3 font-semibold">Location Type</th>
-            <th class="px-5 py-3 font-semibold">Business</th>
-            <th class="px-5 py-3 font-semibold text-right">Actions</th>
+          <tr class="bg-ivory text-start text-[11px] uppercase tracking-wide text-fog">
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'نوع الموقع' : 'Location Type' }}</th>
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'الشركة' : 'Business' }}</th>
+            <th class="px-5 py-3 font-semibold text-end">{{ language() === 'ar' ? 'الإجراءات' : 'Actions' }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-inkText/6">
           @if (loading()) {
-            <tr><td colspan="3" class="px-5 py-8 text-center text-fog">Loading…</td></tr>
+            <tr><td colspan="3" class="px-5 py-8 text-center text-fog">{{ language() === 'ar' ? 'جارٍ التحميل…' : (language() === 'ar' ? "جارٍ التحميل…" : "Loading…") }}</td></tr>
           } @else {
             @for (item of items(); track item.id) {
               <tr class="hover:bg-ivory/60">
@@ -87,7 +87,7 @@
                   <div class="flex items-center justify-end gap-1">
                     <!-- View details -->
                     <button type="button" class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
-                            title="View details" [attr.aria-label]="'View ' + item.name"
+                            [attr.title]="language() === 'ar' ? 'عرض التفاصيل' : 'View details'" [attr.aria-label]="(language() === 'ar' ? 'عرض ' : 'View ') + item.name"
                             (click)="openDetails(item)">
                       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
@@ -95,7 +95,7 @@
                       </svg>
                     </button>
                     <button *appHasPermission="'Permissions.LocationTypes.Edit'" type="button" class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
-                            title="Edit type" [attr.aria-label]="'Edit ' + item.name"
+                            [attr.title]="language() === 'ar' ? 'تعديل النوع' : 'Edit type'" [attr.aria-label]="(language() === 'ar' ? 'تعديل ' : 'Edit ') + item.name"
                             (click)="openEdit(item)">
                       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M12 20h9"></path>
@@ -103,7 +103,7 @@
                       </svg>
                     </button>
                     <button *appHasPermission="'Permissions.LocationTypes.Delete'" type="button" class="p-1.5 rounded-lg hover:bg-dangerBg text-danger"
-                            title="Delete type" [attr.aria-label]="'Delete ' + item.name"
+                            [attr.title]="language() === 'ar' ? 'حذف النوع' : 'Delete type'" [attr.aria-label]="(language() === 'ar' ? 'حذف ' : 'Delete ') + item.name"
                             (click)="openDelete(item)">
                       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M3 6h18"></path>
@@ -115,7 +115,7 @@
                 </td>
               </tr>
             } @empty {
-              <tr><td colspan="3" class="px-5 py-8 text-center text-fog">No location types found.</td></tr>
+              <tr><td colspan="3" class="px-5 py-8 text-center text-fog">{{ language() === 'ar' ? 'لا توجد أنواع مواقع.' : 'No location types found.' }}</td></tr>
             }
           }
         </tbody>
@@ -124,18 +124,18 @@
 
     <!-- Pagination -->
     <div class="p-4 sm:p-5 border-t border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-fog">
-      <p>Showing {{ from() }} to {{ to() }} of {{ totalCount() }} location types</p>
+      <p>{{ language() === 'ar' ? 'عرض' : 'Showing' }} {{ from() }} {{ language() === 'ar' ? 'إلى' : 'to' }} {{ to() }} {{ language() === 'ar' ? 'من أصل' : 'of' }} {{ totalCount() }} {{ language() === 'ar' ? 'نوع موقع' : 'location types' }}</p>
       <div class="flex items-center gap-1">
         <button type="button" (click)="prev()" [disabled]="!hasPreviousPage()"
                 class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed">
-          Previous
+          {{ language() === 'ar' ? 'السابق' : 'Previous' }}
         </button>
         <span class="px-3 py-1.5 rounded-lg bg-ink text-ivory font-semibold">
           {{ pageNumber() }} / {{ totalPages() }}
         </span>
         <button type="button" (click)="next()" [disabled]="!hasNextPage()"
                 class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed">
-          Next
+          {{ language() === 'ar' ? 'التالي' : 'Next' }}
         </button>
       </div>
     </div>
@@ -163,8 +163,8 @@
         aria-labelledby="location-type-details-title"
       >
         <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
-          <p id="location-type-details-title" class="font-display text-xl text-inkText">Location Type Details</p>
-          <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog" aria-label="Close" (click)="closeDetails()">
+          <p id="location-type-details-title" class="font-display text-xl text-inkText">{{ language() === 'ar' ? 'تفاصيل نوع الموقع' : 'Location Type Details' }}</p>
+          <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog" [attr.aria-label]="language() === 'ar' ? 'إغلاق' : 'Close'" (click)="closeDetails()">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M18 6 6 18M6 6l12 12" />
@@ -174,29 +174,29 @@
 
         <div class="px-6 py-6">
           @if (detailsLoading()) {
-            <p class="text-sm text-fog text-center py-6">Loading…</p>
+            <p class="text-sm text-fog text-center py-6">{{ language() === 'ar' ? "جارٍ التحميل…" : "Loading…" }}</p>
           } @else if (detailsError()) {
             <div class="text-sm text-danger text-center py-6">
               {{ detailsError() }}
-              <button type="button" class="underline ms-2" (click)="retryDetails()">Retry</button>
+              <button type="button" class="underline ms-2" (click)="retryDetails()">{{ language() === 'ar' ? "إعادة المحاولة" : "Retry" }}</button>
             </div>
           } @else if (detailsItem(); as t) {
             <dl class="space-y-4 text-sm">
               <div class="flex items-start justify-between gap-4">
-                <dt class="text-fog">Name</dt>
+              <dt class="text-fog">{{ language() === 'ar' ? 'الاسم' : 'Name' }}</dt>
                 <dd class="font-semibold text-inkText text-right wrap-break-word">{{ t.name }}</dd>
               </div>
          
               <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-                <dt class="text-fog">Business</dt>
+                <dt class="text-fog">{{ language() === 'ar' ? 'الشركة' : 'Business' }}</dt>
                 <dd class="text-inkText text-right">{{ t.businessName || selectedBusiness()?.name || '—' }}</dd>
               </div>
               <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-                <dt class="text-fog">Created by</dt>
+                <dt class="text-fog">{{ language() === 'ar' ? 'أنشأه' : 'Created by' }}</dt>
                 <dd class="text-inkText text-right">{{ t.createdByName || '—' }}</dd>
               </div>
               <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-                <dt class="text-fog">Updated by</dt>
+                <dt class="text-fog">{{ language() === 'ar' ? 'آخر تعديل بواسطة' : 'Updated by' }}</dt>
                 <dd class="text-inkText text-right">{{ t.updatedByName || '—' }}</dd>
               </div>
             </dl>
@@ -208,7 +208,7 @@
               class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft"
               (click)="closeDetails()"
             >
-              Close
+              {{ language() === 'ar' ? 'إغلاق' : (language() === 'ar' ? "إغلاق" : "Close") }}
             </button>
           </div>
         </div>
@@ -229,11 +229,11 @@
         aria-describedby="delete-location-type-desc"
       >
         <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
-          <p id="delete-location-type-title" class="font-display text-xl text-inkText">Delete Location Type</p>
+          <p id="delete-location-type-title" class="font-display text-xl text-inkText">{{ language() === 'ar' ? 'حذف نوع الموقع' : 'Delete Location Type' }}</p>
           <button
             type="button"
             class="p-2 rounded-lg hover:bg-ink/5 text-fog disabled:opacity-40"
-            aria-label="Close"
+            [attr.aria-label]="language() === 'ar' ? 'إغلاق' : 'Close'"
             [disabled]="deleting()"
             (click)="cancelDelete()"
           >
@@ -255,9 +255,9 @@
               </svg>
             </span>
             <p id="delete-location-type-desc" class="text-sm text-inkText">
-              Are you sure you want to delete
+              {{ language() === 'ar' ? 'هل أنت متأكد من حذف' : 'Are you sure you want to delete' }}
               <span class="font-semibold">{{ target.name }}</span>?
-              This action cannot be undone.
+              {{ language() === 'ar' ? '؟ لا يمكن التراجع عن هذا الإجراء.' : 'This action cannot be undone.' }}
             </p>
           </div>
 
@@ -274,7 +274,7 @@
               [disabled]="deleting()"
               (click)="cancelDelete()"
             >
-              Cancel
+              {{ language() === 'ar' ? 'إلغاء' : 'Cancel' }}
             </button>
             <button
               type="button"
@@ -282,7 +282,7 @@
               [disabled]="deleting()"
               (click)="confirmDelete()"
             >
-              {{ deleting() ? 'Deleting…' : 'Delete type' }}
+              {{ language() === 'ar' ? (deleting() ? 'جارٍ الحذف…' : 'حذف النوع') : (deleting() ? 'Deleting…' : 'Delete type') }}
             </button>
           </div>
         </div>

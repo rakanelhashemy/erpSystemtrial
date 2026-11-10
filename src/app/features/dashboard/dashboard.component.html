@@ -1,9 +1,9 @@
 <section class="relative z-10 watermark">
 
      <div class="mb-8">
-    <p class="font-display text-2xl sm:text-3xl text-inkText">Modules</p>
+    <p class="font-display text-2xl sm:text-3xl text-inkText">{{ language() === 'ar' ? "الوحدات" : "Modules" }}</p>
     <p class="text-sm text-fog mt-1.5 max-w-xl">
-      Access the tools and sections of your hotel management workspace.
+      {{ language() === 'ar' ? "ادخل إلى أدوات وأقسام نظام إدارة الفندق." : "Access the tools and sections of your hotel management workspace." }}
     </p>
   </div>
 
@@ -16,8 +16,8 @@
           <circle cx="12" cy="10" r="2.5"></circle>
         </svg>
       </span>
-      <span class="block font-display text-base text-inkText">Locations</span>
-      <span class="block text-xs text-fog mt-1 leading-relaxed">Properties, buildings, floors &amp; spaces</span>
+      <span class="block font-display text-base text-inkText">{{ language() === 'ar' ? "المواقع" : "Locations" }}</span>
+      <span class="block text-xs text-fog mt-1 leading-relaxed">{{ language() === 'ar' ? "العقارات والمباني والطوابق والمساحات" : "Properties, buildings, floors &amp; spaces" }}</span>
     </a>
 
     <!-- Groups -->
@@ -30,8 +30,8 @@
           <rect x="14" y="14" width="7" height="7" rx="1.2"></rect>
         </svg>
       </span>
-      <span class="block font-display text-base text-inkText">Groups</span>
-      <span class="block text-xs text-fog mt-1 leading-relaxed">Asset categories &amp; depreciation groups</span>
+      <span class="block font-display text-base text-inkText">{{ language() === 'ar' ? "المجموعات" : "Groups" }}</span>
+      <span class="block text-xs text-fog mt-1 leading-relaxed">{{ language() === 'ar' ? "فئات الأصول ومجموعات الإهلاك" : "Asset categories &amp; depreciation groups" }}</span>
     </a>
 
     <!-- Items -->
@@ -42,8 +42,8 @@
           <path d="M3 8v8l9 5 9-5V8M12 13v8"></path>
         </svg>
       </span>
-      <span class="block font-display text-base text-inkText">Items</span>
-      <span class="block text-xs text-fog mt-1 leading-relaxed">Asset inventory, import &amp; depreciation</span>
+      <span class="block font-display text-base text-inkText">{{ language() === 'ar' ? "الأصناف" : "Items" }}</span>
+      <span class="block text-xs text-fog mt-1 leading-relaxed">{{ language() === 'ar' ? "مخزون الأصول والاستيراد والإهلاك" : "Asset inventory, import &amp; depreciation" }}</span>
     </a>
 
     <!-- Departments -->
@@ -54,8 +54,8 @@
           <path d="M9 21v-6h6v6"></path>
         </svg>
       </span>
-      <span class="block font-display text-base text-inkText">Departments</span>
-      <span class="block text-xs text-fog mt-1 leading-relaxed">Hotel operational departments</span>
+      <span class="block font-display text-base text-inkText">{{ language() === 'ar' ? "الأقسام" : "Departments" }}</span>
+      <span class="block text-xs text-fog mt-1 leading-relaxed">{{ language() === 'ar' ? "أقسام تشغيل الفندق" : "Hotel operational departments" }}</span>
     </a>
 
     <!-- Suppliers -->
@@ -67,8 +67,8 @@
           <circle cx="18" cy="19" r="2"></circle>
         </svg>
       </span>
-      <span class="block font-display text-base text-inkText">Suppliers</span>
-      <span class="block text-xs text-fog mt-1 leading-relaxed">Vendor contacts for purchasing</span>
+      <span class="block font-display text-base text-inkText">{{ language() === 'ar' ? "الموردون" : "Suppliers" }}</span>
+      <span class="block text-xs text-fog mt-1 leading-relaxed">{{ language() === 'ar' ? "جهات اتصال الموردين لأغراض الشراء" : "Vendor contacts for purchasing" }}</span>
     </a>
 
     <!-- Maintenance Companies -->
@@ -79,8 +79,8 @@
           <path d="m13 11 3 3"></path>
         </svg>
       </span>
-      <span class="block font-display text-base text-inkText">Maintenance Companies</span>
-      <span class="block text-xs text-fog mt-1 leading-relaxed">External service &amp; repair vendors</span>
+      <span class="block font-display text-base text-inkText">{{ language() === 'ar' ? "شركات الصيانة" : "Maintenance Companies" }}</span>
+      <span class="block text-xs text-fog mt-1 leading-relaxed">{{ language() === 'ar' ? "مقدمو خدمات الصيانة والإصلاح" : "External service &amp; repair vendors" }}</span>
     </a>
 
     <!-- Employees -->
@@ -91,8 +91,8 @@
           <path d="M8 5V3h8v2M8 11h8M8 15h5"></path>
         </svg>
       </span>
-      <span class="block font-display text-base text-inkText">Employees</span>
-      <span class="block text-xs text-fog mt-1 leading-relaxed">Staff records, roles &amp; job titles</span>
+      <span class="block font-display text-base text-inkText">{{ language() === 'ar' ? "الموظفون" : "Employees" }}</span>
+      <span class="block text-xs text-fog mt-1 leading-relaxed">{{ language() === 'ar' ? "بيانات الموظفين والأدوار والمسميات الوظيفية" : "Staff records, roles &amp; job titles" }}</span>
     </a>
 
     <!-- Check List -->
@@ -103,8 +103,8 @@
           <path d="m8 11 2 2 4-5M8 16h8"></path>
         </svg>
       </span>
-      <span class="block font-display text-base text-inkText">Check List</span>
-      <span class="block text-xs text-fog mt-1 leading-relaxed">Physical audits &amp; verification runs</span>
+      <span class="block font-display text-base text-inkText">{{ language() === 'ar' ? "قائمة الفحص" : "Check List" }}</span>
+      <span class="block text-xs text-fog mt-1 leading-relaxed">{{ language() === 'ar' ? "التدقيق الميداني وعمليات التحقق" : "Physical audits &amp; verification runs" }}</span>
     </a>
 
     <!-- Printing -->
@@ -116,8 +116,8 @@
           <path d="M6 17h12v5H6z"></path>
         </svg>
       </span>
-      <span class="block font-display text-base text-inkText">Printing</span>
-      <span class="block text-xs text-fog mt-1 leading-relaxed">Barcode &amp; asset tag print runs</span>
+      <span class="block font-display text-base text-inkText">{{ language() === 'ar' ? "الطباعة" : "Printing" }}</span>
+      <span class="block text-xs text-fog mt-1 leading-relaxed">{{ language() === 'ar' ? "طباعة الباركود وبطاقات الأصول" : "Barcode &amp; asset tag print runs" }}</span>
     </a>
 
     <!-- Transactions -->
@@ -130,8 +130,8 @@
           <path d="M21 13v2a2 2 0 0 1-2 2H3"></path>
         </svg>
       </span>
-      <span class="block font-display text-base text-inkText">Transactions</span>
-      <span class="block text-xs text-fog mt-1 leading-relaxed">Receiving, transfers &amp; scrapping</span>
+      <span class="block font-display text-base text-inkText">{{ language() === 'ar' ? "المعاملات" : "Transactions" }}</span>
+      <span class="block text-xs text-fog mt-1 leading-relaxed">{{ language() === 'ar' ? "الاستلام والتحويل والاستبعاد" : "Receiving, transfers &amp; scrapping" }}</span>
     </a>
 
     <!-- Users -->
@@ -144,8 +144,8 @@
           <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
         </svg>
       </span>
-      <span class="block font-display text-base text-inkText">Users</span>
-      <span class="block text-xs text-fog mt-1 leading-relaxed">Staff accounts &amp; access rights</span>
+      <span class="block font-display text-base text-inkText">{{ language() === 'ar' ? "المستخدمون" : "Users" }}</span>
+      <span class="block text-xs text-fog mt-1 leading-relaxed">{{ language() === 'ar' ? "حسابات الموظفين وصلاحيات الوصول" : "Staff accounts &amp; access rights" }}</span>
     </a>
 
     <!-- Settings -->
@@ -156,13 +156,13 @@
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.42.24.66.24 1.51V15Z"></path>
         </svg>
       </span>
-      <span class="block font-display text-base text-inkText">Settings</span>
-      <span class="block text-xs text-fog mt-1 leading-relaxed">Property, currency &amp; system preferences</span>
+      <span class="block font-display text-base text-inkText">{{ language() === 'ar' ? "الإعدادات" : "Settings" }}</span>
+      <span class="block text-xs text-fog mt-1 leading-relaxed">{{ language() === 'ar' ? "العقار والعملة وتفضيلات النظام" : "Property, currency &amp; system preferences" }}</span>
     </a>
 
     <!-- SOE -->
     <a routerLink="/app/soe" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
-      <span class="absolute top-4 right-4 text-[9px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-brass/15 text-brassDk">Soon</span>
+      <span class="absolute top-4 right-4 text-[9px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-brass/15 text-brassDk">{{ language() === 'ar' ? "قريبًا" : "Soon" }}</span>
       <span class="w-12 h-12 rounded-xl bg-ink text-brassLt flex items-center justify-center mb-4 group-hover:bg-brass group-hover:text-ink transition-colors duration-300">
         <svg class="w-5.5 h-5.5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path>
@@ -170,13 +170,13 @@
           <path d="M8 13h8M8 17h5"></path>
         </svg>
       </span>
-      <span class="block font-display text-base text-inkText">SOE</span>
-      <span class="block text-xs text-fog mt-1 leading-relaxed">Statement of expenses &amp; ledger entries</span>
+      <span class="block font-display text-base text-inkText">{{ language() === 'ar' ? 'بيان المصروفات' : 'SOE' }}</span>
+      <span class="block text-xs text-fog mt-1 leading-relaxed">{{ language() === 'ar' ? "بيان المصروفات وقيود دفتر الأستاذ" : "Statement of expenses &amp; ledger entries" }}</span>
     </a>
 
     <!-- Reports -->
     <a *appHasPermission="'Permissions.Reports.View'" routerLink="/app/reports" class="module-card group relative block text-left bg-paper rounded-2xl p-5 sm:p-6 border border-inkText/8 shadow-soft hover:border-brass hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
-      <span class="absolute top-4 right-4 text-[9px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-brass/15 text-brassDk">Soon</span>
+      <span class="absolute top-4 right-4 text-[9px] font-bold uppercase tracking-wide px-2 py-1 rounded-full bg-brass/15 text-brassDk">{{ language() === 'ar' ? "قريبًا" : "Soon" }}</span>
       <span class="w-12 h-12 rounded-xl bg-ink text-brassLt flex items-center justify-center mb-4 group-hover:bg-brass group-hover:text-ink transition-colors duration-300">
         <svg class="w-5.5 h-5.5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 3v16a2 2 0 0 0 2 2h16"></path>
@@ -185,8 +185,8 @@
           <rect x="17" y="5" width="3" height="13"></rect>
         </svg>
       </span>
-      <span class="block font-display text-base text-inkText">Reports</span>
-      <span class="block text-xs text-fog mt-1 leading-relaxed">Cross-module analytics &amp; insights</span>
+      <span class="block font-display text-base text-inkText">{{ language() === 'ar' ? "التقارير" : "Reports" }}</span>
+      <span class="block text-xs text-fog mt-1 leading-relaxed">{{ language() === 'ar' ? "تحليلات ومؤشرات عبر الأقسام" : "Cross-module analytics &amp; insights" }}</span>
     </a>
   </div>
 

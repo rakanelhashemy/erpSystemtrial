@@ -3,8 +3,8 @@
   <!-- Header -->
   <div class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <p class="font-display text-xl text-inkText">Maintenance Companies</p>
-      <p class="text-xs text-fog mt-0.5">Manage maintenance contractors and their contacts.</p>
+      <p class="font-display text-xl text-inkText">{{ language() === 'ar' ? "شركات الصيانة" : "Maintenance Companies" }}</p>
+      <p class="text-xs text-fog mt-0.5">{{ language() === 'ar' ? "إدارة شركات الصيانة وجهات الاتصال بها." : "Manage maintenance contractors and their contacts." }}</p>
     </div>
     <button *appHasPermission="'Permissions.MaintenanceCompanies.Add'"
       type="button"
@@ -14,7 +14,7 @@
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M12 5v14M5 12h14" />
       </svg>
-      Add Company
+      {{ language() === 'ar' ? "إضافة شركة" : "Add Company" }}
     </button>
   </div>
 
@@ -29,8 +29,8 @@
       <input
         #searchBox
         type="search"
-        placeholder="Search companies…"
-        aria-label="Search maintenance companies"
+        [attr.placeholder]="language() === 'ar' ? 'ابحث عن الشركات…' : 'Search companies…'"
+        [attr.aria-label]="language() === 'ar' ? 'ابحث عن شركات الصيانة' : 'Search maintenance companies'"
         class="w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-inkText/15 focus:outline-none focus:ring-2 focus:ring-brass/30"
         [value]="searchTerm()"
         (input)="searchTerm.set(searchBox.value)" />
@@ -45,7 +45,7 @@
       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
         <path d="M4 6h16M7 12h10M10 18h4" />
       </svg>
-      <span>Advanced Filters</span>
+      <span>{{ language() === 'ar' ? "فلاتر متقدمة" : "Advanced Filters" }}</span>
       @if (activeFiltersCount() > 0) {
         <span class="min-w-5 h-5 px-1.5 rounded-full bg-brass text-white text-[10px] leading-5 text-center">
           {{ activeFiltersCount() }}
@@ -62,11 +62,11 @@
             <input id="maintenance-filter-address" placeholder=" "
                    [value]="draftAddress()"
                    (input)="draftAddress.set($any($event.target).value)" />
-            <label for="maintenance-filter-address">Address</label>
+            <label for="maintenance-filter-address">{{ language() === 'ar' ? "العنوان" : "Address" }}</label>
           </div>
-          <app-lazy-dropdown label="Specialty" placeholder="All specialties" [options]="specialties()"
+          <app-lazy-dropdown [label]="language() === 'ar' ? 'التخصص' : 'Specialty'" [placeholder]="language() === 'ar' ? 'كل التخصصات' : 'All specialties'" [options]="specialties()"
             [selectedValue]="draftSpecialtyId()" [loading]="specialtyLoading()" [hasMore]="specialtyHasMore()"
-            [searchable]="true" [searchTerm]="specialtyFilterSearch()" searchPlaceholder="Search specialties…"
+            [searchable]="true" [searchTerm]="specialtyFilterSearch()" [searchPlaceholder]="language() === 'ar' ? 'ابحث عن التخصصات…' : 'Search specialties…'"
             [allowClear]="true" (searchChanged)="onSpecialtyFilterSearch($event)"
             (loadMore)="loadSpecialties()" (selected)="draftSpecialtyId.set(+$event.id)"
             (cleared)="draftSpecialtyId.set(null)" />
@@ -75,12 +75,12 @@
           <button type="button"
                   class="px-4 py-2.5 rounded-lg text-sm font-semibold text-fog hover:bg-ink/5"
                   (click)="resetFilters()">
-            Reset
+            {{ language() === 'ar' ? "إعادة تعيين" : "Reset" }}
           </button>
           <button type="button"
                   class="px-4 py-2.5 rounded-lg text-sm font-semibold bg-ink text-ivory"
                   (click)="applyFilters()">
-            Apply Filters
+            {{ language() === 'ar' ? "تطبيق الفلاتر" : "Apply Filters" }}
           </button>
         </div>
       </div>
@@ -90,7 +90,7 @@
   <!-- Page size -->
   <div class="px-4 sm:px-5 py-3 border-b border-inkText/8 flex justify-end">
     <label class="flex items-center gap-2 text-xs text-fog">
-      Show
+      {{ language() === 'ar' ? "عرض" : "Show" }}
       <select
         #sizeSelect
         class="border border-inkText/15 rounded-lg px-2 py-1.5 text-xs text-inkText focus:outline-none focus:ring-2 focus:ring-brass/30"
@@ -99,7 +99,7 @@
           <option [value]="size" [selected]="size === pageSize()">{{ size }}</option>
         }
       </select>
-      entries
+      {{ language() === 'ar' ? "قيود" : "entries" }}
     </label>
   </div>
 
@@ -108,17 +108,17 @@
     @if (error()) {
       <div class="text-sm text-danger text-center py-8">
         {{ error() }}
-        <button type="button" class="underline ms-2" (click)="reload()">Retry</button>
+        <button type="button" class="underline ms-2" (click)="reload()">{{ language() === 'ar' ? "إعادة المحاولة" : "Retry" }}</button>
       </div>
     } @else {
       <table class="w-full text-sm">
         <thead>
           <tr class="bg-ivory text-left text-[11px] uppercase tracking-wide text-fog">
-            <th class="px-5 py-3 font-semibold">Code</th>
-            <th class="px-5 py-3 font-semibold">Company Name</th>
-            <th class="px-5 py-3 font-semibold">Specialty</th>
-            <th class="px-5 py-3 font-semibold">Address</th>
-            <th class="px-5 py-3 font-semibold text-right">Actions</th>
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'الكود' : 'Code' }}</th>
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'اسم الشركة' : 'Company Name' }}</th>
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'التخصص' : 'Specialty' }}</th>
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'العنوان' : 'Address' }}</th>
+            <th class="px-5 py-3 font-semibold text-right">{{ language() === 'ar' ? 'الإجراءات' : 'Actions' }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-inkText/6">
@@ -136,8 +136,8 @@
                 <button
                   type="button"
                   class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
-                  title="View details"
-                  [attr.aria-label]="'View ' + co.name"
+                  [attr.title]="language() === 'ar' ? 'عرض التفاصيل' : 'View details'"
+                  [attr.aria-label]="(language() === 'ar' ? 'عرض ' : 'View ') + co.name"
                   (click)="$event.stopPropagation(); openDetails(co)">
                   <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
@@ -147,8 +147,8 @@
                 <button *appHasPermission="'Permissions.MaintenanceCompanies.Edit'"
                   type="button"
                   class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
-                  title="Edit company"
-                  [attr.aria-label]="'Edit ' + co.name"
+                  [attr.title]="language() === 'ar' ? 'تعديل الشركة' : 'Edit company'"
+                  [attr.aria-label]="(language() === 'ar' ? 'تعديل ' : 'Edit ') + co.name"
                   (click)="$event.stopPropagation(); openEdit(co)">
                   <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M12 20h9" />
@@ -158,8 +158,8 @@
                 <button *appHasPermission="'Permissions.MaintenanceCompanies.Delete'"
                   type="button"
                   class="p-1.5 rounded-lg hover:bg-dangerBg text-danger"
-                  title="Delete company"
-                  [attr.aria-label]="'Delete ' + co.name"
+                  [attr.title]="language() === 'ar' ? 'حذف الشركة' : 'Delete company'"
+                  [attr.aria-label]="(language() === 'ar' ? 'حذف ' : 'Delete ') + co.name"
                   (click)="$event.stopPropagation(); openDelete(co)">
                   <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M3 6h18" />
@@ -172,7 +172,7 @@
           } @empty {
             <tr>
               <td colspan="5" class="text-sm text-fog text-center py-8">
-                {{ loading() ? 'Loading companies…' : (searchTerm() || activeFiltersCount() ? 'No matching companies found.' : 'No maintenance companies yet.') }}
+                {{ loading() ? (language() === 'ar' ? 'جارٍ تحميل الشركات…' : 'Loading companies…') : (searchTerm() || activeFiltersCount() ? (language() === 'ar' ? 'لم يتم العثور على شركات مطابقة.' : 'No matching companies found.') : (language() === 'ar' ? 'لا توجد شركات صيانة بعد.' : 'No maintenance companies yet.')) }}
               </td>
             </tr>
           }
@@ -185,9 +185,9 @@
   <div class="p-4 sm:p-5 border-t border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-fog">
     <p>
       @if (pageRange().total) {
-        Showing {{ pageRange().from }}–{{ pageRange().to }} of {{ pageRange().total }} companies
+        {{ language() === 'ar' ? 'عرض' : 'Showing' }} {{ pageRange().from }} {{ language() === 'ar' ? 'إلى' : 'to' }} {{ pageRange().to }} {{ language() === 'ar' ? 'من أصل' : 'of' }} {{ pageRange().total }} {{ language() === 'ar' ? 'شركات الصيانة' : 'companies' }}
       } @else {
-        No matching companies found
+        {{ language() === 'ar' ? 'لم يتم العثور على شركات مطابقة.' : 'No matching companies found' }}
       }
     </p>
     <div class="flex items-center gap-1">
@@ -195,7 +195,7 @@
         class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
         [disabled]="currentPage() <= 1 || loading()"
         (click)="prevPage()">
-        Previous
+        {{ language() === 'ar' ? "السابق" : "Previous" }}
       </button>
       <span class="px-3 py-1.5 rounded-lg bg-ink text-ivory font-semibold">
         {{ currentPage() }} / {{ totalPages() }}
@@ -204,7 +204,7 @@
         class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
         [disabled]="currentPage() >= totalPages() || loading()"
         (click)="nextPage()">
-        Next
+        {{ language() === 'ar' ? "التالي" : "Next" }}
       </button>
     </div>
   </div>
@@ -232,8 +232,8 @@
          role="dialog" aria-modal="true" aria-labelledby="maintenance-details-title">
 
       <div class="sticky top-0 z-10 bg-paper flex items-center justify-between px-6 py-5 border-b border-inkText/8">
-        <p id="maintenance-details-title" class="font-display text-xl text-inkText">Company Details</p>
-        <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog" aria-label="Close" (click)="closeDetails()">
+        <p id="maintenance-details-title" class="font-display text-xl text-inkText">{{ language() === 'ar' ? "بيانات الشركة" : "Company Details" }}</p>
+        <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog" [attr.aria-label]="language() === 'ar' ? 'إغلاق' : 'Close'" (click)="closeDetails()">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M18 6 6 18M6 6l12 12" />
@@ -244,30 +244,30 @@
       <div class="px-6 py-6">
         <dl class="space-y-4 text-sm">
           <div class="flex items-start justify-between gap-4">
-            <dt class="text-fog">Name</dt>
+            <dt class="text-fog">{{ language() === 'ar' ? "الاسم" : "Name" }}</dt>
             <dd class="font-semibold text-inkText text-right wrap-break-word">{{ company.name }}</dd>
           </div>
           <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-            <dt class="text-fog">Code</dt>
+            <dt class="text-fog">{{ language() === 'ar' ? "الكود" : "Code" }}</dt>
             <dd class="font-semibold text-inkText text-right">{{ company.code }}</dd>
           </div>
           <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-            <dt class="text-fog">Specialty</dt>
+            <dt class="text-fog">{{ language() === 'ar' ? "التخصص" : "Specialty" }}</dt>
             <dd class="text-inkText text-right">{{ company.specialtyName || '—' }}</dd>
           </div>
           <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-            <dt class="text-fog">Address</dt>
+            <dt class="text-fog">{{ language() === 'ar' ? "العنوان" : "Address" }}</dt>
             <dd class="text-inkText text-right wrap-break-word">{{ company.address || '—' }}</dd>
           </div>
           <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-            <dt class="text-fog">Notes</dt>
+            <dt class="text-fog">{{ language() === 'ar' ? "ملاحظات" : "Notes" }}</dt>
             <dd class="text-inkText text-right wrap-break-word">{{ company.notes || '—' }}</dd>
           </div>
 
           @if (detailsResource.error()) {
             <div class="flex items-center justify-between gap-4 pt-4 border-t border-inkText/8 text-xs text-danger">
-              <span>Could not load the rest of the details.</span>
-              <button type="button" class="font-semibold underline" (click)="detailsResource.reload()">Retry</button>
+              <span>{{ language() === 'ar' ? "تعذر تحميل بقية التفاصيل." : "Could not load the rest of the details." }}</span>
+              <button type="button" class="font-semibold underline" (click)="detailsResource.reload()">{{ language() === 'ar' ? "إعادة المحاولة" : "Retry" }}</button>
             </div>
           } @else {
             @let extra = detailsResource.value();
@@ -275,7 +275,7 @@
             <!-- Contact people -->
             <div class="pt-4 border-t border-inkText/8">
               <div class="flex items-center justify-between mb-3">
-                <dt class="text-fog">Contact People</dt>
+                <dt class="text-fog">{{ language() === 'ar' ? "جهات الاتصال" : "Contact People" }}</dt>
                 @if (!detailsResource.isLoading() && extra?.contactPeople?.length) {
                   <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-brass/15 text-brassDk">
                     {{ extra?.contactPeople?.length }}
@@ -343,7 +343,7 @@
                     </div>
                   } @empty {
                     <div class="text-center py-6 rounded-xl border border-dashed border-inkText/15">
-                      <p class="text-xs text-fog">No contact people.</p>
+                      <p class="text-xs text-fog">{{ language() === 'ar' ? "لا توجد جهات اتصال." : "No contact people." }}</p>
                     </div>
                   }
                 </div>
@@ -352,11 +352,11 @@
 
             <!-- Audit -->
             <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-              <dt class="text-fog">Created by</dt>
+              <dt class="text-fog">{{ language() === 'ar' ? "أنشأه" : "Created by" }}</dt>
               <dd class="text-inkText text-right">{{ extra?.createdByName || '—' }}</dd>
             </div>
             <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-              <dt class="text-fog">Updated by</dt>
+              <dt class="text-fog">{{ language() === 'ar' ? "عدّله" : "Updated by" }}</dt>
               <dd class="text-inkText text-right">{{ extra?.updatedByName || '—' }}</dd>
             </div>
           }
@@ -366,7 +366,7 @@
           <button type="button"
             class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft"
             (click)="closeDetails()">
-            Close
+            {{ language() === 'ar' ? "إغلاق" : "Close" }}
           </button>
         </div>
       </div>
@@ -383,9 +383,9 @@
          role="alertdialog" aria-modal="true"
          aria-labelledby="delete-maintenance-title" aria-describedby="delete-maintenance-desc">
       <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
-        <p id="delete-maintenance-title" class="font-display text-xl text-inkText">Delete Company</p>
+        <p id="delete-maintenance-title" class="font-display text-xl text-inkText">{{ language() === 'ar' ? "حذف الشركة" : "Delete Company" }}</p>
         <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog disabled:opacity-40"
-                aria-label="Close" [disabled]="deleting()" (click)="cancelDelete()">
+                [attr.aria-label]="language() === 'ar' ? 'إغلاق' : 'Close'" [disabled]="deleting()" (click)="cancelDelete()">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M18 6 6 18M6 6l12 12" />
@@ -404,10 +404,9 @@
             </svg>
           </span>
           <p id="delete-maintenance-desc" class="text-sm text-inkText">
-            Are you sure you want to delete
+            {{ language() === 'ar' ? "هل أنت متأكد أنك تريد الحذف؟" : "Are you sure you want to delete" }}
             <span class="font-semibold">{{ target.name }}</span>
-            <span class="text-fog">({{ target.code }})</span>?
-            This action cannot be undone.
+            <span class="text-fog">({{ target.code }})</span>{{ language() === 'ar' ? "؟ لا يمكن التراجع عن هذا الإجراء." : "? This action cannot be undone." }}
           </p>
         </div>
 
@@ -419,12 +418,12 @@
           <button type="button"
             class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5 disabled:opacity-40"
             [disabled]="deleting()" (click)="cancelDelete()">
-            Cancel
+            {{ language() === 'ar' ? "إلغاء" : "Cancel" }}
           </button>
           <button type="button"
             class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-danger text-white hover:opacity-90 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed"
             [disabled]="deleting()" (click)="confirmDelete()">
-            {{ deleting() ? 'Deleting…' : 'Delete company' }}
+            {{ deleting() ? 'Deleting…' : (language() === 'ar' ? "حذف الشركة" : "Delete company") }}
           </button>
         </div>
       </div>

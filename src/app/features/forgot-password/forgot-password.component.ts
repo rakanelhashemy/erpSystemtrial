@@ -19,6 +19,7 @@ import { BrandingService } from '../../core/services/branding.service';
   templateUrl: './forgot-password.component.html',
 })
 export class ForgotPasswordComponent {
+  readonly language = inject(AuthService).language;
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);

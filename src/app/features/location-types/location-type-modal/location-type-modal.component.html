@@ -1,5 +1,5 @@
 
-<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4" [attr.dir]="language() === 'ar' ? 'rtl' : 'ltr'">
   <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="cancel()"></div>
 
   <div class="relative bg-paper w-full max-w-md rounded-2xl shadow-soft"
@@ -7,24 +7,24 @@
     <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
       <div>
         <p id="location-type-modal-title" class="font-display text-xl text-inkText">
-          {{ isEdit() ? 'Edit Location Type' : 'Add Location Type' }}
+          {{ language() === 'ar' ? (isEdit() ? 'تعديل نوع الموقع' : 'إضافة نوع موقع') : (isEdit() ? 'Edit Location Type' : 'Add Location Type') }}
         </p>
         @if (businessName()) {
           <p class="text-xs text-fog mt-0.5">{{ businessName() }}</p>
         }
       </div>
       <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog"
-              aria-label="Close location type modal" (click)="cancel()">×</button>
+              [attr.aria-label]="language() === 'ar' ? 'إغلاق نافذة نوع الموقع' : 'Close location type modal'" (click)="cancel()">×</button>
     </div>
 
     <form class="px-6 py-6 space-y-5" novalidate (ngSubmit)="save()">
       <div class="field" [class.has-error]="nameError()">
         <input id="location-type-name" type="text" placeholder=" " required name="name"
                [ngModel]="name()" (ngModelChange)="name.set($event); nameError.set(false)" />
-        <label for="location-type-name">Location Type Name</label>
+      <label for="location-type-name">{{ language() === 'ar' ? 'اسم نوع الموقع' : 'Location Type Name' }}</label>
       </div>
       @if (nameError()) {
-        <p class="text-xs text-danger -mt-3" role="alert">Location type name is required.</p>
+        <p class="text-xs text-danger -mt-3" role="alert">{{ language() === 'ar' ? 'اسم نوع الموقع مطلوب.' : 'Location type name is required.' }}</p>
       }
       @if (error()) {
         <p class="text-xs text-danger -mt-3" role="alert">{{ error() }}</p>
@@ -32,10 +32,10 @@
 
       <div class="flex items-center justify-end gap-3 pt-3 border-t border-inkText/8">
         <button type="button" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5"
-                (click)="cancel()">Cancel</button>
+                (click)="cancel()">{{ language() === 'ar' ? 'إلغاء' : 'Cancel' }}</button>
         <button type="submit" [disabled]="saving()"
                 class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-40">
-          {{ saving() ? 'Saving…' : 'Save Location Type' }}
+          {{ language() === 'ar' ? (saving() ? 'جارٍ الحفظ…' : 'حفظ نوع الموقع') : (saving() ? 'Saving…' : 'Save Location Type') }}
         </button>
       </div>
     </form>

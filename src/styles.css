@@ -96,6 +96,48 @@ body {
   #sidebar.is-collapsed .nav-item {
     justify-content: flex-start;
   }
+  #sidebar[dir='rtl'] {
+    inset: 0 0 0 auto;
+    transform: translateX(100%);
+  }
+  #sidebar[dir='rtl'].is-mobile-open {
+    transform: translateX(0);
+  }
+}
+
+/* Tables follow the reading direction, including templates with fixed LTR classes. */
+html[dir='rtl'] table {
+  direction: rtl;
+}
+html[dir='rtl'] table th,
+html[dir='rtl'] table td {
+  text-align: right !important;
+}
+html[dir='rtl'] table th.text-center,
+html[dir='rtl'] table td.text-center {
+  text-align: center !important;
+}
+
+/* Keep names and Arabic text fields aligned to the right, including card rows. */
+html[dir='rtl'] .loc-row button.text-left,
+html[dir='rtl'] .loc-row button.text-left > span:nth-of-type(2) {
+  text-align: right !important;
+}
+html[dir='rtl'] input[type='text'],
+html[dir='rtl'] input[type='search'],
+html[dir='rtl'] input[type='email'],
+html[dir='rtl'] input[type='tel'],
+html[dir='rtl'] textarea,
+html[dir='rtl'] select {
+  text-align: right;
+}
+html[dir='rtl'] .field label {
+  left: auto;
+  right: 1rem;
+}
+html[dir='rtl'] .field .chevron {
+  right: auto;
+  left: 1rem;
 }
 
 #sidebar-scrim {
@@ -501,4 +543,48 @@ body {
 
 button {
   cursor: pointer;
+}
+
+/* Keep icon actions consistent across every data table. */
+table tbody td:has(> div > button svg),
+table tbody td:has(> button svg) {
+  vertical-align: middle;
+  text-align: center;
+  white-space: nowrap;
+}
+
+table tbody td:has(> div > button svg) > div:has(> button svg) {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-height: 2rem;
+  white-space: nowrap;
+}
+
+table tbody td:has(> div > button svg) > div:has(> button svg) > button:not(:has(svg)) {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+table tbody td:has(> div > button svg) button:has(svg),
+table tbody td:has(> button svg) > button:has(svg) {
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 2rem;
+  place-items: center;
+  padding: 0;
+  border-radius: 0.5rem;
+}
+
+table tbody td:has(> div > button svg) button:has(svg) svg,
+table tbody td:has(> button svg) > button:has(svg) svg {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }

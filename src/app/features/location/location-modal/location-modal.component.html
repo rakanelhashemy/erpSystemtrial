@@ -9,12 +9,12 @@
   >
     <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
       <p id="location-modal-title" class="font-display text-xl text-inkText">
-        {{ isEdit() ? 'Edit Location' : 'Add Location' }}
+        {{ isEdit() ? (language() === 'ar' ? 'تعديل موقع' : 'Edit Location') : (language() === 'ar' ? 'إضافة موقع' : 'Add Location') }}
       </p>
       <button
         type="button"
         class="p-2 rounded-lg hover:bg-ink/5 text-fog disabled:opacity-40"
-        aria-label="Close"
+        [attr.aria-label]="language() === 'ar' ? 'إغلاق' : 'Close'"
         [disabled]="saving()"
         (click)="cancelled.emit()"
       >
@@ -36,11 +36,11 @@
           [ngModel]="name()"
           (ngModelChange)="name.set($event)"
         />
-        <label for="location-name">Location name</label>
+        <label for="location-name">{{ language() === 'ar' ? "اسم الموقع" : "Location name" }}</label>
       </div>
 
       <div class="field">
-        <app-lazy-dropdown label="Location type" placeholder="Select location type" [options]="typeOptions()"
+        <app-lazy-dropdown [label]="language() === 'ar' ? 'نوع الموقع' : 'Location type'" [placeholder]="language() === 'ar' ? 'اختر نوع الموقع' : 'Select location type'" [options]="typeOptions()"
           [selectedValue]="locationTypeId()" [loading]="typesLoading()" [hasMore]="typesHasMore()"
           (selected)="selectLocationType($event)" (loadMore)="loadMoreTypes()" />
       </div>
@@ -48,7 +48,7 @@
       @if (typesError()) {
         <p class="text-xs text-danger">
           {{ typesError() }}
-          <button type="button" class="underline ms-1" (click)="loadTypes()">Retry</button>
+          <button type="button" class="underline ms-1" (click)="loadTypes()">{{ language() === 'ar' ? "إعادة المحاولة" : "Retry" }}</button>
         </p>
       }
 
@@ -66,14 +66,14 @@
             [disabled]="saving()"
             (click)="cancelled.emit()"
           >
-            Cancel
+            {{ language() === 'ar' ? "إلغاء" : "Cancel" }}
           </button>
           <button
             type="submit"
             class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed"
             [disabled]="saving() || !canSave()"
           >
-            {{ saving() ? 'Saving…' : 'Save location' }}
+            {{ saving() ? (language() === 'ar' ? "جارٍ الحفظ…" : "Saving…") : (language() === 'ar' ? "حفظ الموقع" : "Save location") }}
           </button>
         </div>
       </div>

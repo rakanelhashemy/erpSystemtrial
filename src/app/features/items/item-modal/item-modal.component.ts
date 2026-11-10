@@ -28,6 +28,7 @@ import {
 import { ItemRequest } from '../../../core/models/items-modal';
 import { ItemsServices } from '../../../core/services/items-services';
 import { toImageUrl } from '../../../core/config/image-url';
+import { AuthService } from '../../../core/auth/auth-service/auth-service';
 import {
   LazyDropdownComponent,
   LazyDropdownOption,
@@ -42,6 +43,7 @@ type TabId = 'general' | 'specs' | 'financials';
   host: { '(document:keydown.escape)': 'close()' },
 })
 export class ItemModalComponent implements OnInit {
+  readonly language = inject(AuthService).language;
   private readonly service = inject(ItemsServices);
   private readonly dropdownService = inject(DropDownServices);
   private readonly fb = inject(NonNullableFormBuilder);

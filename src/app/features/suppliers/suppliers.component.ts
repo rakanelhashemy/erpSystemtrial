@@ -9,6 +9,7 @@ import { HasPermissionDirective } from '../../shared/directives/has-permission.d
 import { SuppliersModalComponent } from './suppliers-modal/suppliers-modal.component';
 import { LazyDropdownComponent } from '../../shared/ui/lazy-dropdown/lazy-dropdown.component';
 
+import { AuthService } from '../../core/auth/auth-service/auth-service';
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HasPermissionDirective, SuppliersModalComponent, LazyDropdownComponent],
@@ -17,6 +18,7 @@ import { LazyDropdownComponent } from '../../shared/ui/lazy-dropdown/lazy-dropdo
   templateUrl: './suppliers.component.html',
 })
 export class SuppliersComponent {
+  readonly language = inject(AuthService).language;
   private readonly api = inject(Suppliers);
   private readonly dropdown = inject(DropDownServices);
   private readonly destroyRef = inject(DestroyRef);

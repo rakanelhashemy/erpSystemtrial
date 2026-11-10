@@ -26,6 +26,7 @@ import { BusinessContextService } from '../../core/services/business-context.ser
 import { ItemModalComponent } from './item-modal/item-modal.component';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { toImageUrl } from '../../core/config/image-url';
+import { AuthService } from '../../core/auth/auth-service/auth-service';
 import {
   LazyDropdownComponent,
   LazyDropdownOption,
@@ -81,6 +82,7 @@ const emptyFilters = (): ItemFilters => ({
   templateUrl: './items.component.html',
 })
 export class ItemsComponent implements OnInit {
+  readonly language = inject(AuthService).language;
   private readonly destroyRef = inject(DestroyRef);
   private readonly itemService = inject(ItemsServices);
   private readonly dd = inject(DropDownServices);

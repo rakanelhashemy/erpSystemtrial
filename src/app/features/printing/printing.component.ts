@@ -1,9 +1,12 @@
-import { Component } from '@angular/core';
+import { Component,
+  inject,} from '@angular/core';
 
+import { AuthService } from '../../core/auth/auth-service/auth-service';
 @Component({
   imports: [],
   selector: 'app-printing',
   styleUrl: './printing.component.css',
   templateUrl: './printing.component.html',
 })
-export class PrintingComponent {}
+export class PrintingComponent {
+  readonly language = inject(AuthService).language;}

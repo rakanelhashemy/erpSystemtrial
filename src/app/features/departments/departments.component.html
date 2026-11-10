@@ -1,8 +1,8 @@
 <div class="bg-paper rounded-2xl border border-inkText/8 shadow-soft overflow-hidden">
   <div class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <p class="font-display text-lg text-inkText">All Departments</p>
-      <p class="text-xs text-fog mt-0.5">Organize departments one level at a time.</p>
+      <p class="font-display text-lg text-inkText">{{ language() === 'ar' ? "كل الأقسام" : "All Departments" }}</p>
+      <p class="text-xs text-fog mt-0.5">{{ language() === 'ar' ? "نظّم الأقسام مستوىً تلو الآخر." : "Organize departments one level at a time." }}</p>
     </div>
     <button *appHasPermission="'Permissions.Departments.Add'"
       type="button"
@@ -13,11 +13,11 @@
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M12 5v14M5 12h14" />
       </svg>
-      Add Department
+      {{ language() === 'ar' ? "إضافة قسم" : "Add Department" }}
     </button>
   </div>
 
-  <nav class="px-4 sm:px-5 py-3 border-b border-inkText/8 bg-ivory/50" aria-label="Department path">
+  <nav class="px-4 sm:px-5 py-3 border-b border-inkText/8 bg-ivory/50" [attr.aria-label]="language() === 'ar' ? 'مسار القسم' : 'Department path'">
     <button
       type="button"
       class="text-sm cursor-pointer"
@@ -29,7 +29,7 @@
       [attr.aria-current]="!currentDepartment() ? 'page' : null"
       (click)="goToBreadcrumb(null)"
     >
-      Departments (Top Level)
+      {{ language() === 'ar' ? "الأقسام (المستوى الأعلى)" : "Departments (Top Level)" }}
     </button>
     @for (crumb of breadcrumb(); track crumb.id; let last = $last) {
       <span class="mx-2 text-fog" aria-hidden="true">/</span>
@@ -60,8 +60,8 @@
       <input
         #searchBox
         type="search"
-        placeholder="Search departments…"
-        aria-label="Search departments"
+        [attr.placeholder]="language() === 'ar' ? 'ابحث عن الأقسام…' : 'Search departments…'"
+        [attr.aria-label]="language() === 'ar' ? 'ابحث عن الأقسام' : 'Search departments'"
         class="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-inkText/15 focus:outline-none focus:ring-2 focus:ring-brass/30"
         [value]="searchTerm()"
         (input)="searchTerm.set(searchBox.value)"
@@ -69,7 +69,7 @@
     </div>
 
     <label class="flex items-center gap-2 text-xs text-fog">
-      Show
+      {{ language() === 'ar' ? "عرض" : "Show" }}
       <select
         #sizeSelect
         class="border border-inkText/15 rounded-lg px-2 py-1.5 text-xs text-inkText focus:outline-none focus:ring-2 focus:ring-brass/30"
@@ -79,7 +79,7 @@
           <option [value]="size" [selected]="size === pageSize()">{{ size }}</option>
         }
       </select>
-      entries
+      {{ language() === 'ar' ? "قيود" : "entries" }}
     </label>
   </div>
 
@@ -87,7 +87,7 @@
     @if (error()) {
       <div class="text-sm text-danger text-center py-8">
         {{ error() }}
-        <button type="button" class="underline ms-2" (click)="reload()">Retry</button>
+        <button type="button" class="underline ms-2" (click)="reload()">{{ language() === 'ar' ? "إعادة المحاولة" : "Retry" }}</button>
       </div>
     } @else {
       @for (dept of items(); track dept.id) {
@@ -97,7 +97,7 @@
           <button
             type="button"
             class="flex items-center gap-3 min-w-0 flex-1 text-left"
-            [attr.aria-label]="'Open ' + dept.title"
+            [attr.aria-label]="(language() === 'ar' ? 'فتح ' : 'Open ') + dept.title"
             (click)="openChild(dept)"
           >
            <div class="flex items-center gap-3 min-w-0 ">
@@ -121,8 +121,8 @@
           <button
             type="button"
             class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
-            title="View details"
-            [attr.aria-label]="'View ' + dept.title"
+            [attr.title]="language() === 'ar' ? 'عرض التفاصيل' : 'View details'"
+            [attr.aria-label]="(language() === 'ar' ? 'عرض ' : 'View ') + dept.title"
             (click)="openDetails(dept)"
           >
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -133,8 +133,8 @@
           <button *appHasPermission="'Permissions.Departments.Edit'"
             type="button"
             class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
-            title="Edit department"
-            [attr.aria-label]="'Edit ' + dept.title"
+            [attr.title]="language() === 'ar' ? 'تعديل القسم' : 'Edit department'"
+            [attr.aria-label]="(language() === 'ar' ? 'تعديل ' : 'Edit ') + dept.title"
             (click)="openEdit(dept)"
           >
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -145,8 +145,8 @@
           <button *appHasPermission="'Permissions.Departments.Delete'"
             type="button"
             class="p-1.5 rounded-lg hover:bg-dangerBg text-danger"
-            title="Delete department"
-            [attr.aria-label]="'Delete ' + dept.title"
+            [attr.title]="language() === 'ar' ? 'حذف القسم' : 'Delete department'"
+            [attr.aria-label]="(language() === 'ar' ? 'حذف ' : 'Delete ') + dept.title"
             (click)="openDelete(dept)"
           >
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -158,7 +158,7 @@
         </article>
       } @empty {
         <p class="text-sm text-fog text-center py-8">
-          {{ loading() ? 'Loading departments…' : (searchTerm() ? 'No matching departments found.' : 'No sub-departments here yet.') }}
+          {{ loading() ? (language() === 'ar' ? "جارٍ تحميل الأقسام…" : "Loading departments…") : (searchTerm() ? (language() === 'ar' ? "لم يتم العثور على أقسام مطابقة." : "No matching departments found.") : (language() === 'ar' ? "لا توجد أقسام فرعية هنا بعد." : "No sub-departments here yet.")) }}
         </p>
       }
     }
@@ -167,9 +167,9 @@
   <div class="p-4 sm:p-5 border-t border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-fog">
     <p>
       @if (pageRange().total) {
-        Showing {{ pageRange().from }}–{{ pageRange().to }} of {{ pageRange().total }} departments
+        {{ language() === 'ar' ? 'عرض' : 'Showing' }} {{ pageRange().from }} {{ language() === 'ar' ? 'إلى' : 'to' }} {{ pageRange().to }} {{ language() === 'ar' ? 'من أصل' : 'of' }} {{ pageRange().total }} {{ language() === 'ar' ? 'الأقسام' : 'departments' }}
       } @else {
-        No matching departments found
+        {{ language() === 'ar' ? 'لم يتم العثور على أقسام مطابقة.' : 'No matching departments found' }}
       }
     </p>
     <div class="flex items-center gap-1">
@@ -179,7 +179,7 @@
         [disabled]="currentPage() <= 1 || loading()"
         (click)="prevPage()"
       >
-        Previous
+        {{ language() === 'ar' ? "السابق" : "Previous" }}
       </button>
       <span class="px-3 py-1.5 rounded-lg bg-ink text-ivory font-semibold">{{ currentPage() }}</span>
       <button
@@ -188,7 +188,7 @@
         [disabled]="currentPage() >= totalPages() || loading()"
         (click)="nextPage()"
       >
-        Next
+        {{ language() === 'ar' ? "التالي" : "Next" }}
       </button>
     </div>
   </div>
@@ -219,8 +219,8 @@
       aria-labelledby="department-details-title"
     >
       <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
-        <p id="department-details-title" class="font-display text-xl text-inkText">Department Details</p>
-        <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog" aria-label="Close" (click)="closeDetails()">
+        <p id="department-details-title" class="font-display text-xl text-inkText">{{ language() === 'ar' ? "بيانات القسم" : "Department Details" }}</p>
+        <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog" [attr.aria-label]="language() === 'ar' ? 'إغلاق' : 'Close'" (click)="closeDetails()">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M18 6 6 18M6 6l12 12" />
@@ -231,31 +231,31 @@
       <div class="px-6 py-6">
         <dl class="space-y-4 text-sm">
           <div class="flex items-start justify-between gap-4">
-            <dt class="text-fog">Title</dt>
+            <dt class="text-fog">{{ language() === 'ar' ? "العنوان" : "Title" }}</dt>
             <dd class="font-semibold text-inkText text-right wrap-break-word">{{ department.title }}</dd>
           </div>
           <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-            <dt class="text-fog">Code</dt>
+            <dt class="text-fog">{{ language() === 'ar' ? "الكود" : "Code" }}</dt>
             <dd class="font-semibold text-inkText text-right">{{ department.code }}</dd>
           </div>
           <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-            <dt class="text-fog">Parent</dt>
-            <dd class="text-inkText text-right">{{ currentDepartment()?.title ?? 'Top level' }}</dd>
+            <dt class="text-fog">{{ language() === 'ar' ? "الأصل الأعلى" : "Parent" }}</dt>
+            <dd class="text-inkText text-right">{{ currentDepartment()?.title ?? (language() === 'ar' ? "المستوى الأعلى" : "Top level") }}</dd>
           </div>
 
           @if (detailsResource.error()) {
             <div class="flex items-center justify-between gap-4 pt-4 border-t border-inkText/8 text-xs text-danger">
-              <span>Could not load the rest of the details.</span>
-              <button type="button" class="font-semibold underline" (click)="detailsResource.reload()">Retry</button>
+              <span>{{ language() === 'ar' ? "تعذر تحميل بقية التفاصيل." : "Could not load the rest of the details." }}</span>
+              <button type="button" class="font-semibold underline" (click)="detailsResource.reload()">{{ language() === 'ar' ? "إعادة المحاولة" : "Retry" }}</button>
             </div>
           } @else {
             @let extra = detailsResource.value();
             <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-              <dt class="text-fog">Created by</dt>
+              <dt class="text-fog">{{ language() === 'ar' ? "أنشأه" : "Created by" }}</dt>
               <dd class="text-inkText text-right">{{ detailsResource.isLoading() ? '…' : (extra?.createdByName || '—') }}</dd>
             </div>
             <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-              <dt class="text-fog">Updated by</dt>
+              <dt class="text-fog">{{ language() === 'ar' ? "عدّله" : "Updated by" }}</dt>
               <dd class="text-inkText text-right">{{ detailsResource.isLoading() ? '…' : (extra?.updatedByName || '—') }}</dd>
             </div>
           }
@@ -267,7 +267,7 @@
             class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft"
             (click)="closeDetails()"
           >
-            Close
+            {{ language() === 'ar' ? "إغلاق" : "Close" }}
           </button>
         </div>
       </div>
@@ -288,11 +288,11 @@
       aria-describedby="delete-department-desc"
     >
       <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
-        <p id="delete-department-title" class="font-display text-xl text-inkText">Delete Department</p>
+        <p id="delete-department-title" class="font-display text-xl text-inkText">{{ language() === 'ar' ? "حذف القسم" : "Delete Department" }}</p>
         <button
           type="button"
           class="p-2 rounded-lg hover:bg-ink/5 text-fog disabled:opacity-40"
-          aria-label="Close"
+          [attr.aria-label]="language() === 'ar' ? 'إغلاق' : 'Close'"
           [disabled]="deleting()"
           (click)="cancelDelete()"
         >
@@ -314,10 +314,9 @@
             </svg>
           </span>
           <p id="delete-department-desc" class="text-sm text-inkText">
-            Are you sure you want to delete
+            {{ language() === 'ar' ? "هل أنت متأكد أنك تريد الحذف؟" : "Are you sure you want to delete" }}
             <span class="font-semibold">{{ target.title }}</span>
-            <span class="text-fog">({{ target.code }})</span>?
-            This action cannot be undone.
+            <span class="text-fog">({{ target.code }})</span>{{ language() === 'ar' ? "؟ لا يمكن التراجع عن هذا الإجراء." : "? This action cannot be undone." }}
           </p>
         </div>
 
@@ -334,7 +333,7 @@
             [disabled]="deleting()"
             (click)="cancelDelete()"
           >
-            Cancel
+            {{ language() === 'ar' ? "إلغاء" : "Cancel" }}
           </button>
           <button
             type="button"
@@ -342,7 +341,7 @@
             [disabled]="deleting()"
             (click)="confirmDelete()"
           >
-            {{ deleting() ? 'Deleting…' : 'Delete department' }}
+            {{ deleting() ? 'Deleting…' : (language() === 'ar' ? "حذف القسم" : "Delete department") }}
           </button>
         </div>
       </div>

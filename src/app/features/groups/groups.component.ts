@@ -9,6 +9,7 @@ import { toast } from 'ngx-sonner';
 import { BusinessContextService } from '../../core/services/business-context.service';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 
+import { AuthService } from '../../core/auth/auth-service/auth-service';
 @Component({
   imports: [FormsModule, GroupModalComponent, HasPermissionDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -17,6 +18,7 @@ import { HasPermissionDirective } from '../../shared/directives/has-permission.d
   templateUrl: './groups.component.html',
 })
 export class GroupsComponent {
+  readonly language = inject(AuthService).language;
    private readonly api = inject(GroupService);
   private readonly destroyRef = inject(DestroyRef);
 

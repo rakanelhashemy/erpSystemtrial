@@ -12,6 +12,7 @@ import { RolemodalComponent } from './models/rolemodal/rolemodal.component';
 import { toast } from 'ngx-sonner';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 
+import { AuthService } from '../../core/auth/auth-service/auth-service';
 interface Role {
   id: string;
   name: string;
@@ -24,6 +25,7 @@ interface Role {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RolesComponent implements OnInit {
+  readonly language = inject(AuthService).language;
    private readonly rolesService = inject(RolesService);
   private readonly destroyRef = inject(DestroyRef);
 

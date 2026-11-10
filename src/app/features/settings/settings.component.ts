@@ -10,6 +10,7 @@ import { AppLanguage, AuthService } from '../../core/auth/auth-service/auth-serv
   templateUrl: './settings.component.html',
 })
 export class SettingsComponent {
+  readonly language = inject(AuthService).language;
   readonly branding = inject(BrandingService);
   readonly auth = inject(AuthService);
 

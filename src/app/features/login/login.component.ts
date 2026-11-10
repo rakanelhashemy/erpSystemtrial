@@ -15,6 +15,7 @@ const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*\d).{6,}$/;
 })
 
 export class LoginComponent {
+  readonly language = inject(AuthService).language;
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   protected readonly branding = inject(BrandingService);

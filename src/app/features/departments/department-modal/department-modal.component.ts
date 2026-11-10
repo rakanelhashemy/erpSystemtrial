@@ -1,6 +1,8 @@
-import { afterNextRender, Component, computed, ElementRef, input, linkedSignal, output, signal, viewChild } from '@angular/core';
+import { afterNextRender, Component, computed, ElementRef, input, linkedSignal, output, signal, viewChild,
+  inject,} from '@angular/core';
 import { Department } from '../../../core/models/depatment-modal';
 
+import { AuthService } from '../../../core/auth/auth-service/auth-service';
 @Component({
   imports: [],
   selector: 'app-department-modal',
@@ -8,6 +10,7 @@ import { Department } from '../../../core/models/depatment-modal';
   templateUrl: './department-modal.component.html',
 })
 export class DepartmentModalComponent {
+  readonly language = inject(AuthService).language;
   readonly department = input<Department | null>(null); // null = creating
   readonly saving = input(false);
   readonly error = input<string | null>(null);

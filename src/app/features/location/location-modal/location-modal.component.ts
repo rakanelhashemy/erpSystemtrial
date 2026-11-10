@@ -6,6 +6,7 @@ import { LocationTypeService } from '../../../core/services/location-type-servic
 import { FormsModule } from '@angular/forms';
 import { LazyDropdownComponent, LazyDropdownOption } from '../../../shared/ui/lazy-dropdown/lazy-dropdown.component';
 
+import { AuthService } from '../../../core/auth/auth-service/auth-service';
 @Component({
   imports: [FormsModule, LazyDropdownComponent],
   selector: 'app-location-modal',
@@ -13,6 +14,7 @@ import { LazyDropdownComponent, LazyDropdownOption } from '../../../shared/ui/la
   templateUrl: './location-modal.component.html',
 })
 export class LocationModalComponent {
+  readonly language = inject(AuthService).language;
   private readonly typeService = inject(LocationTypeService);
   private readonly destroyRef = inject(DestroyRef);
  

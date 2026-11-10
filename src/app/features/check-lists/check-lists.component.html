@@ -5,8 +5,8 @@
       class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
     >
       <div>
-        <p class="font-display text-xl text-inkText">Check Lists</p>
-        <p class="text-xs text-fog mt-0.5">Manage physical asset audits</p>
+        <p class="font-display text-xl text-inkText">{{ language() === 'ar' ? "قوائم الفحص" : "Check Lists" }}</p>
+        <p class="text-xs text-fog mt-0.5">{{ language() === 'ar' ? "إدارة عمليات تدقيق الأصول المادية" : "Manage physical asset audits" }}</p>
       </div>
       <button
         *appHasPermission="'Permissions.CheckLists.Add'"
@@ -25,7 +25,7 @@
         >
           <path d="M12 5v14M5 12h14"></path>
         </svg>
-        New Check List
+        {{ language() === 'ar' ? "قائمة فحص جديدة" : "New Check List" }}
       </button>
     </div>
 
@@ -53,7 +53,7 @@
       </div>
       <input
         type="search"
-        placeholder="Search check lists..."
+        [attr.placeholder]="language() === 'ar' ? 'ابحث عن قوائم الفحص...' : 'Search check lists...'"
         [ngModel]="search()"
         (ngModelChange)="onSearch($event)"
         class="w-full lg:w-72 px-3 py-2.5 text-sm rounded-lg border border-inkText/15 focus:outline-none focus:ring-2 focus:ring-brass/30"
@@ -74,18 +74,18 @@
       <table class="w-full text-sm">
         <thead>
           <tr class="bg-ivory text-left text-[11px] uppercase tracking-wide text-fog">
-            <th class="px-5 py-3 font-semibold">Title</th>
-            <th class="px-5 py-3 font-semibold">Audit Date</th>
-            <th class="px-5 py-3 font-semibold">Date Created</th>
-            <th class="px-5 py-3 font-semibold">Created By</th>
-            <th class="px-5 py-3 font-semibold">Assigned To</th>
-            <th class="px-5 py-3 font-semibold text-right">Actions</th>
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'العنوان' : 'Title' }}</th>
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'تاريخ التدقيق' : 'Audit Date' }}</th>
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'تاريخ الإنشاء' : 'Date Created' }}</th>
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'أنشأه' : 'Created By' }}</th>
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'مسند إلى' : 'Assigned To' }}</th>
+            <th class="px-5 py-3 font-semibold text-right">{{ language() === 'ar' ? 'الإجراءات' : 'Actions' }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-inkText/6">
           @if (loading()) {
             <tr>
-              <td colspan="6" class="px-5 py-10 text-center text-sm text-fog">Loading…</td>
+              <td colspan="6" class="px-5 py-10 text-center text-sm text-fog">{{ language() === 'ar' ? "جارٍ التحميل…" : "Loading…" }}</td>
             </tr>
           } @else {
             @for (row of checkLists(); track row.id) {
@@ -93,7 +93,7 @@
                 <td class="px-5 py-3.5 font-semibold text-inkText">
                   {{ row.title }}
                   @if (row.status === 'Completed') {
-                    <span class="perm-chip is-granted ml-2">Completed</span>
+                    <span class="perm-chip is-granted ml-2">{{ language() === 'ar' ? "مكتمل" : "Completed" }}</span>
                   }
                 </td>
                 <td class="px-5 py-3.5 text-fog">{{ row.auditDate }}</td>
@@ -124,8 +124,8 @@
                         type="button"
                         (click)="edit(row)"
                         class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
-                        title="Edit check list"
-                        [attr.aria-label]="'Edit ' + row.title"
+                        [attr.title]="language() === 'ar' ? 'تعديل قائمة الفحص' : 'Edit check list'"
+                        [attr.aria-label]="(language() === 'ar' ? 'تعديل ' : 'Edit ') + row.title"
                       >
                         <svg
                           class="w-4 h-4"
@@ -145,8 +145,8 @@
                         type="button"
                         (click)="openDelete(row)"
                         class="p-1.5 rounded-lg hover:bg-dangerBg text-danger"
-                        title="Delete check list"
-                        [attr.aria-label]="'Delete ' + row.title"
+                        [attr.title]="language() === 'ar' ? 'حذف قائمة الفحص' : 'Delete check list'"
+                        [attr.aria-label]="(language() === 'ar' ? 'حذف ' : 'Delete ') + row.title"
                       >
                         <svg
                           class="w-4 h-4"
@@ -169,7 +169,7 @@
                         (click)="runAudit(row)"
                         class="px-3 py-2 rounded-lg bg-inkText/10 text-inkText hover:bg-inkText/20 text-xs font-semibold"
                       >
-                        View Results
+                        {{ language() === 'ar' ? "عرض النتائج" : "View Results" }}
                       </button>
                     } @else if (row.canExecute) {
                       <button
@@ -177,7 +177,7 @@
                         (click)="runAudit(row)"
                         class="px-3 py-2 rounded-lg bg-ink text-ivory hover:bg-ink2 text-xs font-semibold"
                       >
-                        Run Audit
+                        {{ language() === 'ar' ? "تنفيذ التدقيق" : "Run Audit" }}
                       </button>
                     }
                   </div>
@@ -186,7 +186,7 @@
             } @empty {
               <tr>
                 <td colspan="6" class="px-5 py-10 text-center text-sm text-fog">
-                  No check lists found.
+                  {{ language() === 'ar' ? "لم يتم العثور على قوائم فحص." : "No check lists found." }}
                 </td>
               </tr>
             }
@@ -200,7 +200,7 @@
       class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-fog"
     >
       <label class="flex items-center gap-2">
-        Show
+        {{ language() === 'ar' ? "عرض" : "Show" }}
         <select
           [ngModel]="pageSize()"
           (ngModelChange)="onPageSizeChange($event)"
@@ -210,9 +210,9 @@
           <option [ngValue]="10">10</option>
           <option [ngValue]="25">25</option>
         </select>
-        entries
+        {{ language() === 'ar' ? "قيود" : "entries" }}
       </label>
-      <p>Showing {{ from() }} to {{ to() }} of {{ totalCount() }} check lists</p>
+      <p>{{ language() === 'ar' ? 'عرض' : 'Showing' }} {{ from() }} {{ language() === 'ar' ? 'إلى' : 'to' }} {{ to() }} {{ language() === 'ar' ? 'من أصل' : 'of' }} {{ totalCount() }} {{ language() === 'ar' ? 'قوائم الفحص' : 'check lists' }}</p>
       <div class="flex items-center gap-1">
         <button
           type="button"
@@ -220,7 +220,7 @@
           [disabled]="pageNumber() <= 1"
           class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          Previous
+          {{ language() === 'ar' ? "السابق" : "Previous" }}
         </button>
         <span class="px-3 py-1.5 rounded-lg bg-ink text-ivory font-semibold"
           >{{ pageNumber() }} / {{ totalPages() }}</span
@@ -231,7 +231,7 @@
           [disabled]="pageNumber() >= totalPages()"
           class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          Next
+          {{ language() === 'ar' ? "التالي" : "Next" }}
         </button>
       </div>
     </div>
@@ -253,11 +253,11 @@
         aria-describedby="delete-cl-desc"
       >
         <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
-          <p id="delete-cl-title" class="font-display text-xl text-inkText">Delete Check List</p>
+          <p id="delete-cl-title" class="font-display text-xl text-inkText">{{ language() === 'ar' ? "حذف قائمة الفحص" : "Delete Check List" }}</p>
           <button
             type="button"
             class="p-2 rounded-lg hover:bg-ink/5 text-fog disabled:opacity-40"
-            aria-label="Close"
+            [attr.aria-label]="language() === 'ar' ? 'إغلاق' : 'Close'"
             [disabled]="deleting()"
             (click)="cancelDelete()"
           >
@@ -277,8 +277,8 @@
         </div>
         <div class="px-6 py-6 space-y-4">
           <p id="delete-cl-desc" class="text-sm text-inkText">
-            Are you sure you want to delete <span class="font-semibold">{{ target.title }}</span
-            >? This action cannot be undone.
+            {{ language() === 'ar' ? "هل أنت متأكد أنك تريد الحذف؟" : "Are you sure you want to delete" }} <span class="font-semibold">{{ target.title }}</span
+            >{{ language() === 'ar' ? "؟ لا يمكن التراجع عن هذا الإجراء." : "? This action cannot be undone." }}
           </p>
           @if (deleteError()) {
             <p class="text-xs text-danger bg-dangerBg rounded-lg px-3 py-2" role="alert">
@@ -292,7 +292,7 @@
               [disabled]="deleting()"
               (click)="cancelDelete()"
             >
-              Cancel
+              {{ language() === 'ar' ? "إلغاء" : "Cancel" }}
             </button>
             <button
               type="button"
@@ -300,7 +300,7 @@
               [disabled]="deleting()"
               (click)="confirmDelete()"
             >
-              {{ deleting() ? 'Deleting…' : 'Delete' }}
+              {{ deleting() ? 'Deleting…' : (language() === 'ar' ? "حذف" : "Delete") }}
             </button>
           </div>
         </div>

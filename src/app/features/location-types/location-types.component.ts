@@ -10,6 +10,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BusinessContextService } from '../../core/services/business-context.service';
 import { toast } from 'ngx-sonner';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
+import { AuthService } from '../../core/auth/auth-service/auth-service';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,6 +23,7 @@ export class LocationTypesComponent implements OnInit {
   private service = inject(LocationTypeService);
   private dropdownService = inject(DropDownServices);
   private businessContext = inject(BusinessContextService);
+  readonly language = inject(AuthService).language;
 
   readonly pageSize = 10;
   readonly businessPageSize = 10;

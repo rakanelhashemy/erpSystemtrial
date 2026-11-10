@@ -13,6 +13,7 @@ import { LocationModalComponent } from './location-modal/location-modal.componen
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 
 
+import { AuthService } from '../../core/auth/auth-service/auth-service';
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, LocationModalComponent, HasPermissionDirective],
@@ -21,6 +22,7 @@ import { HasPermissionDirective } from '../../shared/directives/has-permission.d
   templateUrl: './location.component.html',
 })
 export class LocationComponent implements OnInit {
+  readonly language = inject(AuthService).language;
   private readonly api = inject(LocationService);
   private readonly dropdownService = inject(DropDownServices);
   private readonly businessContext = inject(BusinessContextService);

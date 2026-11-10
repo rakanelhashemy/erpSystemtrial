@@ -7,6 +7,7 @@ import { Department, DepartmentRequest } from '../../core/models/depatment-modal
 import { DepartmentService } from '../../core/services/depatment-service';
 import { DepartmentModalComponent } from './department-modal/department-modal.component';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
+import { AuthService } from '../../core/auth/auth-service/auth-service';
 const SEARCH_DEBOUNCE_MS = 300;
 const NO_ITEMS: Department[] = [];
 @Component({
@@ -17,6 +18,7 @@ const NO_ITEMS: Department[] = [];
   templateUrl: './departments.component.html',
 })
 export class DepartmentsComponent {
+  readonly language = inject(AuthService).language;
 
   private readonly api = inject(DepartmentService);
   private readonly destroyRef = inject(DestroyRef);

@@ -15,6 +15,7 @@ import { catchError, finalize, forkJoin, of, switchMap, throwError } from 'rxjs'
 import { toast } from 'ngx-sonner';
 import { Claim, RolesService } from '../../../../core/services/roles-service';
 
+import { AuthService } from '../../../../core/auth/auth-service/auth-service';
 interface PermissionModule {
   moduleName: string;
   label: string;
@@ -40,6 +41,7 @@ const displayName = (value: string): string =>
   host: { '(document:keydown.escape)': 'closeModal()' },
 })
 export class RolemodalComponent implements OnInit {
+  readonly language = inject(AuthService).language;
   private readonly rolesService = inject(RolesService);
   private readonly destroyRef = inject(DestroyRef);
 

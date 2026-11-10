@@ -8,6 +8,7 @@ import { EmployeesServices } from '../../core/services/employees-services';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { EmployessModalComponent } from './employess-modal/employess-modal.component';
 
+import { AuthService } from '../../core/auth/auth-service/auth-service';
 interface AppliedFilters {
   departmentId: string | null;
   gender: number | null;
@@ -34,6 +35,7 @@ const EMPTY_FILTERS: AppliedFilters = {
   templateUrl: './employees.component.html',
 })
 export class EmployeesComponent implements OnInit {
+  readonly language = inject(AuthService).language;
   private api = inject(EmployeesServices);
   private dropdown = inject(DropDownServices);
 

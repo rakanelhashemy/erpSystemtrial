@@ -19,6 +19,7 @@ import { BrandingService } from '../../core/services/branding.service';
   templateUrl: './register.component.html',
 })
 export class RegisterComponent {
+  readonly language = inject(AuthService).language;
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);

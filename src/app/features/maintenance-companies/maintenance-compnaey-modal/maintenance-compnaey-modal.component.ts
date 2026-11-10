@@ -8,6 +8,7 @@ import { DropdownItem, DropDownServices } from '../../../core/services/drop-down
 import { MaintenanceCompanyServices } from '../../../core/services/maintenance-company-services';
 import { LazyDropdownComponent } from '../../../shared/ui/lazy-dropdown/lazy-dropdown.component';
 
+import { AuthService } from '../../../core/auth/auth-service/auth-service';
 @Component({
   imports: [ReactiveFormsModule, LazyDropdownComponent],
   selector: 'app-maintenance-Company-modal',
@@ -15,6 +16,7 @@ import { LazyDropdownComponent } from '../../../shared/ui/lazy-dropdown/lazy-dro
   templateUrl: './maintenance-compnaey-modal.component.html',
 })
 export class MaintenanceCompyModalComponent {
+  readonly language = inject(AuthService).language;
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly api = inject(MaintenanceCompanyServices);
   private readonly dropdown = inject(DropDownServices);

@@ -19,6 +19,7 @@ import { Paged } from '../../core/models/general-model';
 import { toast } from 'ngx-sonner';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 
+import { AuthService } from '../../core/auth/auth-service/auth-service';
 @Component({
   selector: 'app-businesses',
   imports: [BusinessModalComponent, HasPermissionDirective],
@@ -27,6 +28,7 @@ import { HasPermissionDirective } from '../../shared/directives/has-permission.d
   templateUrl: './businesses.component.html',
 })
 export class BusinessesComponent {
+  readonly language = inject(AuthService).language;
   private readonly service = inject(BusinessService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly search$ = new Subject<string>();

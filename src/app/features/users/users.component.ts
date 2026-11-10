@@ -73,6 +73,7 @@ const displayName = (value: string): string =>
   templateUrl: './users.component.html',
 })
 export class UsersComponent {
+  readonly language = inject(AuthService).language;
   private readonly api = inject(Userservices);
   private readonly auth = inject(AuthService);
   private readonly rolesApi = inject(RolesService);

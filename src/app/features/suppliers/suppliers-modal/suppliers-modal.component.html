@@ -7,10 +7,10 @@
     <!-- Header -->
     <div class="sticky top-0 z-10 bg-paper flex items-center justify-between px-6 py-5 border-b border-inkText/8">
       <p id="supplier-modal-title" class="font-display text-xl text-inkText">
-        {{ isEdit() ? 'Edit Supplier' : 'Add Supplier' }}
+        {{ isEdit() ? (language() === 'ar' ? 'تعديل مورد' : 'Edit Supplier') : (language() === 'ar' ? 'إضافة مورد' : 'Add Supplier') }}
       </p>
       <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog disabled:opacity-40"
-              aria-label="Close" [disabled]="saving()" (click)="cancelled.emit()">
+              [attr.aria-label]="language() === 'ar' ? 'إغلاق' : 'Close'" [disabled]="saving()" (click)="cancelled.emit()">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M18 6 6 18M6 6l12 12" />
@@ -20,79 +20,79 @@
 
     @if (isEdit() && detailsResource.error()) {
       <div class="px-6 py-10 text-sm text-danger text-center">
-        Could not load the supplier.
-        <button type="button" class="underline ms-2" (click)="detailsResource.reload()">Retry</button>
+        {{ language() === 'ar' ? "تعذر تحميل بيانات المورد." : "Could not load the supplier." }}
+        <button type="button" class="underline ms-2" (click)="detailsResource.reload()">{{ language() === 'ar' ? "إعادة المحاولة" : "Retry" }}</button>
       </div>
     } @else if (!ready()) {
-      <p class="px-6 py-10 text-sm text-fog text-center">Loading…</p>
+      <p class="px-6 py-10 text-sm text-fog text-center">{{ language() === 'ar' ? "جارٍ التحميل…" : "Loading…" }}</p>
     } @else {
       <form [formGroup]="form" (ngSubmit)="submit()" class="px-6 py-6 space-y-5" novalidate>
 
         <div class="grid sm:grid-cols-2 gap-4">
           <div class="field">
             <input id="sup-name" formControlName="name" placeholder=" " />
-            <label for="sup-name">Supplier Name</label>
+            <label for="sup-name">{{ language() === 'ar' ? "اسم المورد" : "Supplier Name" }}</label>
             @if (form.controls.name.touched && form.controls.name.invalid) {
-              <p class="text-xs text-danger mt-1">Supplier name is required.</p>
+              <p class="text-xs text-danger mt-1">{{ language() === 'ar' ? "اسم المورد مطلوب." : "Supplier name is required." }}</p>
             }
           </div>
 
           <div class="field">
-            <app-lazy-dropdown label="Category" placeholder="Select category" [options]="categories()"
+            <app-lazy-dropdown [label]="language() === 'ar' ? 'الفئة' : 'Category'" [placeholder]="language() === 'ar' ? 'اختر فئة' : 'Select category'" [options]="categories()"
               [selectedValue]="form.controls.categoryId.value" [loading]="categoryLoading()"
               [hasMore]="categoryHasMore()" [searchable]="true" [searchTerm]="categorySearch()"
-              [customOptionText]="categoryNoResults() ? 'Use “' + categorySearch().trim() + '” as a new category' : ''"
+              [customOptionText]="categoryNoResults() ? (language() === 'ar' ? 'استخدم “' + categorySearch().trim() + '” كفئة جديدة' : 'Use “' + categorySearch().trim() + '” as a new category') : ''"
               [customOptionValue]="categorySearch().trim()"
-              searchPlaceholder="Search categories…" [allowClear]="true" (loadMore)="loadCategories()"
+              [searchPlaceholder]="language() === 'ar' ? 'ابحث عن الفئات…' : 'Search categories…'" [allowClear]="true" (loadMore)="loadCategories()"
               (selected)="selectCategory(+$event.id)" (searchChanged)="onCategorySearch($event)"
               (customSelected)="selectNewCategory($event)"
               (cleared)="clearCategory()" />
             @if (categoryNoResults()) {
-              <p class="text-xs text-fog mt-1">No matching category. Select “Use {{ categorySearch().trim() }} as a new category” from the list.</p>
+              <p class="text-xs text-fog mt-1">{{ language() === 'ar' ? 'لا توجد فئة مطابقة. اختر “استخدم “' + categorySearch().trim() + '” كفئة جديدة” من القائمة.' : 'No matching category. Select “Use “' + categorySearch().trim() + '” as a new category” from the list.' }}</p>
             }
             @if (form.controls.categoryId.touched && form.controls.categoryId.value === null && !form.controls.categoryName.value.trim() && !categorySearchPending()) {
-              <p class="text-xs text-danger mt-1">Category is required.</p>
+              <p class="text-xs text-danger mt-1">{{ language() === 'ar' ? "الفئة مطلوبة." : "Category is required." }}</p>
             }
           </div>
 
           <div class="field sm:col-span-2">
             <input id="sup-address" formControlName="address" placeholder=" " />
-            <label for="sup-address">Address</label>
+            <label for="sup-address">{{ language() === 'ar' ? "العنوان" : "Address" }}</label>
           </div>
 
           <div class="field sm:col-span-2">
             <textarea id="sup-notes" rows="2" formControlName="notes" placeholder=" "></textarea>
-            <label for="sup-notes">Notes</label>
+            <label for="sup-notes">{{ language() === 'ar' ? "ملاحظات" : "Notes" }}</label>
           </div>
         </div>
 
         <!-- Contact people -->
         <div class="pt-4 border-t border-inkText/8">
-          <p class="text-xs font-semibold uppercase tracking-wider text-brassDk mb-3">Contacts</p>
+          <p class="text-xs font-semibold uppercase tracking-wider text-brassDk mb-3">{{ language() === 'ar' ? "جهات الاتصال" : "Contacts" }}</p>
 
           <!-- Draft row (Enter adds the contact instead of submitting the supplier) -->
           <div [formGroup]="contactDraft" class="grid sm:grid-cols-2 gap-4"
                (keydown.enter)="$event.preventDefault(); addContact()">
             <div class="field">
               <input id="cd-name" formControlName="name" placeholder=" " />
-              <label for="cd-name">Contact Name</label>
+              <label for="cd-name">{{ language() === 'ar' ? "اسم جهة الاتصال" : "Contact Name" }}</label>
               @if (contactDraft.controls.name.touched && contactDraft.controls.name.invalid) {
-                <p class="text-xs text-danger mt-1">Name is required.</p>
+                <p class="text-xs text-danger mt-1">{{ language() === 'ar' ? "الاسم مطلوب." : "Name is required." }}</p>
               }
             </div>
             <div class="field">
               <input id="cd-pos" formControlName="position" placeholder=" " />
-              <label for="cd-pos">Position</label>
+              <label for="cd-pos">{{ language() === 'ar' ? "المنصب" : "Position" }}</label>
             </div>
             <div class="field">
               <input id="cd-phone" formControlName="phone" placeholder=" " />
-              <label for="cd-phone">Phone</label>
+              <label for="cd-phone">{{ language() === 'ar' ? "الهاتف" : "Phone" }}</label>
             </div>
             <div class="field">
               <input id="cd-email" type="email" formControlName="email" placeholder=" " />
-              <label for="cd-email">Email</label>
+              <label for="cd-email">{{ language() === 'ar' ? "البريد الإلكتروني" : "Email" }}</label>
               @if (contactDraft.controls.email.touched && contactDraft.controls.email.invalid) {
-                <p class="text-xs text-danger mt-1">Invalid email.</p>
+                <p class="text-xs text-danger mt-1">{{ language() === 'ar' ? "البريد الإلكتروني غير صحيح." : "Invalid email." }}</p>
               }
             </div>
           </div>
@@ -106,7 +106,7 @@
             @if (editingIndex() !== null) {
               <button type="button" class="text-xs font-semibold text-fog hover:underline"
                       (click)="cancelEdit()">
-                Cancel edit
+                {{ language() === 'ar' ? "إلغاء التعديل" : "Cancel edit" }}
               </button>
             }
           </div>
@@ -124,11 +124,11 @@
                 </colgroup>
                 <thead class="bg-ivory text-xs uppercase text-fog">
                   <tr>
-                    <th class="text-start font-semibold px-3 py-3">Name</th>
-                    <th class="text-start font-semibold px-3 py-3">Position</th>
-                    <th class="text-start font-semibold px-3 py-3">Phone</th>
-                    <th class="text-start font-semibold px-3 py-3">Email</th>
-                    <th class="text-end font-semibold px-3 py-3">Actions</th>
+                    <th class="text-start font-semibold px-3 py-3">{{ language() === 'ar' ? 'الاسم' : 'Name' }}</th>
+                    <th class="text-start font-semibold px-3 py-3">{{ language() === 'ar' ? 'المنصب' : 'Position' }}</th>
+                    <th class="text-start font-semibold px-3 py-3">{{ language() === 'ar' ? 'الهاتف' : 'Phone' }}</th>
+                    <th class="text-start font-semibold px-3 py-3">{{ language() === 'ar' ? 'البريد الإلكتروني' : 'Email' }}</th>
+                    <th class="text-end font-semibold px-3 py-3">{{ language() === 'ar' ? 'الإجراءات' : 'Actions' }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -141,7 +141,7 @@
                       <td class="px-3 py-3 text-end whitespace-nowrap">
                         <button type="button"
                                 class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-brassDk hover:bg-brass/15 transition-colors"
-                                aria-label="Edit contact" title="Edit" (click)="editContact(i)">
+                                [attr.aria-label]="language() === 'ar' ? 'تعديل جهة الاتصال' : 'Edit contact'" [attr.title]="language() === 'ar' ? 'تعديل' : 'Edit'" (click)="editContact(i)">
                           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M12 20h9" />
@@ -150,7 +150,7 @@
                         </button>
                         <button type="button"
                                 class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-danger hover:bg-dangerBg transition-colors"
-                                aria-label="Remove contact" title="Remove" (click)="removeContact(i)">
+                                [attr.aria-label]="language() === 'ar' ? 'إزالة جهة الاتصال' : 'Remove contact'" [attr.title]="language() === 'ar' ? 'إزالة' : 'Remove'" (click)="removeContact(i)">
                           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M3 6h18" />
@@ -177,12 +177,12 @@
           <button type="button"
                   class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5 disabled:opacity-40"
                   [disabled]="saving()" (click)="cancelled.emit()">
-            Cancel
+            {{ language() === 'ar' ? "إلغاء" : "Cancel" }}
           </button>
           <button type="submit"
                   class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed"
                   [disabled]="saving()">
-            {{ saving() ? 'Saving…' : (isEdit() ? 'Save changes' : 'Save Supplier') }}
+            {{ saving() ? (language() === 'ar' ? "جارٍ الحفظ…" : "Saving…") : (isEdit() ? (language() === 'ar' ? "حفظ التغييرات" : "Save changes") : (language() === 'ar' ? "حفظ المورد" : "Save Supplier")) }}
           </button>
         </div>
       </form>

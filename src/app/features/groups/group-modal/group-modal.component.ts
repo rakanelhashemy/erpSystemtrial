@@ -1,14 +1,17 @@
-import { Component, computed, HostListener, input, output, signal } from '@angular/core';
+import { Component, computed, HostListener, input, output, signal,
+  inject,} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Group } from '../../../core/models/group-modal';
 
 
+import { AuthService } from '../../../core/auth/auth-service/auth-service';
 @Component({
   selector: 'app-group-modal',
   imports: [FormsModule],
   templateUrl: './group-modal.component.html',
 })
 export class GroupModalComponent {
+  readonly language = inject(AuthService).language;
   // Inputs
   readonly group = input<Group | null>(null);
   readonly saving = input(false);

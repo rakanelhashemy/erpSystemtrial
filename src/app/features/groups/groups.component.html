@@ -1,8 +1,8 @@
 <div class="bg-paper rounded-2xl border border-inkText/8 shadow-soft overflow-hidden">
   <div class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <p class="font-display text-lg text-inkText">All Groups</p>
-      <p class="text-xs text-fog mt-0.5">Organize item categories one level at a time.</p>
+      <p class="font-display text-lg text-inkText">{{ language() === 'ar' ? "كل المجموعات" : "All Groups" }}</p>
+      <p class="text-xs text-fog mt-0.5">{{ language() === 'ar' ? "نظّم فئات الأصناف مستوىً تلو الآخر." : "Organize item categories one level at a time." }}</p>
     </div>
     <button *appHasPermission="'Permissions.Groups.Add'"
       type="button"
@@ -13,11 +13,11 @@
            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M12 5v14M5 12h14" />
       </svg>
-      Add Group
+      {{ language() === 'ar' ? "إضافة مجموعة" : "Add Group" }}
     </button>
   </div>
 
-  <nav class="px-4 sm:px-5 py-3 border-b  border-inkText/8 bg-ivory/50" aria-label="Group path">
+  <nav class="px-4 sm:px-5 py-3 border-b  border-inkText/8 bg-ivory/50" [attr.aria-label]="language() === 'ar' ? 'مسار المجموعة' : 'Group path'">
     <button
       type="button"
       class="text-sm cursor-pointer"
@@ -29,7 +29,7 @@
       [attr.aria-current]="!currentGroup() ? 'page' : null"
       (click)="goToBreadcrumb(null)"
     >
-      Groups (Top Level)
+      {{ language() === 'ar' ? "المجموعات (المستوى الأعلى)" : "Groups (Top Level)" }}
     </button>
     @for (crumb of breadcrumb(); track crumb.id; let last = $last) {
       <span class="mx-2 text-fog" aria-hidden="true">/</span>
@@ -59,8 +59,8 @@
       </svg>
       <input
         type="text"
-        placeholder="Search groups…"
-        aria-label="Search groups"
+        [attr.placeholder]="language() === 'ar' ? 'ابحث عن المجموعات…' : 'Search groups…'"
+        [attr.aria-label]="language() === 'ar' ? 'ابحث عن المجموعات' : 'Search groups'"
         class="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-inkText/15 focus:outline-none focus:ring-2 focus:ring-brass/30"
         [ngModel]="searchTerm()"
         (ngModelChange)="setSearchTerm($event)"
@@ -68,7 +68,7 @@
     </div>
 
     <label class="flex items-center gap-2 text-xs text-fog">
-      Show
+      {{ language() === 'ar' ? "عرض" : "Show" }}
       <select
         class="border border-inkText/15 rounded-lg px-2 py-1.5 text-xs text-inkText focus:outline-none focus:ring-2 focus:ring-brass/30"
         [ngModel]="pageSize()"
@@ -79,17 +79,17 @@
         <option [ngValue]="25">25</option>
         <option [ngValue]="50">50</option>
       </select>
-      entries
+      {{ language() === 'ar' ? "قيود" : "entries" }}
     </label>
   </div>
 
   <div class="p-3 sm:p-4">
     @if (loading()) {
-      <p class="text-sm text-fog text-center py-8">Loading…</p>
+      <p class="text-sm text-fog text-center py-8">{{ language() === 'ar' ? "جارٍ التحميل…" : "Loading…" }}</p>
     } @else if (error()) {
       <div class="text-sm text-danger text-center py-8">
         {{ error() }}
-        <button type="button" class="underline ms-2" (click)="load()">Retry</button>
+        <button type="button" class="underline ms-2" (click)="load()">{{ language() === 'ar' ? "إعادة المحاولة" : "Retry" }}</button>
       </div>
     } @else {
       @for (group of items(); track group.id) {
@@ -99,7 +99,7 @@
           <button
             type="button"
             class="flex items-center gap-3 min-w-0 flex-1 text-left"
-            [attr.aria-label]="'Open ' + group.name"
+            [attr.aria-label]="(language() === 'ar' ? 'فتح ' : 'Open ') + group.name"
             (click)="openChild(group)"
           >
             <span class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-ink/5 text-brassDk">
@@ -121,8 +121,8 @@
           <button
             type="button"
             class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
-            title="View details"
-            [attr.aria-label]="'View ' + group.name"
+            [attr.title]="language() === 'ar' ? 'عرض التفاصيل' : 'View details'"
+            [attr.aria-label]="(language() === 'ar' ? 'عرض ' : 'View ') + group.name"
             (click)="openDetails(group)"
           >
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -133,8 +133,8 @@
           <button *appHasPermission="'Permissions.Groups.Edit'"
             type="button"
             class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
-            title="Edit group"
-            [attr.aria-label]="'Edit ' + group.name"
+            [attr.title]="language() === 'ar' ? 'تعديل المجموعة' : 'Edit group'"
+            [attr.aria-label]="(language() === 'ar' ? 'تعديل ' : 'Edit ') + group.name"
             (click)="openEdit(group)"
           >
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -145,8 +145,8 @@
           <button *appHasPermission="'Permissions.Groups.Delete'"
             type="button"
             class="p-1.5 rounded-lg hover:bg-dangerBg text-danger"
-            title="Delete group"
-            [attr.aria-label]="'Delete ' + group.name"
+            [attr.title]="language() === 'ar' ? 'حذف المجموعة' : 'Delete group'"
+            [attr.aria-label]="(language() === 'ar' ? 'حذف ' : 'Delete ') + group.name"
             (click)="openDelete(group)"
           >
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -158,7 +158,7 @@
         </article>
       } @empty {
         <p class="text-sm text-fog text-center py-8">
-          {{ searchTerm() ? 'No matching groups found.' : 'No sub-groups here yet.' }}
+          {{ searchTerm() ? (language() === 'ar' ? "لم يتم العثور على مجموعات مطابقة." : "No matching groups found.") : (language() === 'ar' ? "لا توجد مجموعات فرعية هنا بعد." : "No sub-groups here yet.") }}
         </p>
       }
     }
@@ -167,9 +167,9 @@
   <div class="p-4 sm:p-5 border-t border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-fog">
     <p>
       @if (pageRange().total) {
-        Showing {{ pageRange().from }}–{{ pageRange().to }} of {{ pageRange().total }} groups
+        {{ language() === 'ar' ? 'عرض' : 'Showing' }} {{ pageRange().from }} {{ language() === 'ar' ? 'إلى' : 'to' }} {{ pageRange().to }} {{ language() === 'ar' ? 'من أصل' : 'of' }} {{ pageRange().total }} {{ language() === 'ar' ? 'المجموعات' : 'groups' }}
       } @else {
-        No matching groups found
+        {{ language() === 'ar' ? 'لم يتم العثور على مجموعات مطابقة.' : 'No matching groups found' }}
       }
     </p>
     <div class="flex items-center gap-1">
@@ -179,7 +179,7 @@
         [disabled]="currentPage() <= 1 || loading()"
         (click)="prevPage()"
       >
-        Previous
+        {{ language() === 'ar' ? "السابق" : "Previous" }}
       </button>
       <span class="px-3 py-1.5 rounded-lg bg-ink text-ivory font-semibold">{{ currentPage() }}</span>
       <button
@@ -188,7 +188,7 @@
         [disabled]="currentPage() >= totalPages() || loading()"
         (click)="nextPage()"
       >
-        Next
+        {{ language() === 'ar' ? "التالي" : "Next" }}
       </button>
     </div>
   </div>
@@ -217,8 +217,8 @@
       aria-labelledby="group-details-title"
     >
       <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
-        <p id="group-details-title" class="font-display text-xl text-inkText">Group Details</p>
-        <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog" aria-label="Close" (click)="closeDetails()">
+        <p id="group-details-title" class="font-display text-xl text-inkText">{{ language() === 'ar' ? "بيانات المجموعة" : "Group Details" }}</p>
+        <button type="button" class="p-2 rounded-lg hover:bg-ink/5 text-fog" [attr.aria-label]="language() === 'ar' ? 'إغلاق' : 'Close'" (click)="closeDetails()">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M18 6 6 18M6 6l12 12" />
@@ -228,33 +228,33 @@
 
       <div class="px-6 py-6">
         @if (detailsLoading()) {
-          <p class="text-sm text-fog text-center py-6">Loading…</p>
+          <p class="text-sm text-fog text-center py-6">{{ language() === 'ar' ? "جارٍ التحميل…" : "Loading…" }}</p>
         } @else if (detailsError()) {
           <div class="text-sm text-danger text-center py-6">
             {{ detailsError() }}
-            <button type="button" class="underline ms-2" (click)="retryDetails()">Retry</button>
+            <button type="button" class="underline ms-2" (click)="retryDetails()">{{ language() === 'ar' ? "إعادة المحاولة" : "Retry" }}</button>
           </div>
         } @else if (detailsGroup(); as g) {
           <dl class="space-y-4 text-sm">
             <div class="flex items-start justify-between gap-4">
-              <dt class="text-fog">Name</dt>
+              <dt class="text-fog">{{ language() === 'ar' ? "الاسم" : "Name" }}</dt>
               <dd class="font-semibold text-inkText text-right wrap-break-word">{{ g.name }}</dd>
             </div>
             <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-              <dt class="text-fog">Code</dt>
+              <dt class="text-fog">{{ language() === 'ar' ? "الكود" : "Code" }}</dt>
               <dd class="font-semibold text-inkText text-right">{{ g.code }}</dd>
             </div>
             <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-              <dt class="text-fog">Parent</dt>
-              <dd class="text-inkText text-right">{{ currentGroup()?.name ?? 'Top level' }}</dd>
+              <dt class="text-fog">{{ language() === 'ar' ? "الأصل الأعلى" : "Parent" }}</dt>
+              <dd class="text-inkText text-right">{{ currentGroup()?.name ?? (language() === 'ar' ? "المستوى الأعلى" : "Top level") }}</dd>
             </div>
            
             <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-  <dt class="text-fog">Created by</dt>
+  <dt class="text-fog">{{ language() === 'ar' ? "أنشأه" : "Created by" }}</dt>
   <dd class="text-inkText text-right">{{ g.createdByName || '—' }}</dd>
 </div>
 <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-  <dt class="text-fog">Updated by</dt>
+  <dt class="text-fog">{{ language() === 'ar' ? "عدّله" : "Updated by" }}</dt>
   <dd class="text-inkText text-right">{{ g.updatedByName || '—' }}</dd>
 </div>
           </dl>
@@ -266,7 +266,7 @@
             class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft"
             (click)="closeDetails()"
           >
-            Close
+            {{ language() === 'ar' ? "إغلاق" : "Close" }}
           </button>
         </div>
       </div>
@@ -287,11 +287,11 @@
       aria-describedby="delete-group-desc"
     >
       <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8">
-        <p id="delete-group-title" class="font-display text-xl text-inkText">Delete Group</p>
+        <p id="delete-group-title" class="font-display text-xl text-inkText">{{ language() === 'ar' ? "حذف المجموعة" : "Delete Group" }}</p>
         <button
           type="button"
           class="p-2 rounded-lg hover:bg-ink/5 text-fog disabled:opacity-40"
-          aria-label="Close"
+          [attr.aria-label]="language() === 'ar' ? 'إغلاق' : 'Close'"
           [disabled]="deleting()"
           (click)="cancelDelete()"
         >
@@ -313,10 +313,9 @@
             </svg>
           </span>
           <p id="delete-group-desc" class="text-sm text-inkText">
-            Are you sure you want to delete
+            {{ language() === 'ar' ? "هل أنت متأكد أنك تريد الحذف؟" : "Are you sure you want to delete" }}
             <span class="font-semibold">{{ target.name }}</span>
-            <span class="text-fog">({{ target.code }})</span>?
-            This action cannot be undone.
+            <span class="text-fog">({{ target.code }})</span>{{ language() === 'ar' ? "؟ لا يمكن التراجع عن هذا الإجراء." : "? This action cannot be undone." }}
           </p>
         </div>
 
@@ -333,7 +332,7 @@
             [disabled]="deleting()"
             (click)="cancelDelete()"
           >
-            Cancel
+            {{ language() === 'ar' ? "إلغاء" : "Cancel" }}
           </button>
           <button
             type="button"
@@ -341,7 +340,7 @@
             [disabled]="deleting()"
             (click)="confirmDelete()"
           >
-            {{ deleting() ? 'Deleting…' : 'Delete group' }}
+            {{ deleting() ? 'Deleting…' : (language() === 'ar' ? "حذف المجموعة" : "Delete group") }}
           </button>
         </div>
       </div>

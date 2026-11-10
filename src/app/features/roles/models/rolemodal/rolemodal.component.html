@@ -13,14 +13,14 @@
     <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8 shrink-0">
       <div>
         <p id="role-modal-title" class="font-display text-xl text-inkText">
-          {{ isEdit() ? 'Edit Role' : 'Add Role' }}
+          {{ isEdit() ? (language() === 'ar' ? 'تعديل دور' : 'Edit Role') : (language() === 'ar' ? 'إضافة دور' : 'Add Role') }}
         </p>
-        <p class="text-xs text-fog mt-0.5">Set the role name and assign permissions</p>
+        <p class="text-xs text-fog mt-0.5">{{ language() === 'ar' ? "أدخل اسم الدور وحدد صلاحياته" : "Set the role name and assign permissions" }}</p>
       </div>
       <button
         type="button"
         class="p-2 rounded-lg hover:bg-ink/5 text-fog"
-        aria-label="Close role modal"
+        [attr.aria-label]="language() === 'ar' ? 'إغلاق نافذة الدور' : 'Close role modal'"
         (click)="closeModal()"
       >
         ×
@@ -34,7 +34,7 @@
     >
       <div class="px-6 py-6 flex-1 min-h-0 overflow-y-auto overscroll-contain flex flex-col gap-5">
         @if (loading()) {
-          <p class="text-sm text-fog text-center shrink-0">Loading role...</p>
+          <p class="text-sm text-fog text-center shrink-0">{{ language() === 'ar' ? "جارٍ تحميل الدور…" : "Loading role..." }}</p>
         }
 
         <div class="field shrink-0">
@@ -45,25 +45,25 @@
             [formControl]="roleName"
             autocomplete="off"
           />
-          <label for="role-name">Role Name</label>
+          <label for="role-name">{{ language() === 'ar' ? "اسم الدور" : "Role Name" }}</label>
           @if (roleName.invalid && roleName.touched) {
-            <p class="text-xs text-red-600 mt-1" role="alert">Role name is required</p>
+            <p class="text-xs text-red-600 mt-1" role="alert">{{ language() === 'ar' ? "اسم الدور مطلوب" : "Role name is required" }}</p>
           }
         </div>
 
         <div class="flex flex-col">
           <div class="flex items-center justify-between mb-3">
-            <p class="text-xs font-bold uppercase tracking-wide text-brassDk">Module permissions</p>
+            <p class="text-xs font-bold uppercase tracking-wide text-brassDk">{{ language() === 'ar' ? "صلاحيات الوحدات" : "Module permissions" }}</p>
             <p class="text-xs text-fog">{{ selectedCount() }} selected</p>
           </div>
 
           @if (permissionsLoading()) {
-            <p class="text-xs text-fog py-6 text-center">Loading permissions…</p>
+            <p class="text-xs text-fog py-6 text-center">{{ language() === 'ar' ? "جارٍ تحميل الصلاحيات…" : "Loading permissions…" }}</p>
           } @else if (permissionsError()) {
             <p class="text-xs text-danger py-6 text-center" role="alert">
               {{ permissionsError() }}
               <button type="button" class="underline ms-2" (click)="loadPermissions()">
-                Retry
+                {{ language() === 'ar' ? "إعادة المحاولة" : "Retry" }}
               </button>
             </p>
           } @else {
@@ -71,7 +71,7 @@
               <table class="w-full text-sm">
                 <thead>
                   <tr class="bg-ivory text-left text-[11px] uppercase tracking-wide text-fog">
-                    <th class="px-4 py-2.5 font-semibold">Module</th>
+                    <th class="px-4 py-2.5 font-semibold">{{ language() === 'ar' ? 'الوحدة' : 'Module' }}</th>
                     @for (action of crudActions; track action) {
                       <th class="px-3 py-2.5 font-semibold text-center">{{ action }}</th>
                     }
@@ -112,7 +112,7 @@
 
             @if (extraPermissions().length) {
               <p class="text-xs font-bold uppercase tracking-wide text-brassDk mt-8 mb-3">
-                Additional permissions
+                {{ language() === 'ar' ? "صلاحيات إضافية" : "Additional permissions" }}
               </p>
               <div class="flex flex-wrap gap-x-8 gap-y-3">
                 @for (permission of extraPermissions(); track permission.permission) {
@@ -144,14 +144,14 @@
           [disabled]="saving()"
           (click)="closeModal()"
         >
-          Cancel
+          {{ language() === 'ar' ? "إلغاء" : "Cancel" }}
         </button>
         <button
           type="submit"
           [disabled]="saving() || loading() || permissionsLoading() || !!permissionsError()"
           class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60"
         >
-          {{ saving() ? 'Saving...' : isEdit() ? 'Save Changes' : 'Save Role' }}
+          {{ saving() ? (language() === 'ar' ? "جارٍ الحفظ…" : "Saving...") : isEdit() ? (language() === 'ar' ? "حفظ التغييرات" : "Save Changes") : (language() === 'ar' ? "حفظ الدور" : "Save Role") }}
         </button>
       </div>
     </form>

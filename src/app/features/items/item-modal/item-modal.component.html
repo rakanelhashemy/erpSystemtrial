@@ -15,7 +15,7 @@
     >
       <div>
         <p id="item-modal-title" class="font-display text-2xl text-inkText">
-          {{ isEdit() ? 'Edit Item' : 'Add Item' }}
+          {{ isEdit() ? (language() === 'ar' ? 'تعديل صنف' : 'Edit Item') : (language() === 'ar' ? 'إضافة صنف' : 'Add Item') }}
         </p>
         <p class="text-xs text-fog mt-1">
           {{
@@ -29,7 +29,7 @@
         type="button"
         (click)="close()"
         class="p-2 rounded-lg hover:bg-ink/5 text-fog"
-        aria-label="Close item modal"
+        [attr.aria-label]="language() === 'ar' ? 'إغلاق نافذة الصنف' : 'Close item modal'"
       >
         <svg
           class="w-5 h-5"
@@ -48,7 +48,7 @@
     <!-- Tabs -->
     <nav
       class="flex overflow-x-auto border-b border-inkText/8 bg-ivory/55 px-3 sm:px-5 shrink-0"
-      aria-label="Item form sections"
+      [attr.aria-label]="language() === 'ar' ? 'أقسام نموذج الصنف' : 'Item form sections'"
       role="tablist"
     >
       @for (t of tabs; track t.id) {
@@ -75,7 +75,7 @@
     >
       <div class="px-5 sm:px-7 py-6 flex-1">
         @if (loadingItem()) {
-          <p class="text-sm text-fog mb-4" role="status">Loading item…</p>
+          <p class="text-sm text-fog mb-4" role="status">{{ language() === 'ar' ? "جارٍ تحميل الصنف…" : "Loading item…" }}</p>
         }
 
         <!-- ============ General & Media ============ -->
@@ -83,17 +83,17 @@
           <div class="mb-5 flex items-start justify-between gap-4">
             <div>
               <p class="text-xs font-bold uppercase tracking-wide text-brassDk">
-                Everyday identity
+                {{ language() === 'ar' ? "هوية كل يوم" : "Everyday identity" }}
               </p>
               <p class="text-sm text-fog mt-1">
-                Capture the essentials and add a recognizable thumbnail.
+                {{ language() === 'ar' ? "أدخل البيانات الأساسية وأضف صورة واضحة." : "Capture the essentials and add a recognizable thumbnail." }}
               </p>
             </div>
             <div
               class="shrink-0 rounded-xl border border-brass/20 bg-brass/5 px-4 py-2.5 text-right"
             >
               <span class="block text-[10px] font-bold uppercase tracking-wider text-brassDk"
-                >Quantity (Qty)</span
+                >{{ language() === 'ar' ? "الكمية" : "Quantity (Qty)" }}</span
               >
               <span class="mt-0.5 block font-display text-xl leading-6 text-inkText">1</span>
             </div>
@@ -144,8 +144,8 @@
                       <path d="m21 15-5-5L5 21"></path>
                     </svg>
                   </span>
-                  <span class="text-xs font-semibold text-inkText">Add thumbnail</span>
-                  <span class="text-[10px] text-fog mt-1.5">Click or drop image</span>
+                  <span class="text-xs font-semibold text-inkText">{{ language() === 'ar' ? "إضافة صورة مصغرة" : "Add thumbnail" }}</span>
+                  <span class="text-[10px] text-fog mt-1.5">{{ language() === 'ar' ? "انقر لاختيار صورة أو اسحبها هنا" : "Click or drop image" }}</span>
                 }
               </label>
               @if (imagePreview()) {
@@ -154,7 +154,7 @@
                   (click)="clearImage()"
                   class="mt-2 w-full text-xs font-semibold text-fog hover:text-danger"
                 >
-                  Remove image
+                  {{ language() === 'ar' ? "إزالة الصورة" : "Remove image" }}
                 </button>
               }
             </div>
@@ -183,7 +183,7 @@
                 </span>
                 <div class="min-w-0">
                   <p class="text-[10px] font-bold uppercase tracking-wider text-fog">
-                    Business <span class="text-danger">*</span>
+                    {{ language() === 'ar' ? "الشركة" : "Business" }} <span class="text-danger">*</span>
                   </p>
                   <p id="item-business" class="mt-0.5 truncate text-sm font-semibold text-inkText">
                     {{ business()?.name ?? '—' }}
@@ -207,7 +207,7 @@
                   [attr.aria-invalid]="showError('name')"
                   aria-describedby="item-name-error"
                 />
-                <label for="item-name">Item name <span class="text-danger">*</span></label>
+                <label for="item-name">{{ language() === 'ar' ? "اسم الصنف" : "Item name" }} <span class="text-danger">*</span></label>
                 @if (
                   itemNameSuggestionsOpen() &&
                   (modalOptions('itemNames').length || modalDropdownLoading()['itemNames'])
@@ -215,7 +215,7 @@
                   <ul
                     class="absolute left-0 right-0 top-full mt-1 z-30 max-h-60 overflow-auto snap-y snap-mandatory rounded-lg border border-inkText/15 bg-paper shadow-soft py-1"
                     role="listbox"
-                    aria-label="Item name suggestions"
+                    [attr.aria-label]="language() === 'ar' ? 'اقتراحات اسم الصنف' : 'Item name suggestions'"
                     (scroll)="onItemNameSuggestionsScroll($event)"
                   >
                     @for (option of modalOptions('itemNames'); track option.id) {
@@ -233,7 +233,7 @@
                         class="snap-start px-3 py-2 text-xs text-fog text-center"
                         aria-live="polite"
                       >
-                        Loading…
+                        {{ language() === 'ar' ? "جارٍ التحميل…" : "Loading…" }}
                       </li>
                     }
                     @if (showError('name')) {
@@ -241,14 +241,14 @@
                         class="snap-start border-t border-inkText/8 px-3 py-2 text-xs text-danger"
                         role="presentation"
                       >
-                        <span id="item-name-error" role="alert">Item name is required.</span>
+                        <span id="item-name-error" role="alert">{{ language() === 'ar' ? "اسم الصنف مطلوب." : "Item name is required." }}</span>
                       </li>
                     }
                   </ul>
                 }
                 @if (showError('name') && !itemNameSuggestionsOpen()) {
                   <p id="item-name-error" class="text-xs text-danger mt-1">
-                    Item name is required.
+                    {{ language() === 'ar' ? "اسم الصنف مطلوب." : "Item name is required." }}
                   </p>
                 }
               </div>
@@ -262,17 +262,17 @@
                   formControlName="price"
                   placeholder=" "
                 />
-                <label for="item-price">Price</label>
+                <label for="item-price">{{ language() === 'ar' ? "السعر" : "Price" }}</label>
               </div>
 
               <div class="field">
                 <select id="item-currency" class="has-value" formControlName="currencyId">
-                  <option [ngValue]="null">All currencies</option>
+                  <option [ngValue]="null">{{ language() === 'ar' ? "كل العملات" : "All currencies" }}</option>
                   @for (c of lookups().currencies; track c.id) {
                     <option [ngValue]="c.id">{{ c.name }}</option>
                   }
                 </select>
-                <label for="item-currency">Currency</label>
+                <label for="item-currency">{{ language() === 'ar' ? "العملة" : "Currency" }}</label>
                 <span class="chevron">⌄</span>
               </div>
 
@@ -287,12 +287,12 @@
                       formControlName="exchangeRate"
                       placeholder=" "
                     />
-                    <label for="item-conversion-rate">Exchange Rate</label>
+                    <label for="item-conversion-rate">{{ language() === 'ar' ? "سعر الصرف" : "Exchange Rate" }}</label>
                   </div>
                   <div class="rounded-lg border border-inkText/8 bg-ivory/50 px-4 py-3">
-                    <p class="text-xs text-fog">Calculated Cost in {{ baseCurrency }}</p>
+                    <p class="text-xs text-fog">{{ language() === 'ar' ? 'التكلفة المحسوبة بعملة' : 'Calculated Cost in' }} {{ baseCurrency }}</p>
                     <p class="mt-1 text-sm font-semibold text-inkText">
-                      Total:
+                      {{ language() === 'ar' ? 'الإجمالي:' : 'Total:' }}
                       {{ convertedTotal() !== null ? (convertedTotal() | number: '1.2-2') : '—' }}
                     </p>
                   </div>
@@ -301,15 +301,15 @@
 
               <div class="field sm:col-span-2">
                 <app-lazy-dropdown
-                  label="Department"
-                  placeholder="All departments"
+                  [label]="language() === 'ar' ? 'القسم' : 'Department'"
+                  [placeholder]="language() === 'ar' ? 'كل الأقسام' : 'All departments'"
                   [options]="modalOptions('departments')"
                   [selectedValue]="form.controls.departmentId.value"
                   [loading]="modalDropdownLoading()['departments'] ?? false"
                   [hasMore]="modalDropdownHasMore()['departments'] ?? false"
                   [searchable]="true"
                   [searchTerm]="modalDropdownSearch()['departments'] ?? ''"
-                  searchPlaceholder="Search departments…"
+                  [searchPlaceholder]="language() === 'ar' ? 'ابحث عن الأقسام…' : 'Search departments…'"
                   [allowClear]="true"
                   (searchChanged)="searchModalDropdown('departments', $event)"
                   (loadMore)="loadModalDropdown('departments')"
@@ -329,7 +329,7 @@
                   placeholder=" "
                   class="w-full resize-y rounded-[0.65rem] border border-inkText/14 bg-white/70 px-4 pt-5 pb-2 text-[0.95rem] text-inkText outline-none focus:border-brass focus:ring-2 focus:ring-brass/20"
                 ></textarea>
-                <label for="item-description">Description</label>
+                <label for="item-description">{{ language() === 'ar' ? "الوصف" : "Description" }}</label>
               </div>
             </div>
           </div>
@@ -339,30 +339,30 @@
         <section [hidden]="activeTab() !== 'specs'" role="tabpanel">
           <div class="mb-5">
             <p class="text-xs font-bold uppercase tracking-wide text-brassDk">
-              Identity &amp; location
+              {{ language() === 'ar' ? "البيانات والموقع" : "Identity &amp; location" }}
             </p>
             <p class="text-sm text-fog mt-1">
-              Keep technical details and hierarchical classification together.
+              {{ language() === 'ar' ? "اجمع التفاصيل الفنية والتصنيف الهرمي في مكان واحد." : "Keep technical details and hierarchical classification together." }}
             </p>
           </div>
 
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div class="field">
               <input id="item-serial" type="text" formControlName="serialNumber" placeholder=" " />
-              <label for="item-serial">Serial number (SN)</label>
+              <label for="item-serial">{{ language() === 'ar' ? "الرقم التسلسلي" : "Serial number (SN)" }}</label>
             </div>
 
             <div class="field">
               <app-lazy-dropdown
-                label="Mark / Brand"
-                placeholder="All brands"
+                [label]="language() === 'ar' ? 'العلامة التجارية' : 'Mark / Brand'"
+                [placeholder]="language() === 'ar' ? 'كل العلامات التجارية' : 'All brands'"
                 [options]="modalOptions('brands')"
                 [selectedValue]="form.controls.brandId.value"
                 [loading]="modalDropdownLoading()['brands'] ?? false"
                 [hasMore]="modalDropdownHasMore()['brands'] ?? false"
                 [searchable]="true"
                 [searchTerm]="modalDropdownSearch()['brands'] ?? ''"
-                searchPlaceholder="Search brands…"
+                [searchPlaceholder]="language() === 'ar' ? 'ابحث عن العلامات التجارية…' : 'Search brands…'"
                 [customOptionText]="newOptionText('brands')"
                 [customOptionValue]="modalDropdownSearch()['brands'] ?? ''"
                 [allowClear]="true"
@@ -382,7 +382,7 @@
 
             <div class="field">
               <app-lazy-dropdown
-                label="Model"
+                [label]="language() === 'ar' ? 'الطراز' : 'Model'"
                 placeholder="All models"
                 [options]="modalOptions('models')"
                 [selectedValue]="form.controls.modelId.value"
@@ -410,7 +410,7 @@
 
             <div class="field">
               <app-lazy-dropdown
-                label="Material"
+                [label]="language() === 'ar' ? 'الخامة' : 'Material'"
                 placeholder="All materials"
                 [options]="modalOptions('materials')"
                 [selectedValue]="form.controls.materialId.value"
@@ -438,17 +438,17 @@
 
             <div class="field">
               <select id="item-origin" class="has-value" formControlName="countryId">
-                <option [ngValue]="null">All countries</option>
+                <option [ngValue]="null">{{ language() === 'ar' ? "كل الدول" : "All countries" }}</option>
                 @for (c of lookups().countries; track c.id) {
                   <option [ngValue]="c.id">{{ c.name }}</option>
                 }
               </select>
-              <label for="item-origin">Country of origin</label><span class="chevron">⌄</span>
+              <label for="item-origin">{{ language() === 'ar' ? "بلد المنشأ" : "Country of origin" }}</label><span class="chevron">⌄</span>
             </div>
 
             <div class="field">
               <input id="item-capacity" type="text" formControlName="capacity" placeholder=" " />
-              <label for="item-capacity">Capacity</label>
+              <label for="item-capacity">{{ language() === 'ar' ? "السعة" : "Capacity" }}</label>
             </div>
 
             <div class="field">
@@ -458,13 +458,13 @@
                 formControlName="dimensions"
                 placeholder=" "
               />
-              <label for="item-dimensions">Dimensions (L x W x H)</label>
-              <p class="mt-1 text-[10px] text-fog">Example: 120 x 60 x 75 cm</p>
+              <label for="item-dimensions">{{ language() === 'ar' ? "الأبعاد (الطول × العرض × الارتفاع)" : "Dimensions (L x W x H)" }}</label>
+              <p class="mt-1 text-[10px] text-fog">{{ language() === 'ar' ? "مثال: 120 × 60 × 75 سم" : "Example: 120 x 60 x 75 cm" }}</p>
             </div>
 
             <div class="field">
               <app-lazy-dropdown
-                label="Group"
+                [label]="language() === 'ar' ? 'المجموعة' : 'Group'"
                 placeholder="All groups"
                 [options]="modalOptions('groups')"
                 [selectedValue]="form.controls.groupId.value"
@@ -472,7 +472,7 @@
                 [hasMore]="modalDropdownHasMore()['groups'] ?? false"
                 [searchable]="true"
                 [searchTerm]="modalDropdownSearch()['groups'] ?? ''"
-                searchPlaceholder="Search groups…"
+                [searchPlaceholder]="language() === 'ar' ? 'ابحث عن المجموعات…' : 'Search groups…'"
                 [allowClear]="true"
                 (searchChanged)="searchModalDropdown('groups', $event)"
                 (loadMore)="loadModalDropdown('groups')"
@@ -509,10 +509,10 @@
         <section [hidden]="activeTab() !== 'financials'" role="tabpanel">
           <div class="mb-5">
             <p class="text-xs font-bold uppercase tracking-wide text-brassDk">
-              Lifecycle &amp; accounting
+              {{ language() === 'ar' ? "دورة حياة الأصل والمحاسبة" : "Lifecycle &amp; accounting" }}
             </p>
             <p class="text-sm text-fog mt-1">
-              Keep valuation, useful life, and write-off status in one focused place.
+              {{ language() === 'ar' ? "أدرج التقييم والعمر الإنتاجي وحالة الاستبعاد في مكان واحد." : "Keep valuation, useful life, and write-off status in one focused place." }}
             </p>
           </div>
 
@@ -525,7 +525,7 @@
                 placeholder=" "
                 (input)="recalculateDepreciationDate($any($event.target).value)"
               />
-              <label for="item-working-date">Working date</label>
+              <label for="item-working-date">{{ language() === 'ar' ? "تاريخ بدء التشغيل" : "Working date" }}</label>
             </div>
             <div class="field">
               <input
@@ -538,9 +538,9 @@
                 placeholder=" "
                 (input)="onDepreciationRateInput($any($event.target).value)"
               />
-              <label for="item-depreciation-rate">Depreciation %</label>
+              <label for="item-depreciation-rate">{{ language() === 'ar' ? "نسبة الإهلاك %" : "Depreciation %" }}</label>
               @if (showError('depreciationRate')) {
-                <p class="text-xs text-danger mt-1">Enter a value between 0 and 100.</p>
+                <p class="text-xs text-danger mt-1">{{ language() === 'ar' ? "أدخل قيمة بين 0 و100." : "Enter a value between 0 and 100." }}</p>
               }
             </div>
             <div class="field">
@@ -553,7 +553,7 @@
                 placeholder=" "
                 (input)="onDepreciationYearsInput($any($event.target).value)"
               />
-              <label for="item-depreciation-years">Depreciation years</label>
+              <label for="item-depreciation-years">{{ language() === 'ar' ? "سنوات الإهلاك" : "Depreciation years" }}</label>
             </div>
             <div class="field">
               <input
@@ -565,7 +565,7 @@
                 aria-readonly="true"
                 class="read-only:bg-ivory/50 read-only:text-fog read-only:cursor-not-allowed"
               />
-              <label for="item-depreciation-date">Depreciation on date</label>
+              <label for="item-depreciation-date">{{ language() === 'ar' ? "الإهلاك في تاريخ" : "Depreciation on date" }}</label>
             </div>
           </div>
         </section>
@@ -581,7 +581,7 @@
           @if (!isEdit()) {
             <div class="mr-2">
               <label class="flex items-center gap-2 text-xs font-semibold text-fog">
-                Create multiple copies:
+                {{ language() === 'ar' ? "إنشاء عدة نسخ:" : "Create multiple copies:" }}
                 <input
                   type="number"
                   min="1"
@@ -595,7 +595,7 @@
                 form.controls.copyCount.hasError('serialRequiresSingleCopy')
               ) {
                 <p class="mt-1 text-[10px] text-danger" role="alert">
-                  A serial number can only be assigned to one copy.
+                  {{ language() === 'ar' ? "يمكن إسناد الرقم التسلسلي إلى نسخة واحدة فقط." : "A serial number can only be assigned to one copy." }}
                 </p>
               }
             </div>
@@ -606,14 +606,14 @@
             [disabled]="saving()"
             class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5"
           >
-            Cancel
+            {{ language() === 'ar' ? "إلغاء" : "Cancel" }}
           </button>
           <button
             type="submit"
             [disabled]="saving() || loadingItem()"
             class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {{ saving() ? 'Saving…' : isEdit() ? 'Save Changes' : 'Save Item' }}
+            {{ saving() ? (language() === 'ar' ? "جارٍ الحفظ…" : "Saving…") : isEdit() ? (language() === 'ar' ? "حفظ التغييرات" : "Save Changes") : (language() === 'ar' ? "حفظ الصنف" : "Save Item") }}
           </button>
         </div>
       </div>

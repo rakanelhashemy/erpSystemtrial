@@ -4,8 +4,8 @@
     class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
   >
     <div>
-      <p class="font-display text-xl text-inkText">Users</p>
-      <p class="text-xs text-fog mt-0.5">Manage system users, their roles and status.</p>
+      <p class="font-display text-xl text-inkText">{{ language() === 'ar' ? "المستخدمون" : "Users" }}</p>
+      <p class="text-xs text-fog mt-0.5">{{ language() === 'ar' ? "إدارة مستخدمي النظام وأدوارهم وحالاتهم." : "Manage system users, their roles and status." }}</p>
     </div>
     <button
       *appHasPermission="'Permissions.Users.Add'"
@@ -25,7 +25,7 @@
       >
         <path d="M12 5v14M5 12h14" />
       </svg>
-      Add User
+      {{ language() === 'ar' ? "إضافة مستخدم" : "Add User" }}
     </button>
   </div>
 
@@ -48,8 +48,8 @@
       <input
         #searchBox
         type="search"
-        placeholder="Search users…"
-        aria-label="Search users"
+        [attr.placeholder]="language() === 'ar' ? 'ابحث عن المستخدمين…' : 'Search users…'"
+        [attr.aria-label]="language() === 'ar' ? 'ابحث عن المستخدمين' : 'Search users'"
         class="w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-inkText/15 focus:outline-none focus:ring-2 focus:ring-brass/30"
         [value]="searchTerm()"
         (input)="searchTerm.set(searchBox.value)"
@@ -60,7 +60,7 @@
   <!-- Page size -->
   <div class="px-4 sm:px-5 py-3 border-b border-inkText/8 flex justify-end">
     <label class="flex items-center gap-2 text-xs text-fog">
-      Show
+      {{ language() === 'ar' ? "عرض" : "Show" }}
       <select
         #sizeSelect
         class="border border-inkText/15 rounded-lg px-2 py-1.5 text-xs text-inkText focus:outline-none focus:ring-2 focus:ring-brass/30"
@@ -70,7 +70,7 @@
           <option [value]="size" [selected]="size === pageSize()">{{ size }}</option>
         }
       </select>
-      entries
+      {{ language() === 'ar' ? "قيود" : "entries" }}
     </label>
   </div>
 
@@ -79,18 +79,18 @@
     @if (error()) {
       <div class="text-sm text-danger text-center py-8">
         {{ error() }}
-        <button type="button" class="underline ms-2" (click)="reload()">Retry</button>
+        <button type="button" class="underline ms-2" (click)="reload()">{{ language() === 'ar' ? "إعادة المحاولة" : "Retry" }}</button>
       </div>
     } @else {
       <table class="w-full text-sm">
         <thead>
           <tr class="bg-ivory text-left text-[11px] uppercase tracking-wide text-fog">
-            <th class="px-5 py-3 font-semibold">Name</th>
-            <th class="px-5 py-3 font-semibold">Email</th>
-            <th class="px-5 py-3 font-semibold">Phone</th>
-            <th class="px-5 py-3 font-semibold">Roles</th>
-            <th class="px-5 py-3 font-semibold">Status</th>
-            <th class="px-5 py-3 font-semibold text-right">Actions</th>
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'الاسم' : 'Name' }}</th>
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'البريد الإلكتروني' : 'Email' }}</th>
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'الهاتف' : 'Phone' }}</th>
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'الأدوار' : 'Roles' }}</th>
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'الحالة' : 'Status' }}</th>
+            <th class="px-5 py-3 font-semibold text-right">{{ language() === 'ar' ? 'الإجراءات' : 'Actions' }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-inkText/6">
@@ -179,8 +179,8 @@
                   *appHasPermission="'Permissions.Users.View'"
                   type="button"
                   class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
-                  title="View details"
-                  [attr.aria-label]="'View ' + u.fullName"
+                  [attr.title]="language() === 'ar' ? 'عرض التفاصيل' : 'View details'"
+                  [attr.aria-label]="(language() === 'ar' ? 'عرض ' : 'View ') + u.fullName"
                   (click)="$event.stopPropagation(); openDetails(u)"
                 >
                   <svg
@@ -201,8 +201,8 @@
                   *appHasPermission="'Permissions.Users.Edit'"
                   type="button"
                   class="p-1.5 rounded-lg hover:bg-ink/5 text-fog"
-                  title="Edit user"
-                  [attr.aria-label]="'Edit ' + u.fullName"
+                  [attr.title]="language() === 'ar' ? 'تعديل المستخدم' : 'Edit user'"
+                  [attr.aria-label]="(language() === 'ar' ? 'تعديل ' : 'Edit ') + u.fullName"
                   (click)="$event.stopPropagation(); openEdit(u)"
                 >
                   <svg
@@ -223,8 +223,8 @@
                   *appHasPermission="'Permissions.Users.Delete'"
                   type="button"
                   class="p-1.5 rounded-lg hover:bg-dangerBg text-danger"
-                  title="Suspend user"
-                  [attr.aria-label]="'Suspend ' + u.fullName"
+                  [attr.title]="language() === 'ar' ? 'إيقاف المستخدم' : 'Suspend user'"
+                  [attr.aria-label]="(language() === 'ar' ? 'إيقاف ' : 'Suspend ') + u.fullName"
                   (click)="suspendUser($event, u)"
                 >
                   <svg
@@ -246,7 +246,7 @@
                   type="button"
                   class="p-1.5 rounded-lg hover:bg-dangerBg text-danger disabled:opacity-40"
                   title="End user sessions"
-                  [attr.aria-label]="'End sessions for ' + u.fullName"
+                  [attr.aria-label]="(language() === 'ar' ? 'إنهاء جلسات المستخدم ' : 'End sessions for ') + u.fullName"
                   [disabled]="revokingSessionIds().has(u.id)"
                   (click)="revokeUserSessions($event, u)"
                 >
@@ -272,10 +272,10 @@
               <td colspan="6" class="text-sm text-fog text-center py-8">
                 {{
                   loading()
-                    ? 'Loading users…'
+                    ? (language() === 'ar' ? "جارٍ تحميل المستخدمين…" : "Loading users…")
                     : searchTerm()
-                      ? 'No matching users found.'
-                      : 'No users yet.'
+                      ? (language() === 'ar' ? "لم يتم العثور على مستخدمين مطابقين." : "No matching users found.")
+                      : (language() === 'ar' ? "لا يوجد مستخدمون بعد." : "No users yet.")
                 }}
               </td>
             </tr>
@@ -291,9 +291,9 @@
   >
     <p>
       @if (pageRange().total) {
-        Showing {{ pageRange().from }}–{{ pageRange().to }} of {{ pageRange().total }} users
+        {{ language() === 'ar' ? 'عرض' : 'Showing' }} {{ pageRange().from }} {{ language() === 'ar' ? 'إلى' : 'to' }} {{ pageRange().to }} {{ language() === 'ar' ? 'من أصل' : 'of' }} {{ pageRange().total }} {{ language() === 'ar' ? 'المستخدمون' : 'users' }}
       } @else {
-        No matching users found
+        {{ language() === 'ar' ? 'لم يتم العثور على مستخدمين مطابقين.' : 'No matching users found' }}
       }
     </p>
     <div class="flex items-center gap-1">
@@ -303,7 +303,7 @@
         [disabled]="currentPage() <= 1 || loading()"
         (click)="prevPage()"
       >
-        Previous
+        {{ language() === 'ar' ? "السابق" : "Previous" }}
       </button>
       <span class="px-3 py-1.5 rounded-lg bg-ink text-ivory font-semibold">
         {{ currentPage() }} / {{ totalPages() }}
@@ -314,7 +314,7 @@
         [disabled]="currentPage() >= totalPages() || loading()"
         (click)="nextPage()"
       >
-        Next
+        {{ language() === 'ar' ? "التالي" : "Next" }}
       </button>
     </div>
   </div>
@@ -334,11 +334,11 @@
       <div
         class="sticky top-0 z-10 bg-paper flex items-center justify-between px-6 py-5 border-b border-inkText/8"
       >
-        <p id="user-details-title" class="font-display text-xl text-inkText">User Details</p>
+        <p id="user-details-title" class="font-display text-xl text-inkText">{{ language() === 'ar' ? "بيانات المستخدم" : "User Details" }}</p>
         <button
           type="button"
           class="p-2 rounded-lg hover:bg-ink/5 text-fog"
-          aria-label="Close"
+          [attr.aria-label]="language() === 'ar' ? 'إغلاق' : 'Close'"
           (click)="closeDetails()"
         >
           <svg
@@ -359,13 +359,13 @@
       <div class="px-6 py-6">
         <dl class="space-y-4 text-sm">
           <div class="flex items-start justify-between gap-4">
-            <dt class="text-fog">Full name</dt>
+            <dt class="text-fog">{{ language() === 'ar' ? "الاسم الكامل" : "Full name" }}</dt>
             <dd class="font-semibold text-inkText text-right wrap-break-word">
               {{ user.fullName }}
             </dd>
           </div>
           <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-            <dt class="text-fog">Email</dt>
+            <dt class="text-fog">{{ language() === 'ar' ? "البريد الإلكتروني" : "Email" }}</dt>
             <dd class="text-inkText text-right wrap-break-word">
               <a [href]="'mailto:' + user.email" class="hover:text-brassDk hover:underline">{{
                 user.email
@@ -373,7 +373,7 @@
             </dd>
           </div>
           <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-            <dt class="text-fog">Phone</dt>
+            <dt class="text-fog">{{ language() === 'ar' ? "الهاتف" : "Phone" }}</dt>
             <dd class="text-inkText text-right" dir="ltr">
               @if (user.phone) {
                 <a [href]="'tel:' + user.phone" class="hover:text-brassDk hover:underline">{{
@@ -385,7 +385,7 @@
             </dd>
           </div>
           <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-            <dt class="text-fog">Status</dt>
+            <dt class="text-fog">{{ language() === 'ar' ? "الحالة" : "Status" }}</dt>
             <dd class="text-right">
               <span
                 class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full"
@@ -442,7 +442,7 @@
             </dd>
           </div>
           <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-            <dt class="text-fog">Roles</dt>
+            <dt class="text-fog">{{ language() === 'ar' ? "الأدوار" : "Roles" }}</dt>
             <dd class="flex flex-wrap justify-end gap-1">
               @for (role of user.roles; track role) {
                 <span class="inline-block text-xs px-2 py-1 rounded-full bg-ink/5 text-brassDk">{{
@@ -458,13 +458,13 @@
             <div
               class="flex items-center justify-between gap-4 pt-4 border-t border-inkText/8 text-xs text-danger"
             >
-              <span>Could not load the rest of the details.</span>
+              <span>{{ language() === 'ar' ? "تعذر تحميل بقية التفاصيل." : "Could not load the rest of the details." }}</span>
               <button
                 type="button"
                 class="font-semibold underline"
                 (click)="detailsResource.reload()"
               >
-                Retry
+                {{ language() === 'ar' ? "إعادة المحاولة" : "Retry" }}
               </button>
             </div>
           } @else if (detailsResource.isLoading()) {
@@ -477,7 +477,7 @@
             @let extra = detailsResource.value();
 
             <div class="pt-4 border-t border-inkText/8">
-              <dt class="text-fog">Businesses</dt>
+              <dt class="text-fog">{{ language() === 'ar' ? "الشركات" : "Businesses" }}</dt>
               <dd class="flex flex-wrap gap-1.5 mt-2">
                 @for (name of (showAllBusinessNames() ? (extra?.businessNames ?? []) : (extra?.businessNames ?? []).slice(0, 5)); track $index) {
                   <span class="inline-flex text-xs px-2.5 py-1 rounded-full bg-ink/5 text-inkText">{{ name }}</span>
@@ -487,12 +487,12 @@
               </dd>
               @if ((extra?.businessNames?.length ?? 0) > 5) {
                 <button type="button" class="mt-2 text-xs font-semibold text-brassDk hover:underline" (click)="showAllBusinessNames.update((value) => !value)">
-                  {{ showAllBusinessNames() ? 'Show less' : 'Show more' }}
+                  {{ showAllBusinessNames() ? (language() === 'ar' ? "عرض أقل" : "Show less") : (language() === 'ar' ? "عرض المزيد" : "Show more") }}
                 </button>
               }
             </div>
             <div class="pt-4 border-t border-inkText/8">
-              <dt class="text-fog">Locations</dt>
+              <dt class="text-fog">{{ language() === 'ar' ? "المواقع" : "Locations" }}</dt>
               <dd class="flex flex-wrap gap-1.5 mt-2">
                 @for (name of (showAllLocationNames() ? (extra?.locationNames ?? []) : (extra?.locationNames ?? []).slice(0, 5)); track $index) {
                   <span class="inline-flex text-xs px-2.5 py-1 rounded-full bg-ink/5 text-inkText">{{ name }}</span>
@@ -502,18 +502,18 @@
               </dd>
               @if ((extra?.locationNames?.length ?? 0) > 5) {
                 <button type="button" class="mt-2 text-xs font-semibold text-brassDk hover:underline" (click)="showAllLocationNames.update((value) => !value)">
-                  {{ showAllLocationNames() ? 'Show less' : 'Show more' }}
+                  {{ showAllLocationNames() ? (language() === 'ar' ? "عرض أقل" : "Show less") : (language() === 'ar' ? "عرض المزيد" : "Show more") }}
                 </button>
               }
             </div>
 
             <!-- Audit -->
             <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-              <dt class="text-fog">Created by</dt>
+              <dt class="text-fog">{{ language() === 'ar' ? "أنشأه" : "Created by" }}</dt>
               <dd class="text-inkText text-right">{{ extra?.createdByName || '—' }}</dd>
             </div>
             <div class="flex items-start justify-between gap-4 pt-4 border-t border-inkText/8">
-              <dt class="text-fog">Updated by</dt>
+              <dt class="text-fog">{{ language() === 'ar' ? "عدّله" : "Updated by" }}</dt>
               <dd class="text-inkText text-right">{{ extra?.updatedByName || '—' }}</dd>
             </div>
           }
@@ -525,7 +525,7 @@
             class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft"
             (click)="closeDetails()"
           >
-            Close
+            {{ language() === 'ar' ? "إغلاق" : "Close" }}
           </button>
         </div>
       </div>
@@ -563,7 +563,7 @@
         <button
           type="button"
           class="p-2 rounded-lg hover:bg-ink/5 text-fog"
-          aria-label="Close"
+          [attr.aria-label]="language() === 'ar' ? 'إغلاق' : 'Close'"
           (click)="closeInvite()"
         >
           <svg
@@ -624,7 +624,7 @@
           <!-- Account -->
           @if (inviteTab() === 'account') {
             @if (editLoading()) {
-              <p class="mb-4 text-xs text-fog" role="status">Loading user details…</p>
+              <p class="mb-4 text-xs text-fog" role="status">{{ language() === 'ar' ? "جارٍ تحميل بيانات المستخدم…" : "Loading user details…" }}</p>
             }
             <div class="grid sm:grid-cols-2 gap-4">
               <div class="field">
@@ -637,7 +637,7 @@
                   [value]="fullName()"
                   (input)="fullName.set(n.value)"
                 />
-                <label for="invite-full-name">Full name</label>
+                <label for="invite-full-name">{{ language() === 'ar' ? "الاسم الكامل" : "Full name" }}</label>
               </div>
               <div class="field">
                 <input
@@ -649,7 +649,7 @@
                   [value]="email()"
                   (input)="email.set(e.value)"
                 />
-                <label for="invite-email">Email address</label>
+                <label for="invite-email">{{ language() === 'ar' ? "عنوان البريد الإلكتروني" : "Email address" }}</label>
               </div>
               <div class="field">
                 <input
@@ -662,11 +662,11 @@
                   [value]="phone()"
                   (input)="phone.set(p.value)"
                 />
-                <label for="invite-phone">Phone</label>
+                <label for="invite-phone">{{ language() === 'ar' ? "الهاتف" : "Phone" }}</label>
               </div>
               <div class="field">
                 <select id="invite-role" #r (change)="onRoleChange(r.value)">
-                  <option value="" [selected]="!roleId()">Select a role</option>
+                  <option value="" [selected]="!roleId()">{{ language() === 'ar' ? "اختر دورًا" : "Select a role" }}</option>
                   @for (role of rolesResource.value(); track role.id ?? role.roleId) {
                     <option
                       [value]="role.id ?? role.roleId"
@@ -676,13 +676,13 @@
                     </option>
                   }
                 </select>
-                <label for="invite-role">Role</label>
+                <label for="invite-role">{{ language() === 'ar' ? "الدور" : "Role" }}</label>
                 <span class="chevron">⌄</span>
               </div>
             </div>
             @if (editingUser(); as user) {
               <div *appHasPermission="'Permissions.Users.Edit'" class="mt-5 pt-4 border-t border-inkText/8">
-                <p class="text-sm font-semibold text-inkText mb-3">Change status</p>
+                <p class="text-sm font-semibold text-inkText mb-3">{{ language() === 'ar' ? "تغيير الحالة" : "Change status" }}</p>
                 <div class="flex flex-wrap gap-2">
                   @for (opt of statusOptions; track opt.value) {
                     <button
@@ -709,7 +709,7 @@
                     [disabled]="reinviteSubmitting() || !email().trim()"
                     (click)="reinvite()"
                   >
-                    {{ reinviteSubmitting() ? 'Sending…' : 'Reinvite' }}
+                    {{ reinviteSubmitting() ? (language() === 'ar' ? "جارٍ الإرسال…" : "Sending…") : (language() === 'ar' ? "إعادة إرسال الدعوة" : "Reinvite") }}
                   </button>
                 }
               </div>
@@ -719,25 +719,25 @@
           <!-- Permissions -->
           @if (inviteTab() === 'permissions') {
             @if (roleClaimsResource.isLoading()) {
-              <p class="text-xs text-fog mb-3">Loading role permissions…</p>
+              <p class="text-xs text-fog mb-3">{{ language() === 'ar' ? "جارٍ تحميل صلاحيات الدور…" : "Loading role permissions…" }}</p>
             } @else if (roleClaimsResource.error()) {
               <p class="text-xs text-danger mb-3">
-                Could not load the role permissions.
+                {{ language() === 'ar' ? "تعذر تحميل صلاحيات الدور." : "Could not load the role permissions." }}
                 <button type="button" class="underline" (click)="roleClaimsResource.reload()">
-                  Retry
+                  {{ language() === 'ar' ? "إعادة المحاولة" : "Retry" }}
                 </button>
               </p>
             } @else if (!roleId()) {
-              <p class="text-xs text-fog mb-3">Select a role first to import its permissions.</p>
+              <p class="text-xs text-fog mb-3">{{ language() === 'ar' ? "اختر دورًا أولًا لاستيراد صلاحياته." : "Select a role first to import its permissions." }}</p>
             }
 
             @if (allPermissionsResource.isLoading()) {
-              <p class="text-xs text-fog py-6 text-center">Loading permissions…</p>
+              <p class="text-xs text-fog py-6 text-center">{{ language() === 'ar' ? "جارٍ تحميل الصلاحيات…" : "Loading permissions…" }}</p>
             } @else if (allPermissionsResource.error()) {
               <p class="text-xs text-danger py-6 text-center">
-                Could not load permissions.
+                {{ language() === 'ar' ? "تعذر تحميل الصلاحيات." : "Could not load permissions." }}
                 <button type="button" class="underline" (click)="allPermissionsResource.reload()">
-                  Retry
+                  {{ language() === 'ar' ? "إعادة المحاولة" : "Retry" }}
                 </button>
               </p>
             } @else {
@@ -748,11 +748,11 @@
                 <table class="w-full text-sm">
                   <thead>
                     <tr class="bg-ivory text-left text-[11px] uppercase tracking-wide text-fog">
-                      <th class="px-4 py-2.5 font-semibold">Module</th>
-                      <th class="px-3 py-2.5 font-semibold text-center">View</th>
-                      <th class="px-3 py-2.5 font-semibold text-center">Add</th>
-                      <th class="px-3 py-2.5 font-semibold text-center">Edit</th>
-                      <th class="px-3 py-2.5 font-semibold text-center">Delete</th>
+                      <th class="px-4 py-2.5 font-semibold">{{ language() === 'ar' ? 'الوحدة' : 'Module' }}</th>
+                      <th class="px-3 py-2.5 font-semibold text-center">{{ language() === 'ar' ? 'عرض' : 'View' }}</th>
+                      <th class="px-3 py-2.5 font-semibold text-center">{{ language() === 'ar' ? 'إضافة' : 'Add' }}</th>
+                      <th class="px-3 py-2.5 font-semibold text-center">{{ language() === 'ar' ? 'تعديل' : (language() === 'ar' ? "تعديل" : "Edit") }}</th>
+                      <th class="px-3 py-2.5 font-semibold text-center">{{ language() === 'ar' ? 'حذف' : (language() === 'ar' ? "حذف" : "Delete") }}</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-inkText/6">
@@ -798,7 +798,7 @@
 
               @if (extraSwitches().length) {
                 <p class="text-xs font-bold uppercase tracking-wide text-brassDk mt-8 mb-3">
-                  Additional permissions
+                  {{ language() === 'ar' ? "صلاحيات إضافية" : "Additional permissions" }}
                 </p>
                 <div class="flex flex-wrap gap-x-8 gap-y-3">
                   @for (s of extraSwitches(); track s.permission) {
@@ -823,19 +823,19 @@
           <!-- Business & Locations -->
           @if (inviteTab() === 'locations') {
             <p class="text-xs font-bold uppercase tracking-wide text-brassDk mb-3">
-              Business access
+              {{ language() === 'ar' ? "صلاحية الوصول للشركات" : "Business access" }}
             </p>
             <div class="flex flex-col sm:flex-row sm:items-end gap-3">
               <div class="flex-1">
                 <app-lazy-dropdown
-                  label="Business"
-                  placeholder="Select a business..."
+                  [label]="language() === 'ar' ? 'الشركة' : 'Business'"
+                  [placeholder]="language() === 'ar' ? 'اختر شركة...' : 'Select a business...'"
                   [options]="businessDropdownOptions()"
                   [selectedValue]="pickedBusinessId() || null"
                   [loading]="businessOptions.isLoading()"
                   [searchable]="true"
                   [searchTerm]="businessSearch()"
-                  searchPlaceholder="Search businesses…"
+                  [searchPlaceholder]="language() === 'ar' ? 'ابحث عن الشركات…' : 'Search businesses…'"
                   [allowClear]="true"
                   (searchChanged)="businessSearch.set($event)"
                   (selected)="pickedBusinessId.set('' + $event.id)"
@@ -848,7 +848,7 @@
                 [disabled]="!pickedBusinessId()"
                 (click)="addBusiness()"
               >
-                + Add Business Access
+                {{ language() === 'ar' ? "إضافة صلاحية شركة" : "+ Add Business Access" }}
               </button>
             </div>
             <div class="mt-3 flex flex-wrap gap-2">
@@ -860,35 +860,35 @@
                   <button
                     type="button"
                     class="hover:text-danger"
-                    [attr.aria-label]="'Remove ' + b.name"
+                    [attr.aria-label]="(language() === 'ar' ? 'إزالة ' : 'Remove ') + b.name"
                     (click)="removeBusiness(b.id)"
                   >
                     ×
                   </button>
                 </span>
               } @empty {
-                <p class="text-xs text-fog">No business access granted yet.</p>
+                <p class="text-xs text-fog">{{ language() === 'ar' ? "لم يتم منح صلاحية الوصول إلى أي شركة بعد." : "No business access granted yet." }}</p>
               }
             </div>
             @if (grantedBusinesses().length > 5) {
               <button type="button" class="mt-2 text-xs font-semibold text-brassDk hover:underline" (click)="showAllEditBusinesses.update((value) => !value)">
-                {{ showAllEditBusinesses() ? 'Show less' : 'Show more' }}
+                {{ showAllEditBusinesses() ? (language() === 'ar' ? "عرض أقل" : "Show less") : (language() === 'ar' ? "عرض المزيد" : "Show more") }}
               </button>
             }
 
             <div class="flex items-center justify-between mt-8 mb-3">
-              <p class="text-xs font-bold uppercase tracking-wide text-brassDk">Location access</p>
-              <span class="text-[11px] text-fog">{{ grantedLocations().length }} selected</span>
+              <p class="text-xs font-bold uppercase tracking-wide text-brassDk">{{ language() === 'ar' ? "صلاحية الوصول للمواقع" : "Location access" }}</p>
+              <span class="text-[11px] text-fog">{{ grantedLocations().length }} {{ language() === 'ar' ? 'محدد' : 'selected' }}</span>
             </div>
 
             @if (!grantedBusinesses().length) {
-              <p class="text-xs text-fog">Add business access to choose locations.</p>
+              <p class="text-xs text-fog">{{ language() === 'ar' ? "أضف صلاحية الوصول إلى شركة لاختيار المواقع." : "Add business access to choose locations." }}</p>
             } @else {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
                 <div class="w-full min-w-0">
                   <app-lazy-dropdown
-                    label="Business"
-                    placeholder="Choose a business..."
+                    [label]="language() === 'ar' ? 'الشركة' : 'Business'"
+                    [placeholder]="language() === 'ar' ? 'اختر شركة...' : 'Choose a business...'"
                     [options]="locationBusinessDropdownOptions()"
                     [selectedValue]="pickedLocationBusinessId() || null"
                     [searchable]="true"
@@ -933,7 +933,7 @@
                     [disabled]="!pickedLocationId()"
                     (click)="addLocation()"
                   >
-                    + Add Access Scope
+                    {{ language() === 'ar' ? "إضافة نطاق وصول" : "+ Add Access Scope" }}
                   </button>
                 </div>
               }
@@ -947,19 +947,19 @@
                   <button
                     type="button"
                     class="hover:text-danger"
-                    [attr.aria-label]="'Remove ' + l.name"
+                    [attr.aria-label]="(language() === 'ar' ? 'إزالة ' : 'Remove ') + l.name"
                     (click)="removeLocation(l.id)"
                   >
                     ×
                   </button>
                 </span>
               } @empty {
-                <p class="text-xs text-fog">No location scopes granted yet.</p>
+                <p class="text-xs text-fog">{{ language() === 'ar' ? "لم يتم منح صلاحية الوصول إلى مواقع بعد." : "No location scopes granted yet." }}</p>
               }
             </div>
             @if (grantedLocations().length > 5) {
               <button type="button" class="mt-2 text-xs font-semibold text-brassDk hover:underline" (click)="showAllEditLocations.update((value) => !value)">
-                {{ showAllEditLocations() ? 'Show less' : 'Show more' }}
+                {{ showAllEditLocations() ? (language() === 'ar' ? "عرض أقل" : "Show less") : (language() === 'ar' ? "عرض المزيد" : "Show more") }}
               </button>
             }
           }
@@ -979,7 +979,7 @@
             class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5"
             (click)="closeInvite()"
           >
-            Cancel
+            {{ language() === 'ar' ? "إلغاء" : "Cancel" }}
           </button>
           <button
             type="submit"
@@ -989,11 +989,11 @@
             {{
               inviteSubmitting()
                 ? editingUserId()
-                  ? 'Saving…'
-                  : 'Sending…'
+                  ? (language() === 'ar' ? "جارٍ الحفظ…" : "Saving…")
+                  : (language() === 'ar' ? "جارٍ الإرسال…" : "Sending…")
                 : editingUserId()
-                  ? 'Save Changes'
-                  : 'Send Invitation'
+                  ? (language() === 'ar' ? "حفظ التغييرات" : "Save Changes")
+                  : (language() === 'ar' ? "إرسال الدعوة" : "Send Invitation")
             }}
           </button>
         </div>

@@ -24,6 +24,7 @@ import {
 } from '../../../core/models/audit-modal';
 import { ChecklistServices } from '../../../core/services/checklist-services';
 import { DropDownServices, DropdownItem } from '../../../core/services/drop-down-services';
+import { AuthService } from '../../../core/auth/auth-service/auth-service';
 import {
   LazyDropdownComponent,
   LazyDropdownOption,
@@ -39,6 +40,7 @@ type AuditOptionKey = 'brands' | 'models' | 'materials' | 'departments';
   templateUrl: './run-audit.component.html',
 })
 export class RunAuditComponent implements OnInit {
+  readonly language = inject(AuthService).language;
   private static readonly MAX_SEARCH_LENGTH = 100;
   private static readonly MAX_SCAN_LENGTH = 128;
   private readonly destroyRef = inject(DestroyRef);

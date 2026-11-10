@@ -23,17 +23,16 @@
     </div>
 
     <div class="relative z-10 max-w-sm">
-      <p class="font-display text-4xl leading-[1.2]">Every stay, <br />managed with care.</p>
+      <p class="font-display text-4xl leading-[1.2]">{{ language() === 'ar' ? "كل إقامة،" : "Every stay," }} <br />{{ language() === 'ar' ? "تُدار بعناية." : "managed with care." }}</p>
       <p class="mt-4 text-sm text-ivory/65 leading-relaxed">
-        One workspace for your front desk, housekeeping and back office — built for teams who
-        treat hospitality as a craft.
+        {{ language() === 'ar' ? 'مساحة عمل واحدة للاستقبال والتدبير المنزلي والإدارة، مصممة لفرق تؤمن بأن الضيافة حرفة.' : 'One workspace for your front desk, housekeeping and back office — built for teams who treat hospitality as a craft.' }}
       </p>
     </div>
 
     <div class="relative z-10 flex items-center gap-6 text-[11px] text-ivory/45 tracking-wide">
       <span>© 2026 {{ branding.companyName() }}</span>
-      <span>Privacy</span>
-      <span>Support</span>
+      <span>{{ language() === 'ar' ? "الخصوصية" : "Privacy" }}</span>
+      <span>{{ language() === 'ar' ? "الدعم" : "Support" }}</span>
     </div>
   </div>
 
@@ -45,8 +44,8 @@
 
     <div class="w-full max-w-sm my-auto">
       <div class="glass-card rounded-2xl shadow-soft p-8 sm:p-10">
-        <h1 class="font-display text-[26px] text-inkText">Welcome back</h1>
-        <p class="text-sm text-fog mt-1.5">Sign in to the {{ branding.companyName() }} {{ branding.systemName() }} system.</p>
+        <h1 class="font-display text-[26px] text-inkText">{{ language() === 'ar' ? "مرحبًا بعودتك" : "Welcome back" }}</h1>
+        <p class="text-sm text-fog mt-1.5">{{ language() === 'ar' ? 'سجّل الدخول إلى' : 'Sign in to the' }} {{ branding.companyName() }} {{ branding.systemName() }} {{ language() === 'ar' ? 'لإدارة الفندق.' : 'system.' }}</p>
 
         <form class="mt-8 space-y-5" [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
 
@@ -61,14 +60,14 @@
                 [attr.aria-invalid]="email.invalid && email.touched"
                 [attr.aria-describedby]="email.invalid && email.touched ? 'login-email-error' : null"
               />
-              <label for="login-email">Email address</label>
+              <label for="login-email">{{ language() === 'ar' ? "عنوان البريد الإلكتروني" : "Email address" }}</label>
             </div>
             @if (email.invalid && email.touched) {
               <p id="login-email-error" class="text-xs text-danger mt-1" role="alert">
                 @if (email.hasError('required')) {
-                  Email is required.
+                  {{ language() === 'ar' ? 'البريد الإلكتروني مطلوب.' : 'Email is required.' }}
                 } @else if (email.hasError('email')) {
-                  Please enter a valid email address.
+                  {{ language() === 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح.' : 'Please enter a valid email address.' }}
                 }
               </p>
             }
@@ -85,11 +84,11 @@
                 [attr.aria-invalid]="password.invalid && password.touched"
                 [attr.aria-describedby]="password.invalid && password.touched ? 'login-password-error' : null"
               />
-              <label for="login-password">Password</label>
+              <label for="login-password">{{ language() === 'ar' ? "كلمة المرور" : "Password" }}</label>
               <button
                 type="button"
                 class="absolute end-3 top-3.5 text-fog hover:text-inkText cursor-pointer transition-colors"
-                [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+                [attr.aria-label]="showPassword() ? (language() === 'ar' ? 'إخفاء كلمة المرور' : 'Hide password') : (language() === 'ar' ? 'إظهار كلمة المرور' : 'Show password')"
                 [attr.aria-pressed]="showPassword()"
                 (click)="togglePasswordVisibility()"
               >
@@ -111,9 +110,9 @@
             @if (password.invalid && password.touched) {
               <p id="login-password-error" class="text-xs text-danger mt-1" role="alert">
                 @if (password.hasError('required')) {
-                  Password is required.
+                  {{ language() === 'ar' ? 'كلمة المرور مطلوبة.' : 'Password is required.' }}
                 } @else if (password.hasError('pattern')) {
-                  Use at least 6 characters, including a lowercase letter and a number.
+                  {{ language() === 'ar' ? 'استخدم 6 أحرف على الأقل، مع حرف إنجليزي صغير ورقم.' : 'Use at least 6 characters, including a lowercase letter and a number.' }}
                 }
               </p>
             }
@@ -122,9 +121,9 @@
           <div class="flex items-center justify-between text-sm">
             <label class="flex items-center gap-2 text-fog cursor-pointer select-none">
               <input type="checkbox" formControlName="rememberMe" class="w-4 h-4 rounded border-fog/40 text-brass focus:ring-brass" />
-              Remember me
+              {{ language() === 'ar' ? "تذكرني" : "Remember me" }}
             </label>
-            <a routerLink="/auth/forgot-password" class="text-brassDk font-semibold hover:underline">Forgot password?</a>
+            <a routerLink="/auth/forgot-password" class="text-brassDk font-semibold hover:underline">{{ language() === 'ar' ? "هل نسيت كلمة المرور؟" : "Forgot password?" }}</a>
           </div>
 
           <button
@@ -137,7 +136,7 @@
                    stroke="currentColor" stroke-width="2" stroke-linecap="round">
                 <path d="M12 3a9 9 0 1 0 9 9" />
               </svg>
-              Signing in…
+              {{ language() === 'ar' ? 'جارٍ تسجيل الدخول…' : 'Signing in…' }}
             } @else {
               Log in to {{ branding.companyName() }}
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"
@@ -148,7 +147,7 @@
           </button>
         </form>
       </div>
-      <p class="text-center text-xs text-fog mt-6">Need access? Contact your property administrator.</p>
+      <p class="text-center text-xs text-fog mt-6">{{ language() === 'ar' ? "تحتاج إلى صلاحية؟ تواصل مع مسؤول النظام." : "Need access? Contact your property administrator." }}</p>
     </div>
   </div>
 </section>

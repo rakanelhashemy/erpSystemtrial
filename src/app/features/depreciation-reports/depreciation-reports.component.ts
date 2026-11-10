@@ -30,6 +30,7 @@ import {
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+import { AuthService } from '../../core/auth/auth-service/auth-service';
 interface ReportFilters {
   fromPrice: number | null;
   toPrice: number | null;
@@ -95,6 +96,7 @@ const DD_KEYS: DdKey[] = ['businesses', 'brands', 'models', 'materials', 'groups
   templateUrl: './depreciation-reports.component.html',
 })
 export class DepreciationReportsComponent {
+  readonly language = inject(AuthService).language;
   private readonly destroyRef = inject(DestroyRef);
   private readonly report = inject(DepreciationReportServices);
   private readonly dd = inject(DropDownServices);

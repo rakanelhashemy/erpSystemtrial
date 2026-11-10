@@ -3,6 +3,7 @@ import { LocationType } from '../../../core/models/location-type-model';
 import { LocationTypeService } from '../../../core/services/location-type-service';
 import { FormsModule } from '@angular/forms';
 import { toast } from 'ngx-sonner';
+import { AuthService } from '../../../core/auth/auth-service/auth-service';
 
 @Component({
   imports: [FormsModule],
@@ -12,6 +13,7 @@ import { toast } from 'ngx-sonner';
 })
 export class LocationTypeModalComponent {
     private service = inject(LocationTypeService);
+  readonly language = inject(AuthService).language;
 
   // inputs / outputs
   businessId = input.required<string>();

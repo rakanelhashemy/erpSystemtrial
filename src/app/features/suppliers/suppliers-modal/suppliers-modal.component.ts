@@ -8,6 +8,7 @@ import { Suppliers } from '../../../core/services/suppliers-service';
 import { DropDownServices } from '../../../core/services/drop-down-services';
 import { LazyDropdownComponent } from '../../../shared/ui/lazy-dropdown/lazy-dropdown.component';
 
+import { AuthService } from '../../../core/auth/auth-service/auth-service';
 @Component({
   imports: [ReactiveFormsModule, LazyDropdownComponent],
   selector: 'app-suppliers-modal',
@@ -15,6 +16,7 @@ import { LazyDropdownComponent } from '../../../shared/ui/lazy-dropdown/lazy-dro
   templateUrl: './suppliers-modal.component.html',
 })
 export class SuppliersModalComponent {
+  readonly language = inject(AuthService).language;
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly api = inject(Suppliers);
   private readonly dropdown = inject(DropDownServices);

@@ -1,18 +1,18 @@
 <div class="bg-paper rounded-2xl border border-inkText/8 shadow-soft overflow-hidden">
   <div class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
     <div>
-      <p class="font-display text-xl text-inkText">Businesses</p>
-      <p class="text-xs text-fog mt-0.5">Manage hotel business units</p>
+      <p class="font-display text-xl text-inkText">{{ language() === 'ar' ? "الشركات" : "Businesses" }}</p>
+      <p class="text-xs text-fog mt-0.5">{{ language() === 'ar' ? "إدارة وحدات عمل الفندق" : "Manage hotel business units" }}</p>
     </div>
     <button *appHasPermission="'Permissions.Businesses.Add'" type="button"
             class="flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2.5 rounded-lg bg-ink text-ivory hover:bg-ink2 shadow-soft"
             (click)="openAdd()">
-      + Add Business
+      {{ language() === 'ar' ? "إضافة شركة" : "+ Add Business" }}
     </button>
   </div>
 
   <div class="p-4 sm:p-5 border-b border-inkText/8 flex justify-end">
-    <input #q type="search" aria-label="Search businesses" placeholder="Search businesses..."
+    <input #q type="search" [attr.aria-label]="language() === 'ar' ? 'ابحث عن الشركات' : 'Search businesses'" [attr.placeholder]="language() === 'ar' ? 'ابحث عن الشركات...' : 'Search businesses...'"
            class="w-full sm:w-64 px-3 py-2.5 text-sm rounded-lg border border-inkText/15 focus:outline-none focus:ring-2 focus:ring-brass/30"
            (input)="setSearch(q.value)" />
   </div>
@@ -21,16 +21,16 @@
     <p class="px-5 py-3 mx-auto text-sm text-danger" role="alert">{{ error() }}</p>
   }
   @if (loading()) {
-    <p class="px-5 py-3 mx-auto w-16 text-xs text-fog" role="status">Loading…</p>
+    <p class="px-5 py-3 mx-auto w-16 text-xs text-fog" role="status">{{ language() === 'ar' ? "جارٍ التحميل…" : "Loading…" }}</p>
   }
 
   <div class="overflow-x-auto">
     <table class="w-full text-sm" [class.opacity-60]="loading()">
       <thead>
         <tr class="bg-ivory text-[11px] uppercase tracking-wide text-fog">
-          <th scope="col" class="px-5 py-3 font-semibold text-start">Business Name</th>
-          <th scope="col" class="px-5 py-3 font-semibold text-start">Business Code</th>
-          <th scope="col" class="px-5 py-3 font-semibold text-end">Actions</th>
+          <th scope="col" class="px-5 py-3 font-semibold text-start">{{ language() === 'ar' ? 'اسم الشركة' : 'Business Name' }}</th>
+          <th scope="col" class="px-5 py-3 font-semibold text-start">{{ language() === 'ar' ? 'كود الشركة' : 'Business Code' }}</th>
+          <th scope="col" class="px-5 py-3 font-semibold text-end">{{ language() === 'ar' ? 'الإجراءات' : 'Actions' }}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-inkText/6">
@@ -43,13 +43,13 @@
               <div class="flex items-center justify-end gap-1">
                 <button *appHasPermission="'Permissions.Businesses.Edit'" type="button"
                         class="p-1.5 rounded-lg hover:bg-ink/5 text-fog disabled:opacity-40"
-                        title="Edit business" [attr.aria-label]="'Edit ' + b.name"
+                        [attr.title]="language() === 'ar' ? 'تعديل الشركة' : 'Edit business'" [attr.aria-label]="(language() === 'ar' ? 'تعديل ' : 'Edit ') + b.name"
                         (click)="openEdit(b)">
                   <span aria-hidden="true"><svg class="inline h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="m16.5 3.5 4 4L7 21l-4 1 1-4Z"/></svg></span>
                 </button>
                 <button *appHasPermission="'Permissions.Businesses.Delete'" type="button"
                         class="p-1.5 rounded-lg hover:bg-dangerBg text-danger/85 disabled:opacity-40"
-                        title="Delete business" [attr.aria-label]="'Delete ' + b.name"
+                        [attr.title]="language() === 'ar' ? 'حذف الشركة' : 'Delete business'" [attr.aria-label]="(language() === 'ar' ? 'حذف ' : 'Delete ') + b.name"
                         (click)="openDeleteModal(b)">
                   <span aria-hidden="true"><svg class="inline h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"/></svg></span>
                 </button>
@@ -58,7 +58,7 @@
           </tr>
         } @empty {
           @if (!loading()) {
-            <tr><td colspan="2" class="px-5 py-10 text-center text-sm text-fog">No businesses found.</td></tr>
+            <tr><td colspan="2" class="px-5 py-10 text-center text-sm text-fog">{{ language() === 'ar' ? "لم يتم العثور على شركات." : "No businesses found." }}</td></tr>
           }
         }
       </tbody>
@@ -66,21 +66,21 @@
   </div>
 
   <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-fog">
-    <label class="flex items-center gap-2">Show
+    <label class="flex items-center gap-2">{{ language() === 'ar' ? "عرض" : "Show" }}
       <select #size class="border border-inkText/15 rounded-lg px-2 py-1.5 text-xs"
               (change)="setPageSize(+size.value)">
         @for (n of pageSizes; track n) {
           <option [value]="n" [selected]="n === pageSize()">{{ n }}</option>
         }
-      </select> entries
+      </select> {{ language() === 'ar' ? "قيود" : "entries" }}
     </label>
-    <p>Showing {{ rangeStart() }} to {{ rangeEnd() }} of {{ totalCount() }} businesses</p>
+    <p>{{ language() === 'ar' ? 'عرض' : 'Showing' }} {{ rangeStart() }} {{ language() === 'ar' ? 'إلى' : 'to' }} {{ rangeEnd() }} {{ language() === 'ar' ? 'من أصل' : 'of' }} {{ totalCount() }} {{ language() === 'ar' ? 'الشركات' : 'businesses' }}</p>
     <div class="flex items-center gap-1">
       <button type="button" class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40"
-              [disabled]="currentPage() <= 1" (click)="prev()">Previous</button>
+              [disabled]="currentPage() <= 1" (click)="prev()">{{ language() === 'ar' ? "السابق" : "Previous" }}</button>
       <span class="px-3 py-1.5 rounded-lg bg-ink text-ivory font-semibold">{{ currentPage() }} / {{ totalPages() }}</span>
       <button type="button" class="px-3 py-1.5 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40"
-              [disabled]="currentPage() >= totalPages()" (click)="next()">Next</button>
+              [disabled]="currentPage() >= totalPages()" (click)="next()">{{ language() === 'ar' ? "التالي" : "Next" }}</button>
     </div>
   </div>
 </div>
@@ -107,11 +107,11 @@
 
     <div class="relative bg-paper w-full max-w-md overflow-hidden rounded-2xl shadow-soft flex flex-col">
       <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8 shrink-0">
-        <p id="delete-business-title" class="font-display text-xl text-inkText">Delete Business</p>
+        <p id="delete-business-title" class="font-display text-xl text-inkText">{{ language() === 'ar' ? "حذف الشركة" : "Delete Business" }}</p>
         <button
           type="button"
           class="p-2 rounded-lg hover:bg-ink/5 text-fog"
-          aria-label="Close delete modal"
+          [attr.aria-label]="language() === 'ar' ? 'إغلاق نافذة الحذف' : 'Close delete modal'"
           [disabled]="deleting()"
           (click)="closeDeleteModal()"
         >×</button>
@@ -126,9 +126,9 @@
         </div>
 
         <div>
-          <p class="font-display text-lg text-inkText">Delete “{{ businessToDelete()?.name }}”?</p>
+          <p class="font-display text-lg text-inkText">{{ language() === 'ar' ? 'حذف «' + businessToDelete()?.name + '»؟' : 'Delete “' + businessToDelete()?.name + '”?' }}</p>
           <p class="text-sm text-fog mt-2">
-            This action can't be undone. Any data linked to this business may be affected.
+            {{ language() === 'ar' ? "لا يمكن التراجع عن هذا الإجراء. قد تتأثر البيانات المرتبطة بهذه الشركة." : "This action can't be undone. Any data linked to this business may be affected." }}
           </p>
         </div>
 
@@ -143,13 +143,13 @@
           class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5"
           [disabled]="deleting()"
           (click)="closeDeleteModal()"
-        >Cancel</button>
+        >{{ language() === 'ar' ? "إلغاء" : "Cancel" }}</button>
         <button
           type="button"
           class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-red-600 text-white hover:bg-red-700 shadow-soft disabled:opacity-60"
           [disabled]="deleting()"
           (click)="confirmDelete()"
-        >{{ deleting() ? 'Deleting...' : 'Delete Business' }}</button>
+        >{{ deleting() ? 'Deleting...' : (language() === 'ar' ? "حذف الشركة" : "Delete Business") }}</button>
       </div>
     </div>
   </div>

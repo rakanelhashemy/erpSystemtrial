@@ -9,7 +9,7 @@
         type="button"
         (click)="back()"
         class="mb-3 inline-flex items-center gap-2 rounded-full border border-inkText/8 bg-white/80 px-3 py-1.5 text-xs font-semibold text-fog shadow-sm transition hover:border-brass/40 hover:text-inkText"
-        aria-label="Back to check lists"
+        [attr.aria-label]="language() === 'ar' ? 'العودة إلى قوائم الفحص' : 'Back to check lists'"
       >
         <svg
           class="w-4 h-4"
@@ -21,7 +21,7 @@
         >
           <path d="m15 18-6-6 6-6M9 12h12" />
         </svg>
-        Check Lists
+        {{ language() === 'ar' ? "قوائم الفحص" : "Check Lists" }}
       </button>
       <div class="flex items-start gap-3">
         <span class="hidden h-11 w-11 shrink-0 place-items-center rounded-2xl bg-ink text-brassLt shadow-soft sm:grid" aria-hidden="true">
@@ -34,14 +34,14 @@
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-2">
             <h1 class="truncate font-display text-xl text-inkText sm:text-2xl">
-              {{ detail()?.title ?? 'Run Audit' }}
+              {{ detail()?.title ?? (language() === 'ar' ? "تنفيذ التدقيق" : "Run Audit") }}
             </h1>
             @if (isReadOnly()) {
-              <span class="perm-chip is-granted">Completed</span>
+              <span class="perm-chip is-granted">{{ language() === 'ar' ? "مكتمل" : "Completed" }}</span>
             } @else {
               <span class="inline-flex items-center gap-1.5 rounded-full border border-brass/25 bg-brass/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-brassDk">
                 <span class="h-1.5 w-1.5 rounded-full bg-brass" aria-hidden="true"></span>
-                In progress
+                {{ language() === 'ar' ? "قيد التنفيذ" : "In progress" }}
               </span>
             }
           </div>
@@ -50,7 +50,7 @@
               <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" />
               </svg>
-              {{ detail()?.locationName || 'Audit checklist' }}
+              {{ detail()?.locationName || (language() === 'ar' ? "قائمة التدقيق" : "Audit checklist") }}
             </span>
             @if (detail()?.groupName) {
               <span class="h-1 w-1 rounded-full bg-inkText/20" aria-hidden="true"></span>
@@ -77,24 +77,24 @@
       >
         <path d="m5 12 4 4L19 6" />
       </svg>
-      Complete Audit
+      {{ language() === 'ar' ? "إنهاء التدقيق" : "Complete Audit" }}
     </button>
     </div>
   </header>
 
   @if (headerLoading() && !detail()) {
     <div class="px-4 sm:px-6 py-3 text-xs text-fog bg-ivory/60" role="status" aria-live="polite">
-      Loading checklist details…
+      {{ language() === 'ar' ? "جارٍ تحميل تفاصيل قائمة الفحص…" : "Loading checklist details…" }}
     </div>
   }
 
   <!-- Progress summary -->
-  <section class="border-b border-inkText/8 bg-white px-4 py-5 sm:px-6" aria-label="Audit progress">
+  <section class="border-b border-inkText/8 bg-white px-4 py-5 sm:px-6" [attr.aria-label]="language() === 'ar' ? 'تقدم التدقيق' : 'Audit progress'">
     <div class="mb-3 flex items-end justify-between gap-3">
       <div>
-        <p class="text-sm font-semibold text-inkText">Audit progress</p>
+        <p class="text-sm font-semibold text-inkText">{{ language() === 'ar' ? "تقدم التدقيق" : "Audit progress" }}</p>
         <span class="mt-1 block text-xs text-fog"
-        >{{ counts().checked + counts().missing }} of {{ counts().total }} items reviewed</span
+        >{{ counts().checked + counts().missing }} {{ language() === 'ar' ? 'من أصل' : 'of' }} {{ counts().total }} {{ language() === 'ar' ? 'عنصر تمت مراجعته' : 'items reviewed' }}</span
       >
       </div>
       <span class="rounded-lg bg-ink px-2.5 py-1.5 text-xs font-bold tabular-nums text-ivory">{{ progress() }}%</span>
@@ -106,7 +106,7 @@
       [attr.aria-valuetext]="progress() + '% reviewed'"
       aria-valuemin="0"
       aria-valuemax="100"
-      aria-label="Audit completion"
+      [attr.aria-label]="language() === 'ar' ? 'اكتمال التدقيق' : 'Audit completion'"
     >
       <div
         class="h-full rounded-full bg-brass transition-[width] duration-300"
@@ -116,21 +116,21 @@
     <div class="mt-4 grid grid-cols-3 gap-2.5 sm:gap-3 text-left">
       <div class="flex items-center gap-3 rounded-xl border border-inkText/8 bg-ivory/45 px-3 py-3 sm:px-4">
         <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-fog shadow-sm"><span class="h-2 w-2 rounded-full bg-fog/60"></span></span>
-        <div><p class="font-display text-lg leading-5 text-inkText tabular-nums">{{ counts().pending }}</p><p class="mt-1 text-[11px] text-fog">Pending</p></div>
+        <div><p class="font-display text-lg leading-5 text-inkText tabular-nums">{{ counts().pending }}</p><p class="mt-1 text-[11px] text-fog">{{ language() === 'ar' ? "قيد الانتظار" : "Pending" }}</p></div>
       </div>
       <div class="flex items-center gap-3 rounded-xl border border-emerald-900/10 bg-emerald-50/60 px-3 py-3 sm:px-4">
         <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-emerald-700 shadow-sm"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg></span>
-        <div><p class="font-display text-lg leading-5 text-inkText tabular-nums">{{ counts().checked }}</p><p class="mt-1 text-[11px] text-fog">Checked</p></div>
+        <div><p class="font-display text-lg leading-5 text-inkText tabular-nums">{{ counts().checked }}</p><p class="mt-1 text-[11px] text-fog">{{ language() === 'ar' ? "تم الفحص" : "Checked" }}</p></div>
       </div>
       <div class="flex items-center gap-3 rounded-xl border border-danger/15 bg-dangerBg/70 px-3 py-3 sm:px-4">
         <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-danger shadow-sm"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg></span>
-        <div><p class="font-display text-lg leading-5 text-danger tabular-nums">{{ counts().missing }}</p><p class="mt-1 text-[11px] text-fog">Missing</p></div>
+        <div><p class="font-display text-lg leading-5 text-danger tabular-nums">{{ counts().missing }}</p><p class="mt-1 text-[11px] text-fog">{{ language() === 'ar' ? "مفقود" : "Missing" }}</p></div>
       </div>
     </div>
   </section>
 
   <!-- Scan and filters -->
-  <section class="space-y-4 border-b border-inkText/8 bg-ivory/20 p-4 sm:p-6" aria-label="Audit tools">
+  <section class="space-y-4 border-b border-inkText/8 bg-ivory/20 p-4 sm:p-6" [attr.aria-label]="language() === 'ar' ? 'أدوات التدقيق' : 'Audit tools'">
     @if (!isReadOnly()) {
       <div class="rounded-2xl border border-inkText/8 bg-white p-3 shadow-sm sm:p-4">
         <div class="mb-3 flex items-center gap-2.5">
@@ -140,7 +140,7 @@
               <path d="M7 12h10M12 7v10" />
             </svg>
           </span>
-          <div><p class="text-xs font-semibold text-inkText">Quick item scan</p><p class="mt-0.5 text-[11px] text-fog">Scan a barcode or type an item code to find it in this audit.</p></div>
+          <div><p class="text-xs font-semibold text-inkText">{{ language() === 'ar' ? "المسح السريع للأصناف" : "Quick item scan" }}</p><p class="mt-0.5 text-[11px] text-fog">{{ language() === 'ar' ? "امسح الباركود أو أدخل كود الصنف للعثور عليه في عملية التدقيق." : "Scan a barcode or type an item code to find it in this audit." }}</p></div>
         </div>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
           <div class="field" [class.opacity-60]="scanning() || !detail()">
@@ -158,7 +158,7 @@
               (keydown.enter)="onScan()"
               aria-describedby="audit-scan-hint"
             />
-            <label for="audit-scan">Scan barcode or enter item code</label>
+            <label for="audit-scan">{{ language() === 'ar' ? "امسح الباركود أو أدخل كود الصنف" : "Scan barcode or enter item code" }}</label>
           </div>
           <button
             type="button"
@@ -179,19 +179,18 @@
               <path d="M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3" />
               <path d="M7 12h10M12 7v10" />
             </svg>
-            {{ scanning() ? 'Scanning…' : 'Scan item' }}
+            {{ scanning() ? (language() === 'ar' ? "جارٍ المسح…" : "Scanning…") : (language() === 'ar' ? "مسح الصنف" : "Scan item") }}
           </button>
         </div>
         <p id="audit-scan-hint" class="mt-2 text-[11px] text-fog">
-          Click <span class="font-semibold text-inkText">Scan item</span> or press
-          <kbd class="rounded border border-inkText/10 bg-ivory px-1.5 py-0.5 font-sans text-[10px]">Enter</kbd>.
-          Up to 128 characters.
+          {{ language() === 'ar' ? "انقر" : "Click" }} <span class="font-semibold text-inkText">{{ language() === 'ar' ? "مسح الصنف" : "Scan item" }}</span> {{ language() === 'ar' ? "أو اضغط" : "or press" }}
+          <kbd class="rounded border border-inkText/10 bg-ivory px-1.5 py-0.5 font-sans text-[10px]">{{ language() === 'ar' ? "اضغط Enter" : "Enter" }}</kbd>{{ language() === 'ar' ? "حتى 128 حرفًا." : ". Up to 128 characters." }}
         </p>
       </div>
     }
 
     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-      <div class="inline-flex w-fit max-w-full flex-wrap gap-1 rounded-xl border border-inkText/8 bg-white p-1 shadow-sm" role="group" aria-label="Filter items by audit status">
+      <div class="inline-flex w-fit max-w-full flex-wrap gap-1 rounded-xl border border-inkText/8 bg-white p-1 shadow-sm" role="group" [attr.aria-label]="language() === 'ar' ? 'تصفية الأصناف حسب حالة التدقيق' : 'Filter items by audit status'">
         @for (pill of pills; track pill.label) {
           <button
             type="button"
@@ -219,9 +218,9 @@
           autocomplete="off"
           [ngModel]="search()"
           (ngModelChange)="onSearch($event)"
-          aria-label="Search audit items"
+          [attr.aria-label]="language() === 'ar' ? 'ابحث عن عناصر التدقيق' : 'Search audit items'"
         />
-        <label for="audit-search">Search items</label>
+        <label for="audit-search">{{ language() === 'ar' ? "ابحث عن الأصناف" : "Search items" }}</label>
       </div>
     </div>
 
@@ -243,7 +242,7 @@
         >
           <path d="M4 6h16M7 12h10m-7 6h4" />
         </svg>
-        {{ filtersExpanded() ? 'Hide filters' : 'More filters' }}
+        {{ filtersExpanded() ? (language() === 'ar' ? "إخفاء الفلاتر" : "Hide filters") : (language() === 'ar' ? "فلاتر إضافية" : "More filters") }}
       </button>
     </div>
 
@@ -264,7 +263,7 @@
               [ngModel]="itemIdFilter()"
               (ngModelChange)="itemIdFilter.set($event)"
             />
-            <label for="audit-filter-item-id">Item ID</label>
+            <label for="audit-filter-item-id">{{ language() === 'ar' ? "معرّف الصنف" : "Item ID" }}</label>
           </div>
           <div class="field">
             <input
@@ -277,19 +276,19 @@
               [ngModel]="codeFilter()"
               (ngModelChange)="codeFilter.set($event)"
             />
-            <label for="audit-filter-code">Item code</label>
+            <label for="audit-filter-code">{{ language() === 'ar' ? "كود الصنف" : "Item code" }}</label>
           </div>
           <div class="field">
             <app-lazy-dropdown
               label="Brand"
-              placeholder="All brands"
+              [placeholder]="language() === 'ar' ? 'كل العلامات التجارية' : 'All brands'"
               [options]="filterDropdownOptions('brands')"
               [selectedValue]="brandIdFilter()"
               [loading]="filterLoading().brands"
               [hasMore]="filterHasMore().brands"
               [searchable]="true"
               [searchTerm]="filterSearch().brands"
-              searchPlaceholder="Search brands…"
+              [searchPlaceholder]="language() === 'ar' ? 'ابحث عن العلامات التجارية…' : 'Search brands…'"
               [allowClear]="true"
               (opened)="loadFilterOptions('brands')"
               (searchChanged)="onFilterSearch('brands', $event)"
@@ -300,7 +299,7 @@
           </div>
           <div class="field">
             <app-lazy-dropdown
-              label="Model"
+              [label]="language() === 'ar' ? 'الطراز' : 'Model'"
               placeholder="All models"
               [options]="filterDropdownOptions('models')"
               [selectedValue]="modelIdFilter()"
@@ -320,7 +319,7 @@
           </div>
           <div class="field">
             <app-lazy-dropdown
-              label="Material"
+              [label]="language() === 'ar' ? 'الخامة' : 'Material'"
               placeholder="All materials"
               [options]="filterDropdownOptions('materials')"
               [selectedValue]="materialIdFilter()"
@@ -339,8 +338,8 @@
           </div>
           <div class="field">
             <app-lazy-dropdown
-              label="Country"
-              placeholder="All countries"
+              [label]="language() === 'ar' ? 'الدولة' : 'Country'"
+              [placeholder]="language() === 'ar' ? 'كل الدول' : 'All countries'"
               [options]="countryDropdownOptions()"
               [selectedValue]="countryIdFilter()"
               [loading]="countryLoading()"
@@ -352,15 +351,15 @@
           </div>
           <div class="field">
             <app-lazy-dropdown
-              label="Department"
-              placeholder="All departments"
+              [label]="language() === 'ar' ? 'القسم' : 'Department'"
+              [placeholder]="language() === 'ar' ? 'كل الأقسام' : 'All departments'"
               [options]="filterDropdownOptions('departments')"
               [selectedValue]="departmentIdFilter()"
               [loading]="filterLoading().departments"
               [hasMore]="filterHasMore().departments"
               [searchable]="true"
               [searchTerm]="filterSearch().departments"
-              searchPlaceholder="Search departments…"
+              [searchPlaceholder]="language() === 'ar' ? 'ابحث عن الأقسام…' : 'Search departments…'"
               [allowClear]="true"
               (opened)="loadFilterOptions('departments')"
               (searchChanged)="onFilterSearch('departments', $event)"
@@ -380,7 +379,7 @@
               [ngModel]="capacityFilter()"
               (ngModelChange)="capacityFilter.set($event)"
             />
-            <label for="audit-filter-capacity">Capacity</label>
+            <label for="audit-filter-capacity">{{ language() === 'ar' ? "السعة" : "Capacity" }}</label>
           </div>
         </div>
         <div class="flex items-center justify-end gap-2 border-t border-inkText/8 pt-3">
@@ -389,14 +388,14 @@
             class="rounded-lg px-3 py-2 text-xs font-semibold text-fog hover:bg-white"
             (click)="resetFilters()"
           >
-            Reset
+            {{ language() === 'ar' ? "إعادة تعيين" : "Reset" }}
           </button>
           <button
             type="button"
             class="rounded-lg bg-ink px-4 py-2 text-xs font-semibold text-ivory shadow-soft transition hover:bg-ink2"
             (click)="applyFilters()"
           >
-            Apply filters
+            {{ language() === 'ar' ? "تطبيق الفلاتر" : "Apply filters" }}
           </button>
         </div>
       </div>
@@ -416,21 +415,21 @@
   <div class="overflow-x-auto" [attr.aria-busy]="loading()">
     <table class="w-full min-w-[760px] text-sm">
       <caption class="sr-only">
-        Checklist audit items and their review status
+        {{ language() === 'ar' ? "عناصر قائمة الفحص وحالة مراجعتها" : "Checklist audit items and their review status" }}
       </caption>
       <thead>
         <tr class="border-y border-inkText/6 bg-ivory/75 text-left text-[10px] uppercase tracking-[0.08em] text-fog">
-          <th scope="col" class="px-5 py-3 font-semibold">Item</th>
-          <th scope="col" class="px-5 py-3 font-semibold">Group / Location</th>
-          <th scope="col" class="px-5 py-3 font-semibold">Status</th>
-          <th scope="col" class="px-5 py-3 font-semibold text-right">Actions</th>
+          <th scope="col" class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'الصنف' : 'Item' }}</th>
+          <th scope="col" class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'المجموعة / الموقع' : 'Group / Location' }}</th>
+          <th scope="col" class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'الحالة' : 'Status' }}</th>
+          <th scope="col" class="px-5 py-3 font-semibold text-right">{{ language() === 'ar' ? 'الإجراءات' : 'Actions' }}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-inkText/6">
         @if (loading()) {
           <tr>
             <td colspan="4" class="px-5 py-12 text-center text-sm text-fog" role="status">
-              Loading audit items…
+              {{ language() === 'ar' ? "جارٍ تحميل عناصر التدقيق…" : "Loading audit items…" }}
             </td>
           </tr>
         } @else {
@@ -475,7 +474,7 @@
                         (click)="setResult(item, 'Checked')"
                         class="rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-ivory shadow-sm transition hover:bg-ink2 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        Found
+                        {{ language() === 'ar' ? "موجود" : "Found" }}
                       </button>
                     }
                     @if (item.status !== 'Missing') {
@@ -485,7 +484,7 @@
                         (click)="setResult(item, 'Missing')"
                         class="rounded-lg border border-danger/15 px-3 py-2 text-xs font-semibold text-danger transition hover:bg-dangerBg disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        Missing
+                        {{ language() === 'ar' ? "مفقود" : "Missing" }}
                       </button>
                     }
                     @if (item.status !== 'Pending') {
@@ -495,7 +494,7 @@
                         (click)="setResult(item, 'Pending')"
                         class="px-3 py-2 rounded-lg text-fog hover:bg-ink/5 text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Reset
+                        {{ language() === 'ar' ? "إعادة تعيين" : "Reset" }}
                       </button>
                     }
                   }
@@ -505,7 +504,7 @@
           } @empty {
             <tr>
               <td colspan="4" class="px-5 py-12 text-center text-sm text-fog">
-                No audit items match these filters.
+                {{ language() === 'ar' ? "لا توجد عناصر تدقيق تطابق عوامل التصفية." : "No audit items match these filters." }}
               </td>
             </tr>
           }
@@ -517,15 +516,15 @@
   <footer
     class="p-4 sm:px-6 sm:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-fog"
   >
-    <p>{{ totalCount() }} {{ totalCount() === 1 ? 'item' : 'items' }}</p>
-    <nav class="flex items-center justify-end gap-1" aria-label="Audit item pages">
+    <p>{{ totalCount() }} {{ totalCount() === 1 ? (language() === 'ar' ? "صنف" : "item") : (language() === 'ar' ? "أصناف" : "items") }}</p>
+    <nav class="flex items-center justify-end gap-1" [attr.aria-label]="language() === 'ar' ? 'صفحات عناصر التدقيق' : 'Audit item pages'">
       <button
         type="button"
         (click)="prev()"
         [disabled]="loading() || pageNumber() <= 1"
         class="px-3 py-2 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        Previous
+        {{ language() === 'ar' ? "السابق" : "Previous" }}
       </button>
       <span
         class="px-3 py-2 rounded-lg bg-ink text-ivory font-semibold tabular-nums"
@@ -539,7 +538,7 @@
         [disabled]="loading() || pageNumber() >= totalPages()"
         class="px-3 py-2 rounded-lg border border-inkText/12 hover:border-brass disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        Next
+        {{ language() === 'ar' ? "التالي" : "Next" }}
       </button>
     </nav>
   </footer>
@@ -550,7 +549,7 @@
     <button
       type="button"
       class="absolute inset-0 bg-ink/55 backdrop-blur-sm cursor-default"
-      aria-label="Close confirmation"
+      [attr.aria-label]="language() === 'ar' ? 'إغلاق التأكيد' : 'Close confirmation'"
       [disabled]="completing()"
       (click)="cancelComplete()"
     ></button>
@@ -562,12 +561,12 @@
       aria-describedby="complete-desc"
     >
       <div class="px-6 py-5 border-b border-inkText/8">
-        <h2 id="complete-title" class="font-display text-xl text-inkText">Complete Audit</h2>
+        <h2 id="complete-title" class="font-display text-xl text-inkText">{{ language() === 'ar' ? "إنهاء التدقيق" : "Complete Audit" }}</h2>
       </div>
       <div class="px-6 py-5 space-y-5">
         <p id="complete-desc" class="text-sm text-inkText leading-relaxed">
-          Complete <span class="font-semibold">{{ detail()?.title }}</span
-          >? The audit will become read-only.
+          {{ language() === 'ar' ? "إكمال" : "Complete" }} <span class="font-semibold">{{ detail()?.title }}</span
+          >{{ language() === 'ar' ? "؟ ستصبح عملية التدقيق للقراءة فقط." : "? The audit will become read-only." }}
         </p>
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-inkText/8">
           <button
@@ -576,7 +575,7 @@
             [disabled]="completing()"
             (click)="cancelComplete()"
           >
-            Cancel
+            {{ language() === 'ar' ? "إلغاء" : "Cancel" }}
           </button>
           <button
             type="button"
@@ -584,7 +583,7 @@
             [disabled]="completing() || !canComplete()"
             (click)="complete()"
           >
-            {{ completing() ? 'Completing…' : 'Complete Audit' }}
+            {{ completing() ? (language() === 'ar' ? "جارٍ الإكمال…" : "Completing…") : (language() === 'ar' ? "إنهاء التدقيق" : "Complete Audit") }}
           </button>
         </div>
       </div>

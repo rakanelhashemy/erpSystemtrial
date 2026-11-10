@@ -17,19 +17,19 @@
         <div
           class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-brass/30 border-t-brass"
         ></div>
-        <h1 class="font-display text-2xl text-inkText">Checking your invitation</h1>
-        <p class="mt-2 text-sm text-fog">Please wait while we verify the link.</p>
+        <h1 class="font-display text-2xl text-inkText">{{ language() === 'ar' ? "جارٍ التحقق من الدعوة" : "Checking your invitation" }}</h1>
+        <p class="mt-2 text-sm text-fog">{{ language() === 'ar' ? "يرجى الانتظار ريثما نتحقق من الرابط." : "Please wait while we verify the link." }}</p>
       </div>
     } @else if (invitationValid()) {
-      <h1 class="font-display text-2xl text-inkText">Complete your account</h1>
+      <h1 class="font-display text-2xl text-inkText">{{ language() === 'ar' ? "أكمل بيانات حسابك" : "Complete your account" }}</h1>
       <p class="mt-2 text-sm leading-relaxed text-fog">
-        Set your phone number and password to finish registration for {{ email() }}.
+        {{ language() === 'ar' ? 'أدخل رقم هاتفك وكلمة المرور لإكمال التسجيل للبريد' : 'Set your phone number and password to finish registration for' }} {{ email() }}.
       </p>
 
       <form class="mt-6 space-y-4" [formGroup]="registrationForm" (ngSubmit)="submit()" novalidate>
         <div class="field">
           <input id="register-email" type="email" placeholder=" " [value]="email()" readonly />
-          <label for="register-email">Email address</label>
+          <label for="register-email">{{ language() === 'ar' ? "عنوان البريد الإلكتروني" : "Email address" }}</label>
         </div>
 
         <div>
@@ -47,11 +47,11 @@
               autocomplete="tel"
               formControlName="phone"
             />
-            <label for="register-phone">Phone number (optional)</label>
+            <label for="register-phone">{{ language() === 'ar' ? "رقم الهاتف (اختياري)" : "Phone number (optional)" }}</label>
           </div>
           @if (registrationForm.controls.phone.touched && registrationForm.controls.phone.invalid) {
             <p class="mt-1 text-xs text-danger" role="alert">
-              Enter a valid phone number or leave it empty.
+              {{ language() === 'ar' ? "أدخل رقم هاتف صحيحًا أو اترك الحقل فارغًا." : "Enter a valid phone number or leave it empty." }}
             </p>
           }
         </div>
@@ -71,7 +71,7 @@
               autocomplete="new-password"
               formControlName="password"
             />
-            <label for="register-password">Password</label>
+            <label for="register-password">{{ language() === 'ar' ? "كلمة المرور" : "Password" }}</label>
             <button
               type="button"
               class="absolute inset-e-3 top-3.5 text-xs font-semibold text-fog hover:text-inkText"
@@ -79,13 +79,13 @@
               [attr.aria-pressed]="showPassword()"
               (click)="togglePasswordVisibility('password')"
             >
-              {{ showPassword() ? 'Hide' : 'Show' }}
+              {{ showPassword() ? (language() === 'ar' ? "إخفاء" : "Hide") : (language() === 'ar' ? "إظهار" : "Show") }}
             </button>
           </div>
           @if (
             registrationForm.controls.password.touched && registrationForm.controls.password.invalid
           ) {
-            <p class="mt-1 text-xs text-danger" role="alert">Use at least 8 characters.</p>
+            <p class="mt-1 text-xs text-danger" role="alert">{{ language() === 'ar' ? "استخدم 8 أحرف على الأقل." : "Use at least 8 characters." }}</p>
           }
         </div>
 
@@ -105,7 +105,7 @@
               autocomplete="new-password"
               formControlName="confirmPassword"
             />
-            <label for="register-confirm-password">Confirm password</label>
+            <label for="register-confirm-password">{{ language() === 'ar' ? "تأكيد كلمة المرور" : "Confirm password" }}</label>
             <button
               type="button"
               class="absolute inset-e-3 top-3.5 text-xs font-semibold text-fog hover:text-inkText"
@@ -115,7 +115,7 @@
               [attr.aria-pressed]="showConfirmPassword()"
               (click)="togglePasswordVisibility('confirmPassword')"
             >
-              {{ showConfirmPassword() ? 'Hide' : 'Show' }}
+              {{ showConfirmPassword() ? (language() === 'ar' ? "إخفاء" : "Hide") : (language() === 'ar' ? "إظهار" : "Show") }}
             </button>
           </div>
           @if (
@@ -144,14 +144,13 @@
           type="submit"
           [disabled]="submitting()"
         >
-          {{ submitting() ? 'Creating account…' : 'Complete registration' }}
+          {{ submitting() ? (language() === 'ar' ? "جارٍ إنشاء الحساب…" : "Creating account…") : (language() === 'ar' ? "إكمال التسجيل" : "Complete registration") }}
         </button>
       </form>
     } @else {
-      <h1 class="font-display text-2xl text-inkText">Invitation unavailable</h1>
+      <h1 class="font-display text-2xl text-inkText">{{ language() === 'ar' ? "الدعوة غير متاحة" : "Invitation unavailable" }}</h1>
       <p class="mt-2 text-sm leading-relaxed text-fog">
-        This invitation link is invalid or has expired. Ask your administrator to send a new
-        invitation.
+        {{ language() === 'ar' ? "رابط الدعوة غير صالح أو انتهت صلاحيته. اطلب من المسؤول إرسال دعوة جديدة." : "This invitation link is invalid or has expired. Ask your administrator to send a new invitation." }}
       </p>
       @if (error()) {
         <p class="mt-4 rounded-lg bg-dangerBg px-3 py-2 text-sm text-danger" role="alert">
@@ -162,7 +161,7 @@
         class="mt-6 inline-block text-sm font-semibold text-brassDk hover:underline"
         routerLink="/login"
       >
-        Back to sign in
+        {{ language() === 'ar' ? "العودة لتسجيل الدخول" : "Back to sign in" }}
       </a>
     }
   </section>

@@ -1,4 +1,4 @@
-<div class="min-h-screen lg:flex" [class.lg:flex-row-reverse]="language() === 'ar'">
+<div class="min-h-screen lg:flex" [attr.dir]="language() === 'ar' ? 'rtl' : 'ltr'">
   <app-sidebar
     [collapsed]="sidebarCollapsed"
     [mobileOpen]="mobileOpen"
@@ -9,19 +9,20 @@
   <div class="flex-1 flex flex-col min-w-0">
     <app-header
       [pageTitle]="pageTitle()"
+      [language]="language()"
       (toggleMenu)="onHamburger()"
       (editProfile)="openEditProfile()"
       (logout)="onLogout()"
     />
 
-    <main class="flex-1 p-4 sm:p-6 lg:p-8">
+    <main class="flex-1 p-4 sm:p-6 lg:p-8" [attr.dir]="language() === 'ar' ? 'rtl' : 'ltr'">
       <router-outlet></router-outlet>
     </main>
   </div>
 </div>
 
 @if (editProfileOpen()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4" [attr.dir]="language() === 'ar' ? 'rtl' : 'ltr'">
     <div class="absolute inset-0 bg-ink/55 backdrop-blur-sm" (click)="closeEditProfile()"></div>
 
     <div
@@ -32,8 +33,8 @@
         class="flex items-center justify-between px-6 py-5 border-b border-inkText/8 sticky top-0 bg-paper z-10"
       >
         <div>
-          <p class="font-display text-xl text-inkText">Edit Profile</p>
-          <p class="text-xs text-fog mt-0.5">Update your personal details and security settings</p>
+          <p class="font-display text-xl text-inkText">{{ language() === 'ar' ? "تعديل الملف الشخصي" : "Edit Profile" }}</p>
+          <p class="text-xs text-fog mt-0.5">{{ language() === 'ar' ? "حدّث بياناتك الشخصية وإعدادات الأمان." : "Update your personal details and security settings" }}</p>
         </div>
         <button
           type="button"
@@ -72,22 +73,22 @@
 
         <div>
           <p class="text-xs font-bold uppercase tracking-wide text-brassDk mb-3">
-            Personal details
+            {{ language() === 'ar' ? "البيانات الشخصية" : "Personal details" }}
           </p>
           <div class="grid sm:grid-cols-2 gap-4">
             <div class="field">
               <input type="text" placeholder=" " formControlName="firstName" />
-              <label>First name</label>
+              <label>{{ language() === 'ar' ? "الاسم الأول" : "First name" }}</label>
               @if (
                 profileForm.controls.firstName.touched && profileForm.controls.firstName.invalid
               ) {
-                <p class="text-[11px] text-danger mt-1">First name is required</p>
+                <p class="text-[11px] text-danger mt-1">{{ language() === 'ar' ? "الاسم الأول مطلوب" : "First name is required" }}</p>
               }
             </div>
 
             <div class="field">
               <input type="text" placeholder=" " formControlName="lastName" />
-              <label>Last name</label>
+              <label>{{ language() === 'ar' ? "اسم العائلة" : "Last name" }}</label>
             </div>
 
             <div class="field sm:col-span-2">
@@ -98,14 +99,14 @@
                 readonly
                 class="opacity-70 cursor-not-allowed"
               />
-              <label>Email address</label>
+              <label>{{ language() === 'ar' ? "عنوان البريد الإلكتروني" : "Email address" }}</label>
             </div>
 
             <div class="field sm:col-span-2">
               <input type="tel" placeholder=" " formControlName="phone" />
-              <label>Phone number (optional)</label>
+              <label>{{ language() === 'ar' ? "رقم الهاتف (اختياري)" : "Phone number (optional)" }}</label>
               @if (profileForm.controls.phone.touched && profileForm.controls.phone.invalid) {
-                <p class="text-[11px] text-danger mt-1">Enter a valid phone number</p>
+                <p class="text-[11px] text-danger mt-1">{{ language() === 'ar' ? "أدخل رقم هاتف صحيحًا" : "Enter a valid phone number" }}</p>
               }
             </div>
           </div>
@@ -126,14 +127,14 @@
             (click)="closeEditProfile()"
             [disabled]="saving()"
           >
-            Cancel
+            {{ language() === 'ar' ? "إلغاء" : "Cancel" }}
           </button>
           <button
             type="submit"
             [disabled]="saving()"
             class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60"
           >
-            {{ saving() ? 'Saving…' : 'Save changes' }}
+            {{ saving() ? (language() === 'ar' ? "جارٍ الحفظ…" : "Saving…") : (language() === 'ar' ? "حفظ التغييرات" : "Save changes") }}
           </button>
         </div>
       </form>
@@ -144,7 +145,7 @@
         [formGroup]="passwordForm"
         (ngSubmit)="savePassword()"
       >
-        <p class="text-xs font-bold uppercase tracking-wide text-brassDk">Change password</p>
+        <p class="text-xs font-bold uppercase tracking-wide text-brassDk">{{ language() === 'ar' ? "تغيير كلمة المرور" : "Change password" }}</p>
 
         <div class="grid sm:grid-cols-2 gap-4">
           <div class="field sm:col-span-2">
@@ -155,7 +156,7 @@
               class="pr-12"
               autocomplete="current-password"
             />
-            <label>Current password</label>
+            <label>{{ language() === 'ar' ? "كلمة المرور الحالية" : "Current password" }}</label>
             <button
               type="button"
               class="absolute right-3 top-6.5 z-10 -translate-y-1/2 text-fog hover:text-inkText"
@@ -193,7 +194,7 @@
               passwordForm.controls.currentPassword.touched &&
               passwordForm.controls.currentPassword.invalid
             ) {
-              <p class="text-[11px] text-danger mt-1">Current password is required</p>
+              <p class="text-[11px] text-danger mt-1">{{ language() === 'ar' ? "كلمة المرور الحالية مطلوبة" : "Current password is required" }}</p>
             }
           </div>
 
@@ -205,7 +206,7 @@
               class="pr-12"
               autocomplete="new-password"
             />
-            <label>New password</label>
+            <label>{{ language() === 'ar' ? "كلمة المرور الجديدة" : "New password" }}</label>
             <button
               type="button"
               class="absolute right-3 top-6.5 z-10 -translate-y-1/2 text-fog hover:text-inkText"
@@ -240,7 +241,7 @@
             @if (
               passwordForm.controls.newPassword.touched && passwordForm.controls.newPassword.invalid
             ) {
-              <p class="text-[11px] text-danger mt-1">At least 8 characters</p>
+              <p class="text-[11px] text-danger mt-1">{{ language() === 'ar' ? "8 أحرف على الأقل" : "At least 8 characters" }}</p>
             }
           </div>
 
@@ -252,7 +253,7 @@
               class="pr-12"
               autocomplete="new-password"
             />
-            <label>Confirm new password</label>
+            <label>{{ language() === 'ar' ? "تأكيد كلمة المرور الجديدة" : "Confirm new password" }}</label>
             <button
               type="button"
               class="absolute right-3 top-6.5 z-10 -translate-y-1/2 text-fog hover:text-inkText"
@@ -289,7 +290,7 @@
             @if (
               passwordForm.controls.confirmPassword.touched && passwordForm.hasError('mismatch')
             ) {
-              <p class="text-[11px] text-danger mt-1">Passwords don't match</p>
+              <p class="text-[11px] text-danger mt-1">{{ language() === 'ar' ? "كلمتا المرور غير متطابقتين" : "Passwords don't match" }}</p>
             }
           </div>
         </div>
@@ -306,7 +307,7 @@
           <p
             class="text-sm text-emerald-700 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3"
           >
-            Password updated successfully.
+            {{ language() === 'ar' ? "تم تحديث كلمة المرور بنجاح." : "Password updated successfully." }}
           </p>
         }
 
@@ -316,7 +317,7 @@
             [disabled]="changingPassword()"
             class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60"
           >
-            {{ changingPassword() ? 'Updating…' : 'Update password' }}
+            {{ changingPassword() ? (language() === 'ar' ? "جارٍ التحديث…" : "Updating…") : (language() === 'ar' ? "تحديث كلمة المرور" : "Update password") }}
           </button>
         </div>
       </form>
@@ -324,9 +325,9 @@
       <!-- ============ Terminate All Active Sessions ============ -->
       <div class="px-6 pb-8">
         <div class="rounded-xl border border-danger/15 bg-dangerBg/60 p-4">
-          <p class="text-sm font-semibold text-danger">Terminate All Active Sessions</p>
+          <p class="text-sm font-semibold text-danger">{{ language() === 'ar' ? "إنهاء جميع الجلسات النشطة" : "Terminate All Active Sessions" }}</p>
           <p class="mt-1 text-xs text-fog">
-            Sign this user out of all other devices and revoke their active sessions.
+            {{ language() === 'ar' ? "تسجيل الخروج من جميع الأجهزة الأخرى وإنهاء الجلسات النشطة لهذا المستخدم." : "Sign this user out of all other devices and revoke their active sessions." }}
           </p>
 
           @if (terminateError()) {
@@ -334,7 +335,7 @@
           }
 
           @if (terminateSuccess()) {
-            <p class="mt-3 text-xs text-emerald-700">All other sessions were terminated.</p>
+            <p class="mt-3 text-xs text-emerald-700">{{ language() === 'ar' ? "تم إنهاء جميع الجلسات الأخرى." : "All other sessions were terminated." }}</p>
           }
 
           @if (!confirmTerminate()) {
@@ -343,18 +344,18 @@
               class="mt-3 inline-flex items-center gap-2 rounded-lg bg-dangerBg px-3.5 py-2 text-xs font-bold text-danger hover:bg-danger/10"
               (click)="confirmTerminate.set(true)"
             >
-              Terminate All Active Sessions
+              {{ language() === 'ar' ? "إنهاء جميع الجلسات النشطة" : "Terminate All Active Sessions" }}
             </button>
           } @else {
             <div class="mt-3 flex flex-wrap items-center gap-2">
-              <span class="text-xs font-semibold text-danger">Are you sure?</span>
+              <span class="text-xs font-semibold text-danger">{{ language() === 'ar' ? "هل أنت متأكد؟" : "Are you sure?" }}</span>
               <button
                 type="button"
                 [disabled]="terminating()"
                 class="rounded-lg bg-danger px-3.5 py-2 text-xs font-bold text-white hover:opacity-90 disabled:opacity-60"
                 (click)="terminateSessions()"
               >
-                {{ terminating() ? 'Terminating…' : 'Yes, terminate' }}
+                {{ terminating() ? (language() === 'ar' ? "جارٍ الإنهاء…" : "Terminating…") : (language() === 'ar' ? "نعم، أنهِ الجلسات" : "Yes, terminate") }}
               </button>
               <button
                 type="button"
@@ -362,7 +363,7 @@
                 class="rounded-lg px-3.5 py-2 text-xs font-semibold text-fog hover:bg-ink/5"
                 (click)="confirmTerminate.set(false)"
               >
-                Cancel
+                {{ language() === 'ar' ? "إلغاء" : "Cancel" }}
               </button>
             </div>
           }

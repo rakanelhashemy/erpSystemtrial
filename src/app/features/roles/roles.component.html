@@ -2,8 +2,8 @@
   <div class="bg-paper rounded-2xl border border-inkText/8 shadow-soft overflow-hidden">
     <div class="p-4 sm:p-5 border-b border-inkText/8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        <p class="font-display text-lg text-inkText">Roles &amp; Permissions</p>
-        <p class="text-xs text-fog mt-0.5">Manage role claims assigned to invited users.</p>
+        <p class="font-display text-lg text-inkText">{{ language() === 'ar' ? "الأدوار والصلاحيات" : "Roles &amp; Permissions" }}</p>
+        <p class="text-xs text-fog mt-0.5">{{ language() === 'ar' ? "إدارة صلاحيات الأدوار المخصصة للمستخدمين المدعوين." : "Manage role claims assigned to invited users." }}</p>
       </div>
       <button
         *appHasPermission="'Permissions.Roles.Add'"
@@ -16,7 +16,7 @@
              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M12 5v14M5 12h14"></path>
         </svg>
-        Add Role
+        {{ language() === 'ar' ? "إضافة دور" : "Add Role" }}
       </button>
     </div>
 
@@ -24,19 +24,19 @@
       <table class="w-full text-sm">
         <thead>
           <tr class="bg-ivory text-left text-[11px] uppercase tracking-wide text-fog">
-            <th class="px-5 py-3 font-semibold">Role</th>
-            <th class="px-5 py-3 font-semibold">Users</th>
-            <th class="px-5 py-3 font-semibold text-right">Actions</th>
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'الدور' : 'Role' }}</th>
+            <th class="px-5 py-3 font-semibold">{{ language() === 'ar' ? 'المستخدمون' : 'Users' }}</th>
+            <th class="px-5 py-3 font-semibold text-right">{{ language() === 'ar' ? 'الإجراءات' : 'Actions' }}</th>
           </tr>
         </thead>
         <tbody id="roles-tbody" class="divide-y divide-inkText/6">
           @if (loading()) {
-            <tr><td colspan="3" class="px-5 py-6 text-center text-fog">Loading...</td></tr>
+            <tr><td colspan="3" class="px-5 py-6 text-center text-fog">{{ language() === 'ar' ? "جارٍ التحميل…" : "Loading..." }}</td></tr>
           } @else if (loadError()) {
             <tr>
               <td colspan="3" class="px-5 py-6 text-center text-red-600">
                 {{ loadError() }}
-                <button type="button" class="underline ml-2" (click)="loadRoles()">Retry</button>
+                <button type="button" class="underline ml-2" (click)="loadRoles()">{{ language() === 'ar' ? "إعادة المحاولة" : "Retry" }}</button>
               </td>
             </tr>
           } @else {
@@ -46,13 +46,15 @@
                 <td class="px-5 py-3.5"></td>
                 <td class="px-5 py-3.5">
                   <div class="flex items-center justify-end gap-2">
-                    <button *appHasPermission="'Permissions.Roles.Edit'" (click)="openEditModal(role.id)" type="button" class="px-2.5 py-1.5 rounded-lg hover:bg-ink/5 text-fog">
+                    <button *appHasPermission="'Permissions.Roles.Edit'" (click)="openEditModal(role.id)" type="button" class="px-2.5 py-1.5 rounded-lg hover:bg-ink/5 text-fog" [attr.title]="language() === 'ar' ? 'تعديل الدور' : 'Edit role'" [attr.aria-label]="(language() === 'ar' ? 'تعديل ' : 'Edit ') + role.name">
                       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="m16.5 3.5 4 4L7 21l-4 1 1-4Z"/></svg>
                     </button>
                     <button
                       *appHasPermission="'Permissions.Roles.Delete'"
                       type="button"
                       class="px-2.5 py-1.5 rounded-lg hover:bg-dangerBg text-danger"
+                      [attr.title]="language() === 'ar' ? 'حذف الدور' : 'Delete role'"
+                      [attr.aria-label]="(language() === 'ar' ? 'حذف ' : 'Delete ') + role.name"
                       (click)="openDeleteModal(role)"
                     >
                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"/></svg>
@@ -61,7 +63,7 @@
                 </td>
               </tr>
             } @empty {
-              <tr><td colspan="3" class="px-5 py-6 text-center text-fog">No roles yet.</td></tr>
+              <tr><td colspan="3" class="px-5 py-6 text-center text-fog">{{ language() === 'ar' ? "لا توجد أدوار بعد." : "No roles yet." }}</td></tr>
             }
           }
         </tbody>
@@ -89,11 +91,11 @@
 
     <div class="relative bg-paper w-full max-w-md overflow-hidden rounded-2xl shadow-soft flex flex-col">
       <div class="flex items-center justify-between px-6 py-5 border-b border-inkText/8 shrink-0">
-        <p id="delete-role-title" class="font-display text-xl text-inkText">Delete Role</p>
+        <p id="delete-role-title" class="font-display text-xl text-inkText">{{ language() === 'ar' ? "حذف الدور" : "Delete Role" }}</p>
         <button
           type="button"
           class="p-2 rounded-lg hover:bg-ink/5 text-fog"
-          aria-label="Close delete modal"
+          [attr.aria-label]="language() === 'ar' ? 'إغلاق نافذة الحذف' : 'Close delete modal'"
           [disabled]="deleting()"
           (click)="closeDeleteModal()"
         >×</button>
@@ -108,9 +110,9 @@
         </div>
 
         <div>
-          <p class="font-display text-lg text-inkText">Delete “{{ roleToDelete()?.name }}”?</p>
+          <p class="font-display text-lg text-inkText">{{ language() === 'ar' ? 'حذف «' + roleToDelete()?.name + '»؟' : 'Delete “' + roleToDelete()?.name + '”?' }}</p>
           <p class="text-sm text-fog mt-2">
-            This action can't be undone. Users assigned to this role will lose all of its permissions.
+            {{ language() === 'ar' ? "لا يمكن التراجع عن هذا الإجراء. سيفقد المستخدمون المعيّنون لهذا الدور جميع صلاحياته." : "This action can't be undone. Users assigned to this role will lose all of its permissions." }}
           </p>
         </div>
 
@@ -125,13 +127,13 @@
           class="px-4 py-2.5 rounded-xl text-sm font-semibold text-fog hover:bg-ink/5"
           [disabled]="deleting()"
           (click)="closeDeleteModal()"
-        >Cancel</button>
+        >{{ language() === 'ar' ? "إلغاء" : "Cancel" }}</button>
         <button
           type="button"
           class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-red-600 text-white hover:bg-red-700 shadow-soft disabled:opacity-60"
           [disabled]="deleting()"
           (click)="confirmDelete()"
-        >{{ deleting() ? 'Deleting...' : 'Delete Role' }}</button>
+        >{{ deleting() ? 'Deleting...' : (language() === 'ar' ? "حذف الدور" : "Delete Role") }}</button>
       </div>
     </div>
   </div>

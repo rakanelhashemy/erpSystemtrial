@@ -14,7 +14,7 @@
       <button
         type="button"
         class="p-2 rounded-lg hover:bg-ink/5 text-fog"
-        aria-label="Close check list modal"
+        [attr.aria-label]="language() === 'ar' ? 'إغلاق نافذة قائمة الفحص' : 'Close check list modal'"
         [disabled]="saving()"
         (click)="close()"
       >
@@ -34,13 +34,13 @@
     </div>
 
     @if (loading()) {
-      <p class="text-sm text-fog text-center py-12" role="status">Loading…</p>
+      <p class="text-sm text-fog text-center py-12" role="status">{{ language() === 'ar' ? "جارٍ التحميل…" : "Loading…" }}</p>
     } @else {
       <form class="flex min-h-0 flex-col overflow-hidden" (ngSubmit)="save()" novalidate>
         <div class="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6">
           @if (hasResults()) {
             <p class="text-xs text-brassDk bg-brass/10 rounded-lg px-3 py-2">
-              This audit already has results. Changing its business or location may change which items are included.
+              {{ language() === 'ar' ? 'تحتوي عملية التدقيق هذه على نتائج بالفعل. قد يؤدي تغيير الشركة أو الموقع إلى تغيير الأصناف المشمولة.' : 'This audit already has results. Changing its business or location may change which items are included.' }}
             </p>
           }
 
@@ -56,7 +56,7 @@
                 maxlength="150"
                 [(ngModel)]="title"
               />
-              <label for="check-list-title">Title</label>
+              <label for="check-list-title">{{ language() === 'ar' ? "العنوان" : "Title" }}</label>
             </div>
 
             <div class="space-y-1">
@@ -75,7 +75,7 @@
                     auditDateTouched() && auditDateError() ? 'checklist-audit-date-error' : null
                   "
                 />
-                <label for="checklist-audit-date">Audit Date</label>
+                <label for="checklist-audit-date">{{ language() === 'ar' ? "تاريخ التدقيق" : "Audit Date" }}</label>
               </div>
               @if (auditDateTouched() && auditDateError()) {
                 <p id="checklist-audit-date-error" class="text-xs text-danger" role="alert">
@@ -88,8 +88,8 @@
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div class="field">
               <app-lazy-dropdown
-                label="Business *"
-                placeholder="Select a business..."
+                [label]="language() === 'ar' ? 'الشركة *' : 'Business *'"
+                [placeholder]="language() === 'ar' ? 'اختر شركة...' : 'Select a business...'"
                 [options]="businessOptions()"
                 [selectedValue]="businessId"
                 [loading]="businessLoading()"
@@ -115,7 +115,7 @@
                 [hasMore]="groupHasMore()"
                 [searchable]="true"
                 [searchTerm]="searchTerms().groups"
-                searchPlaceholder="Search groups…"
+                [searchPlaceholder]="language() === 'ar' ? 'ابحث عن المجموعات…' : 'Search groups…'"
                 [allowClear]="true"
                 (opened)="loadBusinessOptions('groups')"
                 (searchChanged)="onOptionSearch('groups', $event)"
@@ -128,11 +128,11 @@
 
           <!-- Target location: one select per hierarchy level -->
           <div>
-            <p class="mb-1 text-xs font-bold uppercase tracking-wide text-brassDk">Target Location *</p>
-            <p class="mb-3 text-xs text-fog">Select a location, then choose a child location if needed.</p>
+            <p class="mb-1 text-xs font-bold uppercase tracking-wide text-brassDk">{{ language() === 'ar' ? "الموقع المستهدف *" : "Target Location *" }}</p>
+            <p class="mb-3 text-xs text-fog">{{ language() === 'ar' ? "اختر موقعًا، ثم اختر موقعًا فرعيًا عند الحاجة." : "Select a location, then choose a child location if needed." }}</p>
             @if (currentLocationName()) {
               <p class="mb-3 text-xs text-fog">
-                Current: <span class="font-semibold text-inkText">{{ currentLocationName() }}</span>
+                {{ language() === 'ar' ? "الحالي:" : "Current:" }} <span class="font-semibold text-inkText">{{ currentLocationName() }}</span>
               </p>
             }
 
@@ -166,13 +166,13 @@
               }
             </div>
             @if (!businessId) {
-              <p class="mt-2 text-xs text-fog">Select a business first to load its locations.</p>
+              <p class="mt-2 text-xs text-fog">{{ language() === 'ar' ? "اختر شركة أولًا لتحميل مواقعها." : "Select a business first to load its locations." }}</p>
             }
           </div>
 
           <!-- Assignees -->
           <div class="pt-2 border-t border-inkText/8">
-            <p class="text-xs font-bold uppercase tracking-wide text-brassDk mb-3">Assignees</p>
+            <p class="text-xs font-bold uppercase tracking-wide text-brassDk mb-3">{{ language() === 'ar' ? "المكلّفون" : "Assignees" }}</p>
             <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
               <div class="field flex-1">
                 <app-lazy-dropdown
@@ -199,7 +199,7 @@
                 [disabled]="!assigneeToAdd"
                 class="px-4 py-3 rounded-lg bg-ink text-ivory text-xs font-semibold shadow-soft transition hover:bg-ink2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                + Add Assignee
+                {{ language() === 'ar' ? "إضافة مكلّف" : "+ Add Assignee" }}
               </button>
             </div>
             <div class="flex flex-wrap gap-2 mt-3">
@@ -211,14 +211,14 @@
                   <button
                     type="button"
                     class="w-4 h-4 rounded-full hover:bg-ink/10 text-fog leading-none"
-                    [attr.aria-label]="'Remove ' + a.fullName"
+                    [attr.aria-label]="(language() === 'ar' ? 'إزالة ' : 'Remove ') + a.fullName"
                     (click)="removeAssignee(a.id)"
                   >
                     ×
                   </button>
                 </span>
               } @empty {
-                <span class="text-xs text-fog">No assignees added yet.</span>
+                <span class="text-xs text-fog">{{ language() === 'ar' ? "لم تتم إضافة مكلّفين بعد." : "No assignees added yet." }}</span>
               }
             </div>
           </div>
@@ -238,14 +238,14 @@
             [disabled]="saving()"
             (click)="close()"
           >
-            Cancel
+            {{ language() === 'ar' ? "إلغاء" : "Cancel" }}
           </button>
           <button
             type="submit"
             class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-ink text-ivory hover:bg-ink2 shadow-soft disabled:opacity-60 disabled:cursor-not-allowed"
             [disabled]="saving()"
           >
-            {{ saving() ? 'Saving…' : 'Save Check List' }}
+            {{ saving() ? (language() === 'ar' ? "جارٍ الحفظ…" : "Saving…") : (language() === 'ar' ? "حفظ قائمة الفحص" : "Save Check List") }}
           </button>
         </div>
       </form>

@@ -7,14 +7,15 @@ import { DropDownServices, DropdownItem } from '../../../core/services/drop-down
 import { EmployeesServices } from '../../../core/services/employees-services';
 import { LazyDropdownComponent, LazyDropdownOption } from '../../../shared/ui/lazy-dropdown/lazy-dropdown.component';
 
+import { AuthService } from '../../../core/auth/auth-service/auth-service';
 @Component({
   imports: [ReactiveFormsModule, LazyDropdownComponent],
   selector: 'app-employess-modal',
   styleUrl: './employess-modal.component.css',
   templateUrl: './employess-modal.component.html',
 })
-export class EmployessModalComponent { 
-
+export class EmployessModalComponent {
+  readonly language = inject(AuthService).language;
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly api = inject(EmployeesServices);
   private readonly dropdown = inject(DropDownServices);
